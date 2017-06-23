@@ -1,0 +1,79 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net451;net45;netstandard1.5;</TargetFrameworks>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <Authors>Team Roasted Bytes</Authors>
+    <Company>Apexol Technologies</Company>
+    <Description>Yet another simple and powerful micro ORM for .NET</Description>
+    <Copyright>Apexol Technologies</Copyright>
+    <PackageLicenseUrl>http://dotentity.net/legal/commercial</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/RoastedBytes/dotEntity</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/RoastedBytes/dotEntity.git</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
+    <PackageTags>Micro-ORM, Database, .NET Framework, POCO</PackageTags>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net45|AnyCPU'">
+    <DefineConstants>TRACE;DEBUG;NET45;NET40</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
+    <DefineConstants>NETSTANDARD15</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' OR '$(TargetFramework)' == 'net451' ">
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
+    <PackageReference Include="System.Collections.Concurrent" Version="4.3.0" />
+    <PackageReference Include="System.Collections.NonGeneric" Version="4.3.0" />
+    <PackageReference Include="System.Data.Common" Version="4.3.0" />
+    <PackageReference Include="System.Dynamic.Runtime" Version="4.3.0" />
+    <PackageReference Include="System.Reflection.Emit" Version="4.3.0" />
+    <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.3.0" />
+    <PackageReference Include="System.Reflection.TypeExtensions" Version="4.3.0" />
+    <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
+    <PackageReference Include="System.Xml.XmlDocument" Version="4.3.0" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.5'">
+    <PackageReference Include="Microsoft.Extensions.DependencyModel">
+      <Version>1.1.2</Version>
+    </PackageReference>
+    <PackageReference Include="System.ComponentModel.Annotations">
+      <Version>4.3.0</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net45'">
+    <PackageReference Include="System.ComponentModel.Annotations">
+      <Version>4.3.0</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net451'">
+    <PackageReference Include="Microsoft.Extensions.DependencyModel">
+      <Version>1.1.2</Version>
+    </PackageReference>
+    <PackageReference Include="System.ComponentModel.Annotations">
+      <Version>4.3.0</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Providers\ProviderFactory.cs" />
+    <Compile Remove="Providers\SqlServerDatabaseProvider.cs" />
+    <Compile Remove="Reflection\Accessor.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CSharp" Version="4.3.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="DataDeserializer.cs">
+      <ExcludeFromSourceAnalysis>False</ExcludeFromSourceAnalysis>
+      <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
+    </Compile>
+  </ItemGroup>
+</Project>
