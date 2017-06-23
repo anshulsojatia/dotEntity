@@ -1,0 +1,9 @@
+packages/
+SampleApp/obj/
+SpruceFramework/obj/
+SpruceFramework.Tests/obj/
+SpruceFramework.Tests.Data/obj/
+SpruceFramework.Tests/bin/
+SpruceFramework.Tests.Data/bin/Debug/SpruceFramework.Tests.Data.pdb
+SpruceFramework.Tests.Data/bin/
+SampleApp/bin/
