@@ -8,12 +8,13 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 
 namespace SpruceFramework.Extensions
 {
     public static class DataReaderExtensions
     {
-        public static DataReaderRow[] GetDataReaderRows(this IDataReader dataReader, string[] columnNames)
+        public static List<DataReaderRow> GetDataReaderRows(this IDataReader dataReader, string[] columnNames, string typeName)
         {
             var dataReaderRows = new List<DataReaderRow>();
             while (dataReader.Read())
@@ -21,13 +22,45 @@ namespace SpruceFramework.Extensions
                 var row = new DataReaderRow();
                 foreach (var c in columnNames)
                 {
-                    row[c] = dataReader[c];
+                    row[typeName + "." + c] = dataReader[c];
                 }
 
                 dataReaderRows.Add(row);
             }
 
-            return dataReaderRows.ToArray();
+            return dataReaderRows;
+        }
+
+        public static List<DataReaderRow> GetDataReaderRows(this IDataReader dataReader, Dictionary<Type, int> columnsWithSkipCount)
+        {
+            var dataReaderRows = new List<DataReaderRow>();
+            var columnNames = new List<string>();
+
+            var breakPointIndexes = columnsWithSkipCount.Values;
+            var activeTypeName = columnsWithSkipCount.Keys.First().Name;
+
+            for (var i = 0; i < dataReader.FieldCount; i++)
+            {
+                columnNames.Add(activeTypeName + "." + dataReader.GetName(i));
+                if (breakPointIndexes.Contains(i + 1))
+                {
+                    activeTypeName = columnsWithSkipCount.First(x => x.Value == i + 1).Key.Name;
+                }
+            }
+
+            while (dataReader.Read())
+            {
+                var row = new DataReaderRow();
+
+                for (var i = 0; i < columnNames.Count; i++)
+                {
+                    var c = columnNames[i];
+                    row[c] = dataReader[i];
+                }
+                dataReaderRows.Add(row);
+            }
+
+            return dataReaderRows;
         }
 
         public static DataTable GetDataTable(this IDataReader dataReader)

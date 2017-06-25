@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading;
 using SampleApp.Entity;
 using SpruceFramework;
-using SpruceFramework.Extensions;
 using SpruceFramework.Providers;
-using SpruceFramework.Reflection;
 
 namespace SampleApp
 {
@@ -22,18 +19,30 @@ namespace SampleApp
             var s = new Stopwatch();
 
             s.Start();
-            SpruceTable<Product>.Query("SELECT * FROM Product WHERE Id < @Id", new {Id = 10});
+            var p1 = SpruceTable<Product>.Query("SELECT * FROM Product WHERE Id < @Id", new {Id = 10});
             Console.WriteLine("Time Taken :{0}ms", s.ElapsedMilliseconds);
             s.Reset();
 
 
             s.Start();
-            SpruceTable<Product>.Where(x => x.Id < 10).Select();
+            var p2 = SpruceTable<Product>.Where(x => x.Id < 10).Select();
             Console.WriteLine("Time Taken :{0}ms", s.ElapsedMilliseconds);
             s.Reset();
+            
+            s.Start();
+            var p = SpruceTable<Product>.Where(x => true)
+                .Join<ProductCategory>("Id", "ProductId")
+                .Join<Category>("CategoryId", "Id")
+                .Relate<Category>((product, category) =>
+                {
+                    if(product.Categories == null)
+                        product.Categories = new List<Category>();
 
-           
-
+                    product.Categories.Add(category);
+                })
+                .SelectNested();
+            Console.WriteLine("Time Taken :{0}ms", s.ElapsedMilliseconds);
+            s.Reset();
 
             Console.ReadKey();
 

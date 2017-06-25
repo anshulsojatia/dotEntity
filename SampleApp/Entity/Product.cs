@@ -6,11 +6,14 @@
 // #endregion
 
 using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace SampleApp.Entity
 {
     public class Product
     {
+        [Key]
         public int Id { get; set; }
 
         public string ProductName { get; set; }
@@ -22,5 +25,7 @@ namespace SampleApp.Entity
         public decimal Price { get; set; }
 
         public bool IsActive { get; set; }
+
+        public virtual IList<Category> Categories { get; set; }
     }
 }

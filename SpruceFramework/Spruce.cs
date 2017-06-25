@@ -56,7 +56,12 @@ namespace SpruceFramework
         public static string GetTableNameForType<T>()
         {
             var tType = typeof(T);
-            return EntityTableNames.ContainsKey(tType) ? EntityTableNames[tType] : tType.Name;
+            return GetTableNameForType(tType);
+        }
+
+        public static string GetTableNameForType(Type type)
+        {
+            return EntityTableNames.ContainsKey(type) ? EntityTableNames[type] : type.Name;
         }
     }
 }

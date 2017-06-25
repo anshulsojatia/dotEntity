@@ -7,11 +7,16 @@
 
 using System;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Reflection.Emit;
 
 namespace SpruceFramework.Reflection
 {
+    public static class Instantiator
+    {
+        public static object GetInstance(Type type)
+        {
+            return ((Delegate) GenericInvoker.InvokeField(null, typeof(Instantiator<>), type, "Instance")).DynamicInvoke();
+        }
+    }
     public static class Instantiator<T>
     {
         private static readonly Type TypeOfT = typeof(T);

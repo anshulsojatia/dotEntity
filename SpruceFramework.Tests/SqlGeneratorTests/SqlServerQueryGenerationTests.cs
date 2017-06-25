@@ -27,6 +27,35 @@ namespace SpruceFramework.Tests.SqlGeneratorTests
         }
 
         [Test]
+        public void SelectGeneration_WithoutAnything_Paginated_Valid()
+        {
+            var sql = generator.GenerateSelect<Product>(out IList<QueryParameter> queryParameters,
+                orderBy: new Dictionary<Expression<Func<Product, object>>, RowOrder>
+                {
+                    {product => product.Id, RowOrder.Ascending}
+                }, page: 1, count: 30);
+
+            var expected = "SELECT * FROM (SELECT *,ROW_NUMBER() OVER (ORDER BY Id) AS __ROW_NUM__ FROM Product) AS __PAGINATEDRESULT__ WHERE __ROW_NUM__ > 0 AND __ROW_NUM__ < 31";
+            Assert.AreEqual(expected, sql);
+        }
+
+        [Test]
+        public void SelectGeneration_With_Where_Paginated_Valid()
+        {
+            var sql = generator.GenerateSelect(out IList<QueryParameter> _, new List<Expression<Func<Product, bool>>>
+            {
+                product => product.ProductName == "Ice Candy"
+            }, new Dictionary<Expression<Func<Product, object>>, RowOrder>
+            {
+                {product => product.Id, RowOrder.Ascending}
+            }, 1, 30);
+
+            var expected = "SELECT * FROM (SELECT *,ROW_NUMBER() OVER (ORDER BY Id) AS __ROW_NUM__ FROM Product WHERE ProductName = @ProductName) AS __PAGINATEDRESULT__ WHERE __ROW_NUM__ > 0 AND __ROW_NUM__ < 31";
+            Assert.AreEqual(expected, sql);
+        }   
+
+
+        [Test]
         public void SelectGenerator_WithWhere_Valid()
         {
             var sql = generator.GenerateSelect(out IList<QueryParameter> queryParameters, new List<Expression<Func<Product, bool>>>
@@ -34,6 +63,17 @@ namespace SpruceFramework.Tests.SqlGeneratorTests
                 product => product.ProductName == "Ice Candy"
             });
             var expected = "SELECT * FROM Product WHERE ProductName = @ProductName";
+            Assert.AreEqual(expected, sql);
+        }
+
+        [Test]
+        public void SelectGenerator_WithWhere_WithoutConstant_Valid()
+        {
+            var sql = generator.GenerateSelect(out IList<QueryParameter> queryParameters, new List<Expression<Func<Product, bool>>>
+            {
+                product => product.ProductName == product.ProductDescription
+            });
+            var expected = "SELECT * FROM Product WHERE ProductName = ProductDescription";
             Assert.AreEqual(expected, sql);
         }
 
@@ -365,6 +405,61 @@ namespace SpruceFramework.Tests.SqlGeneratorTests
 
             var expected = "SELECT * FROM Product WHERE Id=@Id AND IsActive=@IsActive";
             var sql = generator.Query(expected, new {Id = 5, IsActive = false}, out IList<QueryParameter> queryParameters);
+            Assert.AreEqual(expected, sql);
+        }
+
+        [Test]
+        public void JoinGenerator_Simple_Valid()
+        {
+            var sql = generator.GenerateJoin<Product>(out IList<QueryParameter> queryParameters, new List<IJoinMeta>()
+            {
+                new JoinMeta<ProductCategory>("Id", "ProductId"),
+                new JoinMeta<Category>("CategoryId", "Id")
+            });
+
+            var expected = "SELECT * FROM Product t1 INNER JOIN ProductCategory t2 ON t1.[Id] = t2.[ProductId] INNER JOIN Category t3 ON t2.[CategoryId] = t3.[Id]";
+            Assert.AreEqual(expected, sql);
+        }
+
+        [Test]
+        public void JoinGenerator_Simple_WithParentSource_Valid()
+        {
+            var sql = generator.GenerateJoin<Product>(out IList<QueryParameter> queryParameters, new List<IJoinMeta>()
+            {
+                new JoinMeta<ProductCategory>("Id", "ProductId"),
+                new JoinMeta<Category>("CategoryId", "Id", SourceColumn.Parent)
+            });
+
+            var expected = "SELECT * FROM Product t1 INNER JOIN ProductCategory t2 ON t1.[Id] = t2.[ProductId] INNER JOIN Category t3 ON t1.[CategoryId] = t3.[Id]";
+            Assert.AreEqual(expected, sql);
+        }
+
+        [Test]
+        public void JoinGenerator_Simple_Where_Valid()
+        {
+            Expression<Func<Product, Category, bool>> expression = (product, category) => product.Id == category.Id;
+            var sql = generator.GenerateJoin<Product>(out IList<QueryParameter> queryParameters, new List<IJoinMeta>()
+            {
+                new JoinMeta<ProductCategory>("Id", "ProductId"),
+                new JoinMeta<Category>("CategoryId", "Id")
+            }, new List<LambdaExpression>(){ expression });
+
+            var expected = "SELECT * FROM Product t1 INNER JOIN ProductCategory t2 ON t1.[Id] = t2.[ProductId] INNER JOIN Category t3 ON t2.[CategoryId] = t3.[Id]  WHERE [t1].[Id] = [t3].[Id]";
+            Assert.AreEqual(expected, sql);
+        }
+
+        [Test]
+        public void JoinGenerator_Multiple_Where_Valid()
+        {
+            Expression<Func<Product, Category, bool>> expression1 = (product, category) => product.Id == category.Id;
+            Expression<Func<ProductCategory, Category, bool>> expression2 = (productCategory, category) => productCategory.CategoryId > category.Id;
+            var sql = generator.GenerateJoin<Product>(out IList<QueryParameter> queryParameters, new List<IJoinMeta>()
+            {
+                new JoinMeta<ProductCategory>("Id", "ProductId"),
+                new JoinMeta<Category>("CategoryId", "Id")
+            }, new List<LambdaExpression>() { expression1, expression2 });
+
+            var expected = "SELECT * FROM Product t1 INNER JOIN ProductCategory t2 ON t1.[Id] = t2.[ProductId] INNER JOIN Category t3 ON t2.[CategoryId] = t3.[Id]  WHERE [t1].[Id] = [t3].[Id] AND [t2].[CategoryId] > [t3].[Id]";
             Assert.AreEqual(expected, sql);
         }
     }

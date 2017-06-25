@@ -31,6 +31,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -45,13 +46,15 @@
     <Compile Include="Enumerations\DbOperationType.cs" />
     <Compile Include="ExpressionTreeParser.cs" />
     <Compile Include="ExpressionVisitor.cs" />
+    <Compile Include="Extensions\DataDeserializerExtensions.cs" />
     <Compile Include="Extensions\DataReaderExtensions.cs" />
     <Compile Include="Extensions\ExpressionExtensions.cs" />
     <Compile Include="IDataDeserializer.cs" />
     <Compile Include="IQueryProcessor.cs" />
+    <Compile Include="JoinMeta.cs" />
     <Compile Include="Providers\IDatabaseProvider.cs" />
     <Compile Include="IQueryGenerator.cs" />
-    <Compile Include="ISpruceTable.cs" />
+    <Compile Include="ISpruceTable`.cs" />
     <Compile Include="Providers\ProviderFactory.cs" />
     <Compile Include="Providers\SqlServerDatabaseProvider.cs" />
     <Compile Include="QueryMap.cs" />
@@ -61,6 +64,7 @@
     <Compile Include="QueryProcessor.cs" />
     <Compile Include="Enumerations\RowOrder.cs" />
     <Compile Include="Reflection\Accessor.cs" />
+    <Compile Include="Reflection\GenericInvoker.cs" />
     <Compile Include="Reflection\Instantiator.cs" />
     <Compile Include="Reflection\PropertyAccessor.cs" />
     <Compile Include="Singleton.cs" />
@@ -69,6 +73,7 @@
     <Compile Include="SpruceTable.cs" />
     <Compile Include="SpruceTable`.cs" />
     <Compile Include="SqlServerQueryGenerator.cs" />
+    <Compile Include="TablePropertyValue.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

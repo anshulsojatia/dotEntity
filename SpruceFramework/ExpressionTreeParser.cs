@@ -10,6 +10,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 
 namespace SpruceFramework
@@ -26,13 +27,15 @@ namespace SpruceFramework
             public const string NoParam = "NOPARAM";
             public const string Not = "NOT";
         }
+
         /// <summary>
         /// Walks the tree.
         /// </summary>
         /// <param name="body">The body.</param>
         /// <param name="linkingType">Type of the linking.</param>
         /// <param name="queryProperties">The query properties.</param>
-        public static void WalkTree(Expression body, ExpressionType linkingType, ref List<QueryParameter> queryProperties)
+        /// <param name="aliases"></param>
+        public static void WalkTree(Expression body, ExpressionType linkingType, ref List<QueryParameter> queryProperties, Dictionary<string, string> aliases = null)
         {
             if (body is BinaryExpression)
             {
@@ -48,8 +51,12 @@ namespace SpruceFramework
                     var link = GetOperator(linkingType);
 
                     var br = binaryBody.Right;
-                    var propertyValue = br is ConstantExpression || br is MethodCallExpression ? EvaluateExpression(br) : EvaluateCompiled((MemberExpression)br);
+                    var propertyValue = br is ConstantExpression || br is MethodCallExpression ? EvaluateExpression(br) : EvaluateCompiled((MemberExpression)br, aliases);
                     var parameterName = GetSafeParameterName(queryProperties, propertyName, propertyValue);
+
+                    //alias if necessary
+                    propertyName = GetAliasedPropertyName((MemberExpression) binaryBody.Left, aliases);
+
                     queryProperties.Add(new QueryParameter(link, propertyName, propertyValue, opr, parameterName));
                 }
                 else
@@ -149,16 +156,16 @@ namespace SpruceFramework
             }
         }
 
-        internal static List<QueryParameter> GetQueryParameters<T>(Expression<Func<T, bool>> where)
+        internal static List<QueryParameter> GetQueryParameters(LambdaExpression where, Dictionary<string, string> aliases = null)
         {
             var queryProperties = new List<QueryParameter>();
             // walk the tree and build up a list of query parameter objects
             // from the left and right branches of the expression tree
-            WalkTree(where.Body, ExpressionType.Default, ref queryProperties);
+            WalkTree(where.Body, ExpressionType.Default, ref queryProperties, aliases);
             return queryProperties;
         }
 
-        internal static string ParseAsWhereString<T>(Expression<Func<T, bool>> where, out IList<QueryParameter> queryProperties)
+        internal static string ParseAsWhereString(LambdaExpression where, out IList<QueryParameter> queryProperties, Dictionary<string, string> aliases = null)
         {
             queryProperties = null;
             if (where == null)
@@ -166,7 +173,7 @@ namespace SpruceFramework
 
             var builder = new StringBuilder();
 
-            queryProperties = GetQueryParameters(where);
+            queryProperties = GetQueryParameters(where, aliases);
 
             var pendingClose = 0;
             var bracketOpened = false;
@@ -250,19 +257,18 @@ namespace SpruceFramework
                 }
                 else if (!string.IsNullOrEmpty(item.LinkingOperator) && i > 0 && !bracketOpened)
                 {
-                    builder.Append(item.ParameterName == Markers.NoParam
-                        ? $" {item.LinkingOperator} {item.PropertyName} {item.QueryOperator} {item.PropertyValue}"
+                    builder.Append(IncludeParamSymbol(item, out string propertyValue)
+                        ? $" {item.LinkingOperator} {item.PropertyName} {item.QueryOperator} {propertyValue}"
                         : $" {item.LinkingOperator} {item.PropertyName} {item.QueryOperator} @{item.ParameterName}");
                 }
                 else
                 {
-                    builder.Append(item.ParameterName == Markers.NoParam 
-                        ? $"{item.PropertyName} {item.QueryOperator} {item.PropertyValue}"
+                    builder.Append(IncludeParamSymbol(item, out string propertyValue)
+                        ? $"{item.PropertyName} {item.QueryOperator} {propertyValue}"
                         : $"{item.PropertyName} {item.QueryOperator} @{item.ParameterName}");
                     bracketOpened = false;
                 }
 
-                //expando[item.PropertyName] = item.PropertyValue;
             }
 
             //add any extra parameters to the response
@@ -270,7 +276,17 @@ namespace SpruceFramework
             return builder.ToString();
         }
 
-        internal static string ParseAsOrderByString<T>(Expression<Func<T, object>> orderBy)
+        internal static bool IncludeParamSymbol(QueryParameter parameter, out string value)
+        {
+            value = null;
+            if (parameter.ParameterName == Markers.NoParam)
+                value = parameter.PropertyValue.ToString();
+            var propertyValue = parameter.PropertyValue as TablePropertyValue;
+            if (propertyValue != null)
+                value = propertyValue.Value;
+            return value != null;
+        }
+        internal static string ParseAsOrderByString(LambdaExpression orderBy)
         {
             if (orderBy == null)
                 return string.Empty;
@@ -358,8 +374,13 @@ namespace SpruceFramework
             return null;
         }
 
-        internal static object EvaluateCompiled(MemberExpression expression)
+        internal static object EvaluateCompiled(MemberExpression expression, Dictionary<string, string> aliases = null)
         {
+            if (expression.Expression?.Type.MemberType == MemberTypes.TypeInfo)
+            {
+                var propertyName = GetAliasedPropertyName(expression, aliases);
+                return new TablePropertyValue($"{propertyName}");
+            }
             var converted = Expression.Convert(expression, typeof(object));
             var getterLambda = Expression.Lambda<Func<object>>(converted);
             var getter = getterLambda.Compile();
@@ -380,6 +401,20 @@ namespace SpruceFramework
                 }
             }
             return propertyName;
+        }
+
+        public static string GetAliasedPropertyName(MemberExpression memberExpression, Dictionary<string, string> aliases)
+        {
+            var propertyName = memberExpression.Member.Name;
+            if (aliases == null)
+                return propertyName;
+
+            var tableName = Spruce.GetTableNameForType(memberExpression.Expression.Type);
+            propertyName = memberExpression.Member.Name;
+            var prefix = tableName;
+            aliases?.TryGetValue(tableName, out prefix);
+
+            return $"[{prefix}].[{propertyName}]";
         }
     }
 

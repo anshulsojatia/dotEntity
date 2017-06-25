@@ -5,7 +5,6 @@
 // // 
 // #endregion
 
-using System;
 using SpruceFramework.Reflection;
 
 namespace SpruceFramework
