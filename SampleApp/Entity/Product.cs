@@ -26,6 +26,6 @@ namespace SampleApp.Entity
 
         public bool IsActive { get; set; }
 
-        public virtual IList<Category> Categories { get; set; }
+        public virtual IList<ProductCategory> ProductCategories { get; set; }
     }
 }

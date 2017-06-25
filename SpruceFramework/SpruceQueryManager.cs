@@ -8,6 +8,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using SpruceFramework.Enumerations;
@@ -54,13 +56,16 @@ namespace SpruceFramework
 
         public virtual int DoInsert(T entity)
         {
+            var keyColumn = DataDeserializer<T>.Instance.GetKeyColumn();
             var query = _queryGenerator.GenerateInsert(entity, out IList<QueryParameter> queryParameters);
             using (var con = Spruce.Provider.Connection)
-            using (var cmd = _queryProcessor.GetQueryCommand(con, query, queryParameters))
+            using (var cmd = _queryProcessor.GetQueryCommand(con, query, queryParameters, true, keyColumn))
             {
                 con.Open();
-                var rowsAffected = cmd.ExecuteNonQuery();
-                return rowsAffected;
+                var id = (int) cmd.ExecuteScalar();
+                con.Close();
+                DataDeserializer<T>.Instance.SetPropertyAs<int>(entity, keyColumn, id);
+                return 1;
             }
         }
 

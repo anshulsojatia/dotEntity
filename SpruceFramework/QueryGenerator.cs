@@ -27,7 +27,7 @@ namespace SpruceFramework
             var joinValueString = "@" + string.Join(",@", insertColumns); ;
             parameters = ToQueryParameters(columnValueMap);
 
-            return $"INSERT INTO {tableName} ({joinInsertString}) OUTPUT inserted.ID VALUES ({joinValueString})";
+            return $"INSERT INTO {tableName} ({joinInsertString}) OUTPUT inserted.Id VALUES ({joinValueString})";
         }
 
         public virtual string GenerateInsert<T>(T entity, out IList<QueryParameter> parameters) where T : class

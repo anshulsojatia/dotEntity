@@ -12,6 +12,6 @@ namespace SpruceFramework
 {
     internal interface IQueryProcessor
     {
-        IDbCommand GetQueryCommand(IDbConnection connection, string sqlQuery, IList<QueryParameter> parameters, bool loadIdOfAffectedRow = false);
+        IDbCommand GetQueryCommand(IDbConnection connection, string sqlQuery, IList<QueryParameter> parameters, bool loadIdOfAffectedRow = false, string idParameterName = "");
     }
 }

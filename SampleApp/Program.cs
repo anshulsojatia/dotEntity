@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using SampleApp.Entity;
 using SpruceFramework;
 using SpruceFramework.Providers;
@@ -33,14 +34,47 @@ namespace SampleApp
             var p = SpruceTable<Product>.Where(x => true)
                 .Join<ProductCategory>("Id", "ProductId")
                 .Join<Category>("CategoryId", "Id")
+                .Relate<ProductCategory>((product, category) =>
+                {
+                    if (product.ProductCategories == null)
+                        product.ProductCategories = new List<ProductCategory>();
+                    product.ProductCategories.Add(category);
+                })
                 .Relate<Category>((product, category) =>
                 {
-                    if(product.Categories == null)
-                        product.Categories = new List<Category>();
-
-                    product.Categories.Add(category);
+                    var pc = product.ProductCategories.FirstOrDefault(x => x.CategoryId == category.Id);
+                    if (pc != null)
+                    {
+                        pc.Category = category;
+                        pc.Product = product;
+                    }
                 })
                 .SelectNested();
+            Console.WriteLine("Time Taken :{0}ms", s.ElapsedMilliseconds);
+            s.Reset();
+
+            s.Start();
+            p = SpruceTable<Product>.Where(x => x.IsActive)
+                .Join<ProductCategory>("Id", "ProductId")
+                .Join<Category>("CategoryId", "Id")
+                .Relate<ProductCategory>((product, category) =>
+                {
+                    if (product.ProductCategories == null)
+                        product.ProductCategories = new List<ProductCategory>();
+                    product.ProductCategories.Add(category);
+                })
+                .Relate<Category>((product, category) =>
+                {
+                    var pc = product.ProductCategories.FirstOrDefault(x => x.CategoryId == category.Id);
+                    if (pc != null)
+                    {
+                        pc.Category = category;
+                        pc.Product = product;
+                    }
+                })
+                .SelectNested();
+
+
             Console.WriteLine("Time Taken :{0}ms", s.ElapsedMilliseconds);
             s.Reset();
 

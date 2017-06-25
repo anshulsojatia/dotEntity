@@ -203,7 +203,7 @@ namespace SpruceFramework
             return true;
         }
 
-        private void SetPropertyAs<TType>(T instance, string fieldName, object value)
+        internal void SetPropertyAs<TType>(T instance, string fieldName, object value)
         {
             ((Action<T, TType>)TypeMap[fieldName]).Invoke(instance, Parse<TType>(value));
         }

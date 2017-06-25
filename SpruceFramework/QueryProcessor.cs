@@ -13,7 +13,7 @@ namespace SpruceFramework
 {
     internal class QueryProcessor : IQueryProcessor
     {
-        public IDbCommand GetQueryCommand(IDbConnection connection, string sqlQuery, IList<QueryParameter> parameters, bool loadIdOfAffectedRow = false)
+        public IDbCommand GetQueryCommand(IDbConnection connection, string sqlQuery, IList<QueryParameter> parameters, bool loadIdOfAffectedRow = false, string idParameterName = "")
         {
             var command = connection.CreateCommand();
             command.CommandText = sqlQuery;
@@ -28,8 +28,9 @@ namespace SpruceFramework
             {
                 //add an output parameter
                 var idParameter = command.CreateParameter();
-                idParameter.ParameterName = "Id";
+                idParameter.ParameterName = idParameterName;
                 idParameter.Direction = ParameterDirection.Output;
+                idParameter.DbType = DbType.Int32;
                 command.Parameters.Add(idParameter);
             }
             return command;
