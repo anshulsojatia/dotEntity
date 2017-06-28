@@ -19,8 +19,8 @@ namespace SpruceFramework
 {
     internal class DataDeserializer<T> : IDataDeserializer<T> where T : class
     {
-        public ConcurrentDictionary<string, object> TypeMap = null;
-
+        private ConcurrentDictionary<string, object> _typeMap = null;
+        private ConcurrentDictionary<string, object> _getterMap = null;
         private readonly Type _typeofT;
 
         public DataDeserializer()
@@ -31,10 +31,10 @@ namespace SpruceFramework
 
         private void CreateMapIfNotDone()
         {
-            if (TypeMap != null && TypeMap.Count > 0)
+            if (_typeMap != null && _typeMap.Count > 0)
                 return;
 
-            TypeMap = new ConcurrentDictionary<string, object>();
+            _typeMap = new ConcurrentDictionary<string, object>();
             //exclude virtual properties
             var typeProperties = _typeofT.GetProperties().Where(x => !x.GetAccessors()[0].IsVirtual);
             foreach (var property in typeProperties)
@@ -53,7 +53,7 @@ namespace SpruceFramework
                 else if (propertyType == typeof(bool))
                     setter = property.CreateSetter<T, bool>();
 
-                TypeMap.TryAdd(property.Name, setter);
+                _typeMap.TryAdd(property.Name, setter);
             }
         }
       
@@ -64,7 +64,7 @@ namespace SpruceFramework
             return DeserializeMany(reader).FirstOrDefault();
         }
 
-        public T[] DeserializeMany(IDataReader reader)
+        public IEnumerable<T> DeserializeMany(IDataReader reader)
         {
             var tArray = FurnishInstances(reader);
             return tArray;
@@ -75,7 +75,7 @@ namespace SpruceFramework
             for(var i = 0; i < columnNames.Length; i++)
             {
                 var fieldName = columnNames[i];
-                if (!TypeMap.ContainsKey(fieldName)) continue;
+                if (!_typeMap.ContainsKey(fieldName)) continue;
                 var fieldValue = row[_typeofT.Name + "." + fieldName];
                 var fieldType = fieldValue.GetType();
 
@@ -92,7 +92,7 @@ namespace SpruceFramework
             }
         }
        
-        private T[] FurnishInstances(IDataReader reader)
+        private IEnumerable<T> FurnishInstances(IDataReader reader)
         {
             var columnNames = GetColumns();
             var rows = reader.GetDataReaderRows(columnNames, _typeofT.Name);
@@ -103,12 +103,11 @@ namespace SpruceFramework
             {
                 var instance = tInstances[index++];
                 SetProperties(instance, row, columnNames);
+                yield return instance;
             }
-
-            return tInstances;
         }
 
-        public T[] DeserializeManyNested(IDataReader reader, IList<IJoinMeta> joinMetas, Dictionary<Type, Delegate> relationActions)
+        public IEnumerable<T> DeserializeManyNested(IDataReader reader, IList<IJoinMeta> joinMetas, Dictionary<Type, Delegate> relationActions)
         {
             
             var tInstances = new List<T>();
@@ -173,7 +172,7 @@ namespace SpruceFramework
                 rowIndex++;
             }
 
-            return tInstances.ToArray();
+            return tInstances.AsEnumerable();
         }
 
         private bool CreateInstanceIfRequired(Type instanceType, DataReaderRow prevDataRow, DataReaderRow currentDataRow, IDataDeserializer deserializer, int skipColumns, out object newInstance, ref Dictionary<string, object> localCache)
@@ -205,8 +204,25 @@ namespace SpruceFramework
 
         internal void SetPropertyAs<TType>(T instance, string fieldName, object value)
         {
-            ((Action<T, TType>)TypeMap[fieldName]).Invoke(instance, Parse<TType>(value));
+            ((Action<T, TType>)_typeMap[fieldName]).Invoke(instance, Parse<TType>(value));
         }
+
+        internal TType GetPropertyAs<TType>(T instance, string fieldName)
+        {
+            if(_getterMap == null)
+                _getterMap = new ConcurrentDictionary<string, object>();
+
+            if(!_getterMap.TryGetValue(fieldName, out object getter))
+            {
+                var propertyInfo = _typeofT.GetProperty(fieldName);
+                if(propertyInfo == null)
+                    throw new Exception("Can't find property");
+
+                getter = propertyInfo.CreateGetter<T, TType>();
+            }
+            return ((Func<T, TType>) getter).Invoke(instance);
+        }
+
         private static TType Parse<TType>(object value)
         {
             if (value == null || value is DBNull) return default(TType);
@@ -231,7 +247,7 @@ namespace SpruceFramework
         private string[] _columnsAsArray;
         public string[] GetColumns()
         {
-            return _columnsAsArray ?? (_columnsAsArray = TypeMap.Keys.ToArray());
+            return _columnsAsArray ?? (_columnsAsArray = _typeMap.Keys.ToArray());
         }
 
         private string _keyColumnName = null;

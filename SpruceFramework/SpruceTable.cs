@@ -5,12 +5,16 @@
 // // 
 // #endregion
 
-using System.Data;
+
+using System;
 
 namespace SpruceFramework
 {
     public sealed class SpruceTable
     {
-        
+        public static ISpruceTransaction BeginTransaction()
+        {
+            return new SpruceTransaction();
+        }
     }
 }

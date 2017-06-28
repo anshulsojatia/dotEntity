@@ -331,7 +331,7 @@ namespace SpruceFramework.Tests.SqlGeneratorTests
         {
             var p = new Product();
             var sql = generator.GenerateInsert(p, out IList<QueryParameter> queryParameters);
-            var expected = "INSERT INTO Product (ProductName,ProductDescription,DateCreated,Price,IsActive) OUTPUT inserted.ID VALUES (@ProductName,@ProductDescription,@DateCreated,@Price,@IsActive)";
+            var expected = "INSERT INTO Product (ProductName,ProductDescription,DateCreated,Price,IsActive) OUTPUT inserted.Id VALUES (@ProductName,@ProductDescription,@DateCreated,@Price,@IsActive)";
 
             Assert.AreEqual(expected, sql);
         }
@@ -340,7 +340,7 @@ namespace SpruceFramework.Tests.SqlGeneratorTests
         public void InsertGenerator_DynamicType_Valid()
         {
             var sql = generator.GenerateInsert("User", new { UserName = "JohnSmith", FirstName = "John", DateOfBirth = DateTime.Now}, out IList<QueryParameter> queryParameters);
-            var expected = "INSERT INTO User (UserName,FirstName,DateOfBirth) OUTPUT inserted.ID VALUES (@UserName,@FirstName,@DateOfBirth)";
+            var expected = "INSERT INTO User (UserName,FirstName,DateOfBirth) OUTPUT inserted.Id VALUES (@UserName,@FirstName,@DateOfBirth)";
 
             Assert.AreEqual(expected, sql);
         }
@@ -349,6 +349,24 @@ namespace SpruceFramework.Tests.SqlGeneratorTests
         public void UpdateGenerator_EntityType_Valid()
         {
             var sql = generator.GenerateUpdate<Product>(x => x.Id == 4, out IList<QueryParameter> queryParameters);
+            var expected = "UPDATE Product SET ProductName = @ProductName,ProductDescription = @ProductDescription,DateCreated = @DateCreated,Price = @Price,IsActive = @IsActive WHERE Id = @Id";
+
+            Assert.AreEqual(expected, sql);
+        }
+
+        [Test]
+        public void UpdateGenerator_Entity_Valid()
+        {
+            var product = new Product()
+            {
+                Id = 1,
+                IsActive = false,
+                Price = 55,
+                ProductDescription = "Some description",
+                ProductName = "Somr proeud",
+                DateCreated = DateTime.Today
+            };
+            var sql = generator.GenerateUpdate(product, out IList<QueryParameter> queryParameters);
             var expected = "UPDATE Product SET ProductName = @ProductName,ProductDescription = @ProductDescription,DateCreated = @DateCreated,Price = @Price,IsActive = @IsActive WHERE Id = @Id";
 
             Assert.AreEqual(expected, sql);

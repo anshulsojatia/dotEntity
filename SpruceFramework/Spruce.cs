@@ -46,7 +46,7 @@ namespace SpruceFramework
 
         internal static IQueryGenerator QueryGenerator { get; set; }
 
-        internal static IQueryProcessor QueryProcessor { get; set; }
+        internal static QueryProcessor QueryProcessor { get; set; }
 
         public static void MapTableNameForType<T>(string tableName)
         {

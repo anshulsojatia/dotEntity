@@ -11,19 +11,24 @@ using System.Linq;
 
 namespace SpruceFramework
 {
-    internal class QueryProcessor : IQueryProcessor
+    internal class QueryProcessor
     {
-        public IDbCommand GetQueryCommand(IDbConnection connection, string sqlQuery, IList<QueryParameter> parameters, bool loadIdOfAffectedRow = false, string idParameterName = "")
+        public IDbCommand GetQueryCommand(IDbConnection connection, string sqlQuery, IList<QueryParameter> parameters, bool loadIdOfAffectedRow = false, string idParameterName = "", CommandType commandType = CommandType.Text)
         {
             var command = connection.CreateCommand();
             command.CommandText = sqlQuery;
-            foreach (var parameter in parameters.Where(x => !x.SupportOperator))
+            command.CommandType = commandType;
+            if (parameters != null)
             {
-                var cmdParameter = command.CreateParameter();
-                cmdParameter.ParameterName = parameter.ParameterName;
-                cmdParameter.Value = parameter.PropertyValue;
-                command.Parameters.Add(cmdParameter);
+                foreach (var parameter in parameters.Where(x => !x.SupportOperator))
+                {
+                    var cmdParameter = command.CreateParameter();
+                    cmdParameter.ParameterName = parameter.ParameterName;
+                    cmdParameter.Value = parameter.PropertyValue;
+                    command.Parameters.Add(cmdParameter);
+                }
             }
+            
             if (loadIdOfAffectedRow)
             {
                 //add an output parameter
@@ -35,5 +40,8 @@ namespace SpruceFramework
             }
             return command;
         }
+
+        internal static QueryProcessor Instance => Singleton<QueryProcessor>.Instance;
+
     }
 }

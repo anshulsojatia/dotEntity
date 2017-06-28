@@ -8,139 +8,163 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using SpruceFramework.Enumerations;
 
 namespace SpruceFramework
 {
-    internal class SpruceQueryManager<T> : IDisposable where T: class
+    internal class SpruceQueryManager : ISpruceQueryManager
     {
         private readonly IQueryGenerator _queryGenerator;
-        private readonly IQueryProcessor _queryProcessor;
         internal SpruceQueryManager()
         {
             _queryGenerator = Spruce.QueryGenerator;
-            _queryProcessor = Spruce.QueryProcessor;
         }
 
-        public virtual TType DoScaler<TType>(string query, dynamic parameters)
+        private readonly bool _withTransaction;
+        private readonly IList<SpruceDbCommand> _transactionCommands;
+        internal SpruceQueryManager(bool withTransaction) : this()
+        {
+            _withTransaction = withTransaction;
+            _transactionCommands = new List<SpruceDbCommand>();
+        }
+
+        public virtual TType DoScaler<TType>(string query, dynamic parameters, Func<TType, bool> resultAction = null)
         {
             query = _queryGenerator.Query(query, parameters, out IList<QueryParameter> queryParameters);
-            using (var con = Spruce.Provider.Connection)
-            using (var cmd = _queryProcessor.GetQueryCommand(con, query, queryParameters))
+            var cmd = new SpruceDbCommand(DbOperationType.SelectSingle, query, queryParameters);
+            cmd.ProcessResult(o =>
             {
-                con.Open();
-                if (typeof(TType).IsPrimitive)
-                    return (TType) cmd.ExecuteScalar();
+                if (_withTransaction)
+                   cmd.ContinueNextCommand = resultAction?.Invoke((TType) o) ?? true;
+            });
 
+            if (_withTransaction)
+            {
+                _transactionCommands.Add(cmd);
                 return default(TType);
             }
+
+            SpruceDbConnector.ExecuteCommand(cmd);
+            return cmd.GetResultAs<TType>();
         }
 
-        public virtual T[] Do(string query, dynamic parameters)
+        public virtual IEnumerable<T> Do<T>(string query, dynamic parameters, Func<IEnumerable<T>, bool> resultAction = null) where T : class
         {
             query = _queryGenerator.Query(query, parameters, out IList<QueryParameter> queryParameters);
-            using (var con = Spruce.Provider.Connection)
-            using (var cmd = _queryProcessor.GetQueryCommand(con, query, queryParameters))
+            var cmd = new SpruceDbCommand(DbOperationType.Select, query, queryParameters);
+            cmd.ProcessReader(reader =>
             {
-                con.Open();
-                using (var reader = cmd.ExecuteReader())
-                {
+                if(!_withTransaction)
                     return DataDeserializer<T>.Instance.DeserializeMany(reader);
+                if (resultAction != null)
+                {
+                    var ts = DataDeserializer<T>.Instance.DeserializeMany(reader);
+                    cmd.ContinueNextCommand = resultAction.Invoke(ts);
                 }
+                return null;
+            });
+            if (_withTransaction)
+            {
+                _transactionCommands.Add(cmd);
+                return default(IEnumerable<T>);
             }
+            SpruceDbConnector.ExecuteCommand(cmd);
+            return cmd.GetResultAs<IEnumerable<T>>();
         }
 
-        public virtual int DoInsert(T entity)
+        public virtual int DoInsert<T>(T entity, Func<T, bool> resultAction = null) where T : class
         {
             var keyColumn = DataDeserializer<T>.Instance.GetKeyColumn();
             var query = _queryGenerator.GenerateInsert(entity, out IList<QueryParameter> queryParameters);
-            using (var con = Spruce.Provider.Connection)
-            using (var cmd = _queryProcessor.GetQueryCommand(con, query, queryParameters, true, keyColumn))
+            var cmd = new SpruceDbCommand(DbOperationType.Insert, query, queryParameters, keyColumn);
+            cmd.ProcessResult(result =>
             {
-                con.Open();
-                var id = (int) cmd.ExecuteScalar();
-                con.Close();
+                var id = (int) result;
                 DataDeserializer<T>.Instance.SetPropertyAs<int>(entity, keyColumn, id);
-                return 1;
+                if (_withTransaction)
+                    //has somebody called for a rollback?
+                    cmd.ContinueNextCommand = !resultAction?.Invoke(entity) ?? true;
+            });
+            if (_withTransaction)
+            {
+                _transactionCommands.Add(cmd);
+                return default(int);
             }
+            SpruceDbConnector.ExecuteCommand(cmd);
+            return 1;
         }
 
-        public virtual int DoUpdate(T entity)
+        public virtual int DoUpdate<T>(T entity, Func<T, bool> resultAction = null) where T : class
         {
             var query = _queryGenerator.GenerateUpdate(entity, out IList<QueryParameter> queryParameters);
-            using (var con = Spruce.Provider.Connection)
-            using (var cmd = _queryProcessor.GetQueryCommand(con, query, queryParameters))
+            var cmd = new SpruceDbCommand(DbOperationType.Update, query, queryParameters);
+            if (_withTransaction)
             {
-                con.Open();
-                var rowsAffected = cmd.ExecuteNonQuery();
-                return rowsAffected;
+                cmd.ProcessResult(o => cmd.ContinueNextCommand = resultAction?.Invoke(entity) ?? true);
+                _transactionCommands.Add(cmd);
+                return default(int);
             }
+            SpruceDbConnector.ExecuteCommand(cmd);
+            return cmd.GetResultAs<int>();
         }
 
-        public virtual int DoDelete(T entity)
+        public virtual int DoDelete<T>(T entity, Func<T, bool> resultAction = null) where T : class
         {
             var query = _queryGenerator.GenerateDelete<T>(x => x == entity, out IList<QueryParameter> queryParameters);
-            using (var con = Spruce.Provider.Connection)
-            using (var cmd = _queryProcessor.GetQueryCommand(con, query, queryParameters))
+            var cmd = new SpruceDbCommand(DbOperationType.Delete, query, queryParameters);
+            if (_withTransaction)
             {
-                con.Open();
-                var rowsAffected = cmd.ExecuteNonQuery();
-                return rowsAffected;
+                cmd.ProcessResult(o => cmd.ContinueNextCommand = resultAction?.Invoke(entity) ?? true);
+                _transactionCommands.Add(cmd);
+                return default(int);
             }
+            SpruceDbConnector.ExecuteCommand(cmd);
+            return cmd.GetResultAs<int>();
         }
 
-        public virtual T[] DoSelect(List<Expression<Func<T, bool>>> where = null, Dictionary<Expression<Func<T, object>>, RowOrder> orderBy = null, int page = 1, int count = int.MaxValue)
+        public virtual IEnumerable<T> DoSelect<T>(List<Expression<Func<T, bool>>> where = null, Dictionary<Expression<Func<T, object>>, RowOrder> orderBy = null, int page = 1, int count = int.MaxValue) where T : class
         {
             ThrowIfInvalidPage(orderBy, page, count);
 
             var query = _queryGenerator.GenerateSelect(out IList<QueryParameter> queryParameters, where, orderBy, page, count);
-            using (var con = Spruce.Provider.Connection)
-            using (var cmd = _queryProcessor.GetQueryCommand(con, query, queryParameters))
-            {
-                con.Open();
-                using (var reader = cmd.ExecuteReader())
-                {
-                    return DataDeserializer<T>.Instance.DeserializeMany(reader);
-                }
-            }
+            var cmd = new SpruceDbCommand(DbOperationType.Select, query, queryParameters);
+            cmd.ProcessReader(reader => DataDeserializer<T>.Instance.DeserializeMany(reader));
+            SpruceDbConnector.ExecuteCommand(cmd);
+
+            return cmd.GetResultAs<IEnumerable<T>>();
         }
 
-        public virtual T[] DoSelect(List<IJoinMeta> joinMetas, Dictionary<Type, Delegate> relationActions, List<LambdaExpression> where = null, Dictionary<LambdaExpression, RowOrder> orderBy = null, int page = 1, int count = int.MaxValue)
+        public virtual IEnumerable<T> DoSelect<T>(List<IJoinMeta> joinMetas, Dictionary<Type, Delegate> relationActions, List<LambdaExpression> where = null, Dictionary<LambdaExpression, RowOrder> orderBy = null, int page = 1, int count = int.MaxValue) where T : class
         {
             ThrowIfInvalidPage(orderBy, page, count);
 
             var query = _queryGenerator.GenerateJoin<T>(out IList<QueryParameter> queryParameters, joinMetas, where, orderBy, page, count);
-            using (var con = Spruce.Provider.Connection)
-            using (var cmd = _queryProcessor.GetQueryCommand(con, query, queryParameters))
-            {
-                con.Open();
-                using (var reader = cmd.ExecuteReader())
-                {
-                    return DataDeserializer<T>.Instance.DeserializeManyNested(reader, joinMetas, relationActions);
-                }
-            }
+            var cmd = new SpruceDbCommand(DbOperationType.Select, query, queryParameters);
+            cmd.ProcessReader(reader => DataDeserializer<T>.Instance.DeserializeManyNested(reader, joinMetas, relationActions));
+            SpruceDbConnector.ExecuteCommand(cmd);
+            return cmd.GetResultAs<IEnumerable<T>>();
         }
 
-        public virtual T DoSelectSingle(List<Expression<Func<T, bool>>> where = null, Dictionary<Expression<Func<T, object>>, RowOrder> orderBy = null)
+        public virtual T DoSelectSingle<T>(List<Expression<Func<T, bool>>> where = null, Dictionary<Expression<Func<T, object>>, RowOrder> orderBy = null) where T : class
         {
             var query = _queryGenerator.GenerateSelect(out IList<QueryParameter> queryParameters, where, orderBy);
-            using (var con = Spruce.Provider.Connection)
-            using (var cmd = _queryProcessor.GetQueryCommand(con, query, queryParameters))
-            {
-                con.Open();
-                using (var reader = cmd.ExecuteReader())
-                {
-                    return DataDeserializer<T>.Instance.DeserializeSingle(reader);
-                    
-                }
-            }
+            var cmd = new SpruceDbCommand(DbOperationType.Select, query, queryParameters);
+            cmd.ProcessReader(reader => DataDeserializer<T>.Instance.DeserializeSingle(reader));
+            SpruceDbConnector.ExecuteCommand(cmd);
+            return cmd.GetResultAs<T>();
         }
 
-        private void ThrowIfInvalidPage(ICollection orderBy, int page, int count)
+        public virtual void CommitTransaction()
+        {
+            if(!_withTransaction)
+                throw new Exception("Can not call Commit on a non-transactional execution");
+
+            SpruceDbConnector.ExecuteCommands(_transactionCommands.ToArray(), true);
+        }
+
+        private static void ThrowIfInvalidPage(ICollection orderBy, int page, int count)
         {
             if (page < 1 || count < 0 || ((page > 1 || count < int.MaxValue) && (orderBy == null || orderBy.Count == 0)))
             {
@@ -148,9 +172,15 @@ namespace SpruceFramework
             }
         }
 
+        private bool _disposed;
         public void Dispose()
         {
-            //do nothing
+            _disposed = true;
+        }
+
+        public bool IsDisposed()
+        {
+            return _disposed;
         }
     }
 }

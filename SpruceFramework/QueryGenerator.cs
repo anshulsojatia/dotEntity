@@ -8,6 +8,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
@@ -18,7 +19,6 @@ namespace SpruceFramework
 {
     internal abstract class QueryGenerator : IQueryGenerator
     {
-        //https://github.com/bbraithwaite/RepoWrapper
         public virtual string GenerateInsert(string tableName, dynamic entity, out IList<QueryParameter> parameters)
         {
             Dictionary<string, object> columnValueMap = QueryParserUtilities.ParseObjectKeyValues(entity, exclude: "Id");
@@ -39,18 +39,24 @@ namespace SpruceFramework
         public virtual string GenerateUpdate<T>(T entity, out IList<QueryParameter> queryParameters) where T : class
         {
             var tableName = Spruce.GetTableNameForType<T>();
-            return GenerateUpdate(tableName, entity, entity, out queryParameters);
+            var deserializer = DataDeserializer<T>.Instance;
+            var keyColumn = deserializer.GetKeyColumn();
+            var keyColumnValue = deserializer.GetPropertyAs<int>(entity, keyColumn);
+            dynamic data = new ExpandoObject();
+            var dataDictionary = (IDictionary<string, object>)data;
+            dataDictionary.Add(keyColumn, keyColumnValue);
+            return GenerateUpdate(tableName, entity, dataDictionary, out queryParameters, keyColumn);
         }
 
-        public virtual string GenerateUpdate(string tableName, dynamic entity, dynamic where, out IList<QueryParameter> queryParameters)
+        public virtual string GenerateUpdate(string tableName, dynamic entity, dynamic where, out IList<QueryParameter> queryParameters, params string[] exclude)
         {
-            Dictionary<string, object> updateValueMap = QueryParserUtilities.ParseObjectKeyValues(entity);
+            Dictionary<string, object> updateValueMap = QueryParserUtilities.ParseObjectKeyValues(entity, exclude);
+            var whereString = "";
             Dictionary<string, object> whereMap = QueryParserUtilities.ParseObjectKeyValues(where);
-
+            whereString = string.Join(" AND ", whereMap.Select(x => $"{x.Key} = @{x.Key}"));
+            queryParameters = ToQueryParameters(updateValueMap, whereMap);
 
             var updateString = string.Join(",", updateValueMap.Select(x => $"{x.Key} = @{x.Key}"));
-            var whereString = string.Join(" AND ", whereMap.Select(x => $"{x.Key} = @{x.Key}"));
-            queryParameters = ToQueryParameters(updateValueMap, whereMap);
 
             return $"UPDATE {tableName} SET {updateString} WHERE {whereString}";
         }
@@ -117,7 +123,7 @@ namespace SpruceFramework
             parameters = new List<QueryParameter>();
             var builder = new StringBuilder();
             var tableName = Spruce.GetTableNameForType<T>();
-            
+
             var whereStringBuilder = new List<string>();
             var whereString = "";
 
@@ -275,6 +281,8 @@ namespace SpruceFramework
 
         private static IList<QueryParameter> ToQueryParameters(params Dictionary<string, object>[] dict)
         {
+            if (dict == null)
+                return null;
             var queryParameters = new List<QueryParameter>();
             foreach (var dictionary in dict)
             {

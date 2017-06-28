@@ -7,8 +7,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using System.Reflection;
 using SpruceFramework.Enumerations;
+using SpruceFramework.Extensions;
 
 namespace SpruceFramework
 {
@@ -30,45 +30,107 @@ namespace SpruceFramework
         #region static wrappers
         public static void Insert(T entity)
         {
-            using (var manager = new SpruceQueryManager<T>())
+            using (var manager = new SpruceQueryManager())
             {
                 manager.DoInsert(entity);
             }
         }
 
+        public static void Insert(T entity, ISpruceTransaction transaction, Func<T, bool> action = null)
+        {
+            if (!transaction.IsNullOrDisposed())
+            {
+                transaction.Manager.AsSpruceQueryManager().DoInsert(entity, action);
+            }
+        }
+
         public static void Delete(T entity)
         {
-            using (var manager = new SpruceQueryManager<T>())
+            using (var manager = new SpruceQueryManager())
             {
                 manager.DoDelete(entity);
             }
         }
 
-        public static void Delete(Expression<Func<T, bool>> where)
+        public static void Delete(T entity, ISpruceTransaction transaction, Func<T, bool> action = null)
         {
-
-        }
-
-        public static void Update(T entity)
-        {
-
-        }
-
-        public static T[] Query(string query, dynamic parameters)
-        {
-            using (var manager = new SpruceQueryManager<T>())
+            if (!transaction.IsNullOrDisposed())
             {
-                return manager.Do(query, parameters);
+                transaction.Manager.AsSpruceQueryManager().DoDelete(entity, action);
             }
         }
 
-        public static TType QueryScaler<TType>(string query, dynamic parameters)
+        public static void Delete(Expression<Func<T, bool>> where)
         {
-            using (var manager = new SpruceQueryManager<T>())
+            using (var manager = new SpruceQueryManager())
+            {
+                manager.DoDelete(where);
+            }
+        }
+        public static void Delete(Expression<Func<T, bool>> where, ISpruceTransaction transaction)
+        {
+            if (!transaction.IsNullOrDisposed())
+            {
+                transaction.Manager.AsSpruceQueryManager().DoDelete(where);
+            }
+        }
+
+
+        public static void Update(T entity)
+        {
+            using (var manager = new SpruceQueryManager())
+            {
+                manager.DoUpdate(entity);
+            }
+        }
+
+        public static void Update(T entity, ISpruceTransaction transaction, Func<T, bool> action = null)
+        {
+            if (!transaction.IsNullOrDisposed())
+            {
+                transaction.Manager.AsSpruceQueryManager().DoUpdate(entity, action);
+            }
+        }
+
+        public static IEnumerable<T> Select()
+        {
+            using (var manager = new SpruceQueryManager())
+            {
+                return manager.DoSelect<T>();
+            }
+        }
+        public static IEnumerable<T> Query(string query, dynamic parameters = null)
+        {
+            using (var manager = new SpruceQueryManager())
+            {
+                return manager.Do<T>(query, parameters);
+            }
+        }
+
+        public static void Query(string query, dynamic parameters, ISpruceTransaction transaction, Func<IEnumerable<T>, bool> action = null)
+        {
+            if (!transaction.IsNullOrDisposed())
+            {
+                transaction.Manager.AsSpruceQueryManager().Do<T>(query, parameters, action);
+            }
+        }
+
+        public static TType QueryScaler<TType>(string query, dynamic parameters = null)
+        {
+            using (var manager = new SpruceQueryManager())
             {
                 return manager.DoScaler<TType>(query, parameters);
             }
         }
+
+        public static void QueryScaler<TType>(string query, dynamic parameters, ISpruceTransaction transaction, Func<TType, bool> action = null)
+        {
+            if (!transaction.IsNullOrDisposed())
+            {
+                transaction.Manager.AsSpruceQueryManager().DoScaler<TType>(query, parameters, action);
+            }
+        }
+
         public static ISpruceTable<T> Where(Expression<Func<T, bool>> where)
         {
             return Instance.Where(where);
@@ -107,17 +169,17 @@ namespace SpruceFramework
             return this;
         }
 
-        T[] ISpruceTable<T>.Select(int page, int count)
+        IEnumerable<T> ISpruceTable<T>.Select(int page, int count, ISpruceTransaction transaction)
         {
-            using (var manager = new SpruceQueryManager<T>())
+            using (var manager = new SpruceQueryManager())
             {
                 return manager.DoSelect(_whereList, _orderBy, page, count);
             }
         }
 
-        T[] ISpruceTable<T>.SelectNested(int page, int count)
+        IEnumerable<T> ISpruceTable<T>.SelectNested(int page, int count, ISpruceTransaction transaction)
         {
-            using (var manager = new SpruceQueryManager<T>())
+            using (var manager = new SpruceQueryManager())
             {
                 if(_joinWhereList == null)
                     _joinWhereList = new List<LambdaExpression>();
@@ -132,7 +194,7 @@ namespace SpruceFramework
                 foreach(var o in _orderBy)
                     _joinOrderBy.Add(o.Key, o.Value);
 
-                return manager.DoSelect(_joinList, _relationActions, _joinWhereList, _joinOrderBy, page, count);
+                return manager.DoSelect<T>(_joinList, _relationActions, _joinWhereList, _joinOrderBy, page, count);
             }
         }
 
@@ -158,9 +220,9 @@ namespace SpruceFramework
             return this;
         }
 
-        T ISpruceTable<T>.SelectSingle()
+        T ISpruceTable<T>.SelectSingle(ISpruceTransaction transaction)
         {
-            using (var manager = new SpruceQueryManager<T>())
+            using (var manager = new SpruceQueryManager())
             {
                 return manager.DoSelectSingle(_whereList, _orderBy);
             }

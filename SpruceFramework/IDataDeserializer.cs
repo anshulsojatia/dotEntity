@@ -5,6 +5,8 @@
 // // 
 // #endregion
 
+using System;
+using System.Collections.Generic;
 using System.Data;
 
 namespace SpruceFramework
@@ -19,8 +21,8 @@ namespace SpruceFramework
     {
         T DeserializeSingle(IDataReader reader);
 
-        T[] DeserializeMany(IDataReader reader);
+        IEnumerable<T> DeserializeMany(IDataReader reader);
 
-
+        IEnumerable<T> DeserializeManyNested(IDataReader reader, IList<IJoinMeta> joinMetas, Dictionary<Type, Delegate> relationActions);
     }
 }

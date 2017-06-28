@@ -16,5 +16,10 @@ namespace SpruceFramework.Reflection
         {
             return (Action<T, TClass>) Delegate.CreateDelegate(typeof(Action<T, TClass>), propertyInfo.GetSetMethod());
         }
+
+        internal static Func<T, TType> CreateGetter<T, TType>(this PropertyInfo propertyInfo)
+        {
+            return (Func<T, TType>)Delegate.CreateDelegate(typeof(Func<T, TType>), propertyInfo.GetGetMethod());
+        }
     }
 }

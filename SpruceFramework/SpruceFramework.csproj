@@ -33,11 +33,10 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Transactions" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -48,9 +47,13 @@
     <Compile Include="ExpressionVisitor.cs" />
     <Compile Include="Extensions\DataDeserializerExtensions.cs" />
     <Compile Include="Extensions\DataReaderExtensions.cs" />
+    <Compile Include="Extensions\TypeCastExtensions.cs" />
+    <Compile Include="Extensions\WrappedDisposableExtensions.cs" />
     <Compile Include="Extensions\ExpressionExtensions.cs" />
     <Compile Include="IDataDeserializer.cs" />
-    <Compile Include="IQueryProcessor.cs" />
+    <Compile Include="ISpruceQueryManager.cs" />
+    <Compile Include="ISpruceTransaction.cs" />
+    <Compile Include="IWrappedDisposable.cs" />
     <Compile Include="JoinMeta.cs" />
     <Compile Include="Providers\IDatabaseProvider.cs" />
     <Compile Include="IQueryGenerator.cs" />
@@ -69,9 +72,12 @@
     <Compile Include="Reflection\PropertyAccessor.cs" />
     <Compile Include="Singleton.cs" />
     <Compile Include="Spruce.cs" />
+    <Compile Include="SpruceDbCommand.cs" />
+    <Compile Include="SpruceDbConnector.cs" />
     <Compile Include="SpruceQueryManager.cs" />
     <Compile Include="SpruceTable.cs" />
     <Compile Include="SpruceTable`.cs" />
+    <Compile Include="SpruceTransaction.cs" />
     <Compile Include="SqlServerQueryGenerator.cs" />
     <Compile Include="TablePropertyValue.cs" />
   </ItemGroup>

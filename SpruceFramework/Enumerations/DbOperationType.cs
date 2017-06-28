@@ -10,7 +10,9 @@ namespace SpruceFramework.Enumerations
     {
         Insert, //c
         Update, //u
-        Delete, //r
-        Select  //d
+        Delete, //d
+        Select,  //r
+        SelectSingle,
+        Procedure
     }
 }

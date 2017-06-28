@@ -24,7 +24,7 @@ namespace SpruceFramework
 
         string GenerateUpdate<T>(T entity, out IList<QueryParameter> queryParameters) where T : class;
 
-        string GenerateUpdate(string tableName, dynamic item, dynamic where, out IList<QueryParameter> parameters);
+        string GenerateUpdate(string tableName, dynamic item, dynamic where, out IList<QueryParameter> parameters, params string[] exclude);
 
         string GenerateDelete(string tableName, dynamic where, out IList<QueryParameter> parameters);
 

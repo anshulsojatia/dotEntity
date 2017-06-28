@@ -29,6 +29,8 @@ namespace SpruceFramework
 
         internal static Dictionary<string, object> ParseObjectKeyValues(dynamic obj, params string[] exclude)
         {
+            if (obj == null)
+                return null;
             PropertyInfo[] props = obj.GetType().GetProperties();
             props = props.Where(x => !exclude.Contains(x.Name)).ToArray();
             var dict = new Dictionary<string, object>();
@@ -37,6 +39,11 @@ namespace SpruceFramework
                 var propertyName = p.Name;
                 var propertyValue = p.GetValue(obj);
                 dict.Add(propertyName, propertyValue);
+            }
+
+            if (props.Length == 0)
+            {
+                dict = ((IDictionary<string, object>) obj).ToDictionary(x => x.Key, x => x.Value);
             }
             return dict;
         }

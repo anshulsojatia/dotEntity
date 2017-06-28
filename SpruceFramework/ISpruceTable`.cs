@@ -5,6 +5,7 @@
 // // 
 // #endregion
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using SpruceFramework.Enumerations;
 
@@ -24,10 +25,10 @@ namespace SpruceFramework
 
         ISpruceTable<T> Relate<T1>(Action<T, T1> relateAction) where T1 : class;
 
-        T[] Select(int page = 1, int count = int.MaxValue);
+        IEnumerable<T> Select(int page = 1, int count = int.MaxValue, ISpruceTransaction transaction = null);
 
-        T[] SelectNested(int page = 1, int count = int.MaxValue);
+        IEnumerable<T> SelectNested(int page = 1, int count = int.MaxValue, ISpruceTransaction transaction = null);
 
-        T SelectSingle();
+        T SelectSingle(ISpruceTransaction transaction = null);
     }
 }
