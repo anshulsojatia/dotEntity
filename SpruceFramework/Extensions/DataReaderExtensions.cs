@@ -12,9 +12,9 @@ using System.Linq;
 
 namespace SpruceFramework.Extensions
 {
-    public static class DataReaderExtensions
+    internal static class DataReaderExtensions
     {
-        public static List<DataReaderRow> GetDataReaderRows(this IDataReader dataReader, string[] columnNames, string typeName)
+        internal static List<DataReaderRow> GetDataReaderRows(this IDataReader dataReader, string[] columnNames, string typeName)
         {
             var dataReaderRows = new List<DataReaderRow>();
             while (dataReader.Read())

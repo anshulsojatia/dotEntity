@@ -9,7 +9,7 @@ using System.Collections.Generic;
 
 namespace SpruceFramework
 {
-    public static class ExpressionExtensions
+    internal static class ExpressionExtensions
     {
         public static bool In<T>(this T item, ICollection<T> values) where T : struct
         {

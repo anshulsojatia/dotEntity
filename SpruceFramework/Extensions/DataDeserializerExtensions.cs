@@ -9,9 +9,9 @@ using System;
 
 namespace SpruceFramework.Extensions
 {
-    public static class DataDeserializerExtensions
+    internal static class DataDeserializerExtensions
     {
-        public static string[] GetTypedColumnNames(this IDataDeserializer deserializer, string[] columns, Type type)
+        internal static string[] GetTypedColumnNames(this IDataDeserializer deserializer, string[] columns, Type type)
         {
             var typedColumns = new string[columns.Length];
             var typeName = type.Name;
