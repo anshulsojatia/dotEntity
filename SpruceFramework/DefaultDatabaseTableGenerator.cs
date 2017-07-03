@@ -74,7 +74,7 @@ namespace SpruceFramework
                 builder.Append($"\t [{fieldName}] {dbFieldType}{identityString},");
                 builder.Append(Environment.NewLine);
             }
-            builder.Append($"PRIMARY KEY CLUSTERED ([{keyColumn}] ASC));{Environment.NewLine}");
+            builder.Append($"PRIMARY KEY CLUSTERED ([{keyColumn}] ASC));");
             return builder.ToString();
         }
 

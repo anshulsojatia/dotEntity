@@ -69,23 +69,6 @@ namespace SpruceFramework
             return $"UPDATE {tableName} SET {updateString} WHERE {whereString}";
         }
 
-        public virtual string GenerateUpdate<T>(Expression<Func<T, bool>> where, out IList<QueryInfo> queryParameters) where T : class
-        {
-            var tableName = Spruce.GetTableNameForType<T>();
-            var parser = new ExpressionTreeParser(where);
-            var whereString = parser.GetWhereString();
-            queryParameters = parser.QueryInfoList;
-
-            if (!string.IsNullOrEmpty(whereString))
-            {
-                whereString = "WHERE " + whereString;
-                whereString = whereString.Trim();
-            }
-            return $"UPDATE {tableName} {whereString}";
-        }
-
-
-
         public virtual string GenerateUpdate<T>(dynamic item, Expression<Func<T, bool>> where, out IList<QueryInfo> queryParameters) where T : class
         {
             var tableName = Spruce.GetTableNameForType<T>();

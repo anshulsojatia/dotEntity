@@ -427,17 +427,6 @@ namespace SpruceFramework.Tests.SqlGeneratorTests
         }
 
         [Test]
-        public void UpdateGenerator_EntityType_Valid()
-        {
-            var sql = generator.GenerateUpdate<Product>(x => x.Id == 4, out IList<QueryInfo> queryParameters);
-            var expected = "UPDATE Product WHERE Id = @Id";
-
-            Assert.AreEqual(expected, sql);
-            Assert.AreEqual(1, queryParameters.Count);
-            Assert.AreEqual(4, queryParameters.First(x => x.ParameterName == "Id").PropertyValue);
-        }
-
-        [Test]
         public void UpdateGenerator_Entity_Valid()
         {
             var product = new Product()
@@ -475,17 +464,6 @@ namespace SpruceFramework.Tests.SqlGeneratorTests
             Assert.AreEqual(DateTime.Now.Date,
                 ((DateTime) queryParameters.First(x => x.ParameterName == "DateCreated").PropertyValue).Date);
             Assert.AreEqual(expected, sql);
-        }
-
-        [Test]
-        public void UpdateGenerator_EntityType_With_Multiple_Where_Valid()
-        {
-            var sql = generator.GenerateUpdate<Product>(x => x.Id == 4 && x.DateCreated > DateTime.Now, out IList<QueryInfo> queryParameters);
-            var expected = "UPDATE Product WHERE (Id = @Id) AND (DateCreated > @DateCreated)";
-
-            Assert.AreEqual(expected, sql);
-            Assert.AreEqual(4, queryParameters.First(x => x.ParameterName == "Id").PropertyValue);
-            Assert.AreEqual(DateTime.Now.Date, ((DateTime) queryParameters.First(x => x.ParameterName == "DateCreated").PropertyValue).Date);
         }
 
         [Test]
