@@ -47,7 +47,6 @@
     <Compile Include="DefaultTypeMapProvider.cs" />
     <Compile Include="Enumerations\DbOperationType.cs" />
     <Compile Include="Enumerations\JoinType.cs" />
-    <Compile Include="Enumerations\RelationType.cs" />
     <Compile Include="ExpressionTreeParser.cs" />
     <Compile Include="ExpressionVisitor.cs" />
     <Compile Include="Extensions\DataDeserializerExtensions.cs" />
