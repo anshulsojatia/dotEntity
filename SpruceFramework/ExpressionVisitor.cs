@@ -12,6 +12,7 @@ using System.Linq.Expressions;
 
 namespace SpruceFramework
 {
+    [Obsolete("No longer used in favor of Expression Tree Parser", true)]
     public abstract class ExpressionVisitor
     {
         protected ExpressionVisitor()
