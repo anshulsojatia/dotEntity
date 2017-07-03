@@ -159,6 +159,11 @@ namespace SpruceFramework
             return Instance.Where(where);
         }
 
+        public static int Count()
+        {
+            return Instance.Count();
+        }
+
         #endregion
 
         #region implementations
@@ -218,6 +223,14 @@ namespace SpruceFramework
                     _joinOrderBy.Add(o.Key, o.Value);
 
                 return manager.DoSelect<T>(_joinList, _relationActions, _joinWhereList, _joinOrderBy, page, count);
+            }
+        }
+
+        int ISpruceTable<T>.Count(ISpruceTransaction transaction)
+        {
+            using (var manager = new SpruceQueryManager())
+            {
+                return manager.DoCount<T>(_whereList, null);
             }
         }
 

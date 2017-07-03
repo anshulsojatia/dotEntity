@@ -29,6 +29,8 @@ namespace SpruceFramework
 
         IEnumerable<T> SelectNested(int page = 1, int count = int.MaxValue, ISpruceTransaction transaction = null);
 
+        int Count(ISpruceTransaction transaction = null);
+
         T SelectSingle(ISpruceTransaction transaction = null);
     }
 }

@@ -258,6 +258,24 @@ namespace SpruceFramework.Tests.SqlGeneratorTests
         }
 
         [Test]
+        public void Select_Count_Generator_With_NotIn_In_Where_Valid()
+        {
+            var lst = new List<int> { 1, 2, 3, 4 };
+            var sql = generator.GenerateCount(new List<Expression<Func<Product, bool>>>
+            {
+                product => product.ProductName == GetName(),
+                product => !lst.Contains(product.Id)
+            }, out IList<QueryInfo> queryParameters);
+            var expected = "SELECT COUNT(*) FROM Product WHERE ProductName = @ProductName AND Id NOT IN (@Id_InParam_1,@Id_InParam_2,@Id_InParam_3,@Id_InParam_4)";
+            Assert.AreEqual(expected, sql);
+            Assert.AreEqual(GetName(), queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue);
+            Assert.AreEqual(1, queryParameters.First(x => x.ParameterName == "Id_InParam_1").PropertyValue);
+            Assert.AreEqual(2, queryParameters.First(x => x.ParameterName == "Id_InParam_2").PropertyValue);
+            Assert.AreEqual(3, queryParameters.First(x => x.ParameterName == "Id_InParam_3").PropertyValue);
+            Assert.AreEqual(4, queryParameters.First(x => x.ParameterName == "Id_InParam_4").PropertyValue);
+        }
+
+        [Test]
         public void SelectGenerator_With_NotIn_Explicit_Pass_Int_Where_Valid()
         {
             var sql = generator.GenerateSelect(out IList<QueryInfo> queryParameters, new List<Expression<Func<Product, bool>>>

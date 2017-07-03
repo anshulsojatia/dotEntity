@@ -230,6 +230,20 @@ namespace SpruceFramework
             return cmd.GetResultAs<T>();
         }
 
+        public virtual int DoCount<T>(List<Expression<Func<T, bool>>> where, Func<int, bool> resultAction = null) where T : class
+        {
+            var query = _queryGenerator.GenerateCount(where, out IList<QueryInfo> queryParameters);
+            var cmd = new SpruceDbCommand(DbOperationType.SelectSingle, query, queryParameters);
+            if (_withTransaction)
+            {
+                cmd.ProcessResult(o => cmd.ContinueNextCommand = resultAction?.Invoke((int) o) ?? true);
+                _transactionCommands.Add(cmd);
+                return default(int);
+            }
+            SpruceDbConnector.ExecuteCommand(cmd);
+            return cmd.GetResultAs<int>();
+        }
+
         public virtual bool CommitTransaction()
         {
             if(!_withTransaction)

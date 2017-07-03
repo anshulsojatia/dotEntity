@@ -28,6 +28,12 @@ namespace SpruceFramework
 
         string GenerateDelete<T>(Expression<Func<T, bool>> where, out IList<QueryInfo> parameters) where T : class;
 
+        string GenerateCount<T>(IList<Expression<Func<T, bool>>> where, out IList<QueryInfo> parameters) where T : class;
+
+        string GenerateCount<T>(dynamic where, out IList<QueryInfo> parameters);
+
+        string GenerateCount(string tableName, dynamic where, out IList<QueryInfo> parameters);
+
         string GenerateSelect<T>(out IList<QueryInfo> parameters, List<Expression<Func<T, bool>>> where = null,
             Dictionary<Expression<Func<T, object>>, RowOrder> orderBy = null, int page = 1, int count = int.MaxValue) where T : class;
 

@@ -112,17 +112,54 @@ namespace SpruceFramework
             parameters = parser.QueryInfoList;
             return $"DELETE FROM {tableName} WHERE {whereString}";
         }
+
+        public string GenerateCount<T>(IList<Expression<Func<T, bool>>> @where, out IList<QueryInfo> parameters) where T : class
+        {
+            parameters = new List<QueryInfo>();
+            var tableName = Spruce.GetTableNameForType<T>();
+            var whereString = "";
+
+            if (where != null)
+            {
+                var whereStringBuilder = new List<string>();
+                foreach (var wh in where)
+                {
+                    var parser = new ExpressionTreeParser(wh);
+                    whereStringBuilder.Add(parser.GetWhereString());
+                    var queryParameters = parser.QueryInfoList;
+                    parameters = parameters.Concat(queryParameters).ToList();
+                }
+                whereString = string.Join(" AND ", whereStringBuilder).Trim();
+            }
+
+            return $"SELECT COUNT(*) FROM {tableName} WHERE {whereString}";
+        }
+
+        public string GenerateCount<T>(dynamic @where, out IList<QueryInfo> parameters)
+        {
+            var tableName = Spruce.GetTableNameForType<T>();
+            return GenerateCount(tableName, where, out parameters);
+        }
+
+        public string GenerateCount(string tableName, dynamic @where, out IList<QueryInfo> parameters)
+        {
+            Dictionary<string, object> whereMap = QueryParserUtilities.ParseObjectKeyValues(where);
+            var whereString = string.Join(" AND ", whereMap.Select(x => $"{x.Key} = @{x.Key}"));
+            parameters = ToQueryInfos(whereMap);
+            return $"SELECT COUNT(*) FROM {tableName} WHERE {whereString}";
+        }
+
         public virtual string GenerateSelect<T>(out IList<QueryInfo> parameters, List<Expression<Func<T, bool>>> where = null, Dictionary<Expression<Func<T, object>>, RowOrder> orderBy = null, int page = 1, int count = int.MaxValue) where T : class
         {
             parameters = new List<QueryInfo>();
             var builder = new StringBuilder();
             var tableName = Spruce.GetTableNameForType<T>();
 
-            var whereStringBuilder = new List<string>();
             var whereString = "";
 
             if (where != null)
             {
+                var whereStringBuilder = new List<string>();
                 foreach (var wh in where)
                 {
                     var parser = new ExpressionTreeParser(wh);
