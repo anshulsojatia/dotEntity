@@ -13,6 +13,7 @@ namespace SpruceFramework.Enumerations
         Delete, //d
         Select,  //r
         SelectSingle,
-        Procedure
+        Procedure,
+        Other
     }
 }

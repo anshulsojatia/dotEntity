@@ -36,7 +36,7 @@ namespace SpruceFramework
 
             _typeMap = new ConcurrentDictionary<string, object>();
             //exclude virtual properties
-            var typeProperties = _typeofT.GetProperties().Where(x => !x.GetAccessors()[0].IsVirtual);
+            var typeProperties = _typeofT.GetDatabaseUsableProperties();
             foreach (var property in typeProperties)
             {
 
@@ -66,7 +66,9 @@ namespace SpruceFramework
 
         public IEnumerable<T> DeserializeMany(IDataReader reader)
         {
-            var tArray = FurnishInstances(reader);
+            var columnNames = GetColumns();
+            var rows = reader.GetDataReaderRows(columnNames, _typeofT.Name);
+            var tArray = FurnishInstances(reader, rows);
             return tArray;
         }
 
@@ -92,10 +94,9 @@ namespace SpruceFramework
             }
         }
        
-        private IEnumerable<T> FurnishInstances(IDataReader reader)
+        private IEnumerable<T> FurnishInstances(IDataReader reader, List<DataReaderRow> rows)
         {
             var columnNames = GetColumns();
-            var rows = reader.GetDataReaderRows(columnNames, _typeofT.Name);
             var tInstances = Instantiator<T>.Instances(rows.Count);
             var index = 0;
 
@@ -185,6 +186,10 @@ namespace SpruceFramework
             if (DataReaderRow.AreSameRowsForColumns(prevDataRow, currentDataRow, typedColumns, skipColumns))
                 return false;
 
+            //are all columns of current row null
+            if (DataReaderRow.AreAllColumnsNull(currentDataRow, typedColumns, skipColumns))
+                return false;
+
             //let's check if have this object in cache
             var keyColumn = deserializer.GetKeyColumn();
             var cacheKey = string.Format(localObjectKey, instanceType.Name, keyColumn,
@@ -255,8 +260,7 @@ namespace SpruceFramework
         {
             if (_keyColumnName != null)
                 return _keyColumnName;
-            var propertyInfos = _typeofT.GetProperties().Where(x => Attribute.IsDefined(x, typeof(KeyAttribute)));
-            _keyColumnName = propertyInfos.LastOrDefault()?.Name ?? "Id";
+            _keyColumnName = _typeofT.GetKeyColumnName();
             return _keyColumnName;
         }
     }

@@ -1,5 +1,5 @@
 ﻿// #region Author Information
-// // Category.cs
+// // DotEntityVersion.cs
 // // 
 // // (c) Apexol Technologies. All Rights Reserved.
 // // 
@@ -7,13 +7,13 @@
 
 using System.ComponentModel.DataAnnotations;
 
-namespace SpruceFramework.Tests.Data
+namespace SpruceFramework.Versioning
 {
-    public class Category
+    public class DotEntityVersion
     {
         [Key]
         public int Id { get; set; }
 
-        public string CategoryName { get; set; }
+        public string VersionKey { get; set; }
     }
 }

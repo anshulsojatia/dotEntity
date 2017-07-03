@@ -7,21 +7,20 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using SpruceFramework.Providers;
+using SpruceFramework.Versioning;
 
 [assembly: InternalsVisibleTo("SpruceFramework.Tests")]
 namespace SpruceFramework
 {
-    public class Spruce
+    public partial class Spruce
     {
         public static string ConnectionString { get; set; }
 
         public static string ProviderName { get; set; }
 
         private static ConcurrentDictionary<Type, string> EntityTableNames { get; set; }
-
         static Spruce()
         {
             EntityTableNames = new ConcurrentDictionary<Type, string>();
@@ -53,6 +52,11 @@ namespace SpruceFramework
             EntityTableNames.AddOrUpdate(typeof(T), tableName, (type, s) => tableName);
         }
 
+        public static void Relate<TSource, TTarget>(string sourceColumnName, string destinationColumnName)
+        {
+            RelationMapper.Relate<TSource, TTarget>(sourceColumnName, destinationColumnName);
+        }
+
         public static string GetTableNameForType<T>()
         {
             var tType = typeof(T);
@@ -62,6 +66,18 @@ namespace SpruceFramework
         public static string GetTableNameForType(Type type)
         {
             return EntityTableNames.ContainsKey(type) ? EntityTableNames[type] : type.Name;
+        }
+
+        public static void UpdateDatabaseToLatestVersion()
+        {
+            var versionRunner = new VersionUpdater();
+            versionRunner.RunUpgrade();
+        }
+
+        public static void UpdateDatabaseToVersion(string versionKey)
+        {
+            var versionRunner = new VersionUpdater();
+            versionRunner.RunDowngrade(versionKey);
         }
     }
 }

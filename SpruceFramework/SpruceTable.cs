@@ -16,5 +16,10 @@ namespace SpruceFramework
         {
             return new SpruceTransaction();
         }
+
+        internal static ISpruceTransaction BeginInternalTransaction()
+        {
+            return new SpruceTransaction(true);
+        }
     }
 }

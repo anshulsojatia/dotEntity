@@ -15,314 +15,316 @@ using System.Text;
 
 namespace SpruceFramework
 {
-    internal class ExpressionTreeParser
+    internal static class Markers
     {
-        static class Markers
+        public const string Open = "OPEN";
+        public const string Close = "CLOSE";
+        public const string Contains = "CONTAINS";
+        public const string NotContains = "NOT_CONTAINS";
+        public const string StartsWith = "STARTS_WITH";
+        public const string NotStartsWith = "NOT_STARTS_WITH";
+        public const string EndsWith = "ENDS_WITH";
+        public const string NotEndsWith = "NOT_ENDS_WITH";
+        public const string NoParam = "NOPARAM";
+        public const string Not = "NOT";
+    }
+
+    public class ExpressionTreeParser
+    {
+
+        private int[] _callerObjectHashCodes;
+        private int _notCount = 0;
+        private bool _isBinaryOperation = false;
+
+        private IList<QueryInfo> _queryInfo;
+
+        public IList<QueryInfo> QueryInfoList => _queryInfo;
+
+        private Dictionary<string, string> _aliases = null;
+        private readonly Expression _expression;
+
+        public ExpressionTreeParser(Expression expression, Dictionary<string, string> aliases = null)
         {
-            public const string Open = "OPEN";
-            public const string Close = "CLOSE";
-            public const string ContainsStart = "CONTAINS_START";
-            public const string StartsWithStart = "STARTS_WITH_START";
-            public const string EndsWithStart = "ENDS_WITH_START";
-            public const string NoParam = "NOPARAM";
-            public const string Not = "NOT";
+            _expression = expression;
+            _aliases = aliases;
+            _queryInfo = new List<QueryInfo>();
         }
 
-        /// <summary>
-        /// Walks the tree.
-        /// </summary>
-        /// <param name="body">The body.</param>
-        /// <param name="linkingType">Type of the linking.</param>
-        /// <param name="queryProperties">The query properties.</param>
-        /// <param name="aliases"></param>
-        public static void WalkTree(Expression body, ExpressionType linkingType, ref List<QueryParameter> queryProperties, Dictionary<string, string> aliases = null)
+        #region Evaluators
+        private bool IsCallerCalling(object obj)
         {
-            if (body is BinaryExpression)
-            {
-                var binaryBody = (BinaryExpression) body;
-                if (binaryBody.NodeType != ExpressionType.AndAlso && binaryBody.NodeType != ExpressionType.OrElse)
-                {
-                    if ((binaryBody.Left as MemberExpression)?.Expression is ConstantExpression)
-                    {
-                        throw new Exception("Can't use constant expression for field names");
-                    }
-                    var propertyName = GetPropertyName(binaryBody);
-                    var opr = GetOperator(binaryBody.NodeType);
-                    var link = GetOperator(linkingType);
+            var toCheck = obj;
+            if (obj is MemberExpression)
+                toCheck = ((MemberExpression)obj).Expression;
 
-                    var br = binaryBody.Right;
-                    var propertyValue = br is ConstantExpression || br is MethodCallExpression ? EvaluateExpression(br) : EvaluateCompiled((MemberExpression)br, aliases);
-                    var parameterName = GetSafeParameterName(queryProperties, propertyName, propertyValue);
-
-                    //alias if necessary
-                    propertyName = GetAliasedPropertyName((MemberExpression) binaryBody.Left, aliases);
-
-                    queryProperties.Add(new QueryParameter(link, propertyName, propertyValue, opr, parameterName));
-                }
-                else
-                {
-                    queryProperties.Add(new QueryParameter(true, Markers.Open));
-                    WalkTree((BinaryExpression)binaryBody.Left, binaryBody.NodeType, ref queryProperties);
-                    queryProperties.Add(new QueryParameter(true, Markers.Close));
-                    queryProperties.Add(new QueryParameter(true, GetOperator(binaryBody.NodeType)));
-                    queryProperties.Add(new QueryParameter(true, Markers.Open));
-                    WalkTree((BinaryExpression)binaryBody.Right, binaryBody.NodeType, ref queryProperties);
-                    queryProperties.Add(new QueryParameter(true, Markers.Close));
-                }
-            }
-            else if (body is MethodCallExpression)
-            {
-                var mExpBody = (MethodCallExpression)body;
-                if (mExpBody.Object == null)
-                {
-                    //the call must be by a reference type e.g. int
-                    var arguments = mExpBody.Arguments;
-                    var propertyName = EvaluateExpression(arguments[0])?.ToString();
-                    object propertyValue = null;
-                    for (var i = 1; i < arguments.Count; i++)
-                    {
-                        var argument = arguments[i];
-                        if (argument is MethodCallExpression || argument is ListInitExpression)
-                        {
-                            propertyValue = EvaluateExpression(argument);
-                        }
-                        else if (argument is MemberExpression)
-                        {
-                            propertyValue = EvaluateCompiled((MemberExpression) argument);
-                        }
-                    }
-
-                    var opr = "IN";
-                    var lastParameter = queryProperties.LastOrDefault();
-                    if (lastParameter?.LinkingOperator == Markers.Not)
-                    {
-                        opr = "NOT IN";
-                        queryProperties.RemoveAt(queryProperties.Count - 1); //remove this element
-                    }
-                    queryProperties.Add(new QueryParameter(true, Markers.ContainsStart));
-                    queryProperties.Add(new QueryParameter("", propertyName, propertyValue, opr, propertyName));
-
-                }
-                else
-                {
-                    if (mExpBody.Object.Type != typeof(string))
-                    {
-                        throw new Exception();
-                    }
-                    var propertyName = EvaluateExpression(mExpBody.Object)?.ToString();
-                    var argument = mExpBody.Arguments[0];
-                    var propertyValue = argument is ConstantExpression || argument is MethodCallExpression ? EvaluateExpression(argument) : EvaluateCompiled((MemberExpression) argument);
-                    var opr = "LIKE";
-                    var lastParameter = queryProperties.LastOrDefault();
-                    if (lastParameter?.LinkingOperator == Markers.Not)
-                    {
-                        opr = "NOT LIKE";
-                        queryProperties.RemoveAt(queryProperties.Count - 1); //remove this element
-                    }
-
-                    if (mExpBody.Method.Name == "Contains")
-                    {
-                        queryProperties.Add(new QueryParameter(true, Markers.ContainsStart));
-                    }
-                    else if (mExpBody.Method.Name == "StartsWith")
-                    {
-                        queryProperties.Add(new QueryParameter(true, Markers.StartsWithStart));
-                    }
-                    else if (mExpBody.Method.Name == "EndsWith")
-                    {
-                        queryProperties.Add(new QueryParameter(true, Markers.EndsWithStart));
-                    }
-                    queryProperties.Add(new QueryParameter("", propertyName, propertyValue, opr, propertyName));
-                }
-               
-            }
-            else if (body is ConstantExpression)
-            {
-                var constBody = (ConstantExpression) body;
-                if (constBody.Value is bool)
-                {
-                    var value = (bool) constBody.Value;
-                    queryProperties.Add(new QueryParameter("", "1", "1", value ? "=" : "!=", Markers.NoParam));
-                }
-            }
-            else if (body is UnaryExpression)
-            {
-                var unaryBody = (UnaryExpression)body;
-                if (unaryBody.NodeType == ExpressionType.Not)
-                {
-                    queryProperties.Add(new QueryParameter(true, Markers.Not));
-                    WalkTree(unaryBody.Operand, linkingType, ref queryProperties);
-                }
-            }
+            return _callerObjectHashCodes.Contains(toCheck.GetHashCode());
         }
 
-        internal static List<QueryParameter> GetQueryParameters(LambdaExpression where, Dictionary<string, string> aliases = null)
+        private object Visit(Expression expression, out bool isProperty)
         {
-            var queryProperties = new List<QueryParameter>();
-            // walk the tree and build up a list of query parameter objects
-            // from the left and right branches of the expression tree
-            WalkTree(where.Body, ExpressionType.Default, ref queryProperties, aliases);
-            return queryProperties;
+            isProperty = false;
+            
+            
+            if (expression is BinaryExpression)
+                VisitBinary((BinaryExpression)expression);
+            else if (expression is ConstantExpression)
+                return VisitConstant((ConstantExpression)expression);
+            else if (expression is MethodCallExpression)
+                return VisitMethodCallExpression((MethodCallExpression)expression);
+            else if (expression is InvocationExpression)
+                return VisitInvocationExpression((InvocationExpression)expression);
+            else if (expression is UnaryExpression)
+                return VisitUnaryExpression((UnaryExpression)expression);
+            else if (expression is ParameterExpression)
+                VisitParameterExpression((ParameterExpression)expression);
+            else if (expression is MemberExpression)
+                return VisitMemberExpression((MemberExpression)expression, out isProperty);
+            else if (expression is LambdaExpression)
+                return VisitLambdaExpression((LambdaExpression)expression);
+            else if (expression is ListInitExpression)
+                return Compile(expression);
+            else 
+                VisitUnknown(expression);
+            return null;
         }
 
-        internal static string ParseAsWhereString(LambdaExpression where, out IList<QueryParameter> queryProperties, Dictionary<string, string> aliases = null)
+        private void VisitBinary(BinaryExpression expression)
         {
-            queryProperties = null;
-            if (where == null)
-                return string.Empty;
-
-            var builder = new StringBuilder();
-
-            queryProperties = GetQueryParameters(where, aliases);
-
-            var pendingClose = 0;
-            var bracketOpened = false;
-            bool containsOpened = false, startsWith = false, endsWith = false;
-
-            var extraQueryProperties = new List<QueryParameter>();
-            for (var i = 0; i < queryProperties.Count(); i++)
+            if (expression.NodeType != ExpressionType.AndAlso && expression.NodeType != ExpressionType.OrElse)
             {
-                var item = queryProperties[i];
-                if (item.SupportOperator)
+                _isBinaryOperation = true;
+                var propertyName = GetAliasedPropertyName((MemberExpression)expression.Left, _aliases);
+                var propertyValue = Visit(expression.Right, out bool isValueProperty);
+                var opr = GetOperator(expression.NodeType, this);
+                AddQueryParameter("", propertyName, propertyValue, opr, propertyName, isValueProperty);
+                _isBinaryOperation = false;
+            }
+            else
+            {
+                
+                _queryInfo.Add(new QueryInfo(true, Markers.Open));
+                Visit(expression.Left, out bool _);
+                _queryInfo.Add(new QueryInfo(true, Markers.Close));
+                _queryInfo.Add(new QueryInfo(true, GetOperator(expression.NodeType, this)));
+                
+                _queryInfo.Add(new QueryInfo(true, Markers.Open));
+                Visit(expression.Right, out bool _);
+                _queryInfo.Add(new QueryInfo(true, Markers.Close));
+                _notCount--;
+            }
+
+        }
+
+        private object VisitConstant(ConstantExpression expression)
+        {
+            if (expression.Value is bool)
+            {
+                EvaluateAndAdd(expression);
+                return null;
+            }
+
+            return expression.Value;
+        }
+
+        private object VisitMethodCallExpression(MethodCallExpression expression)
+        {
+            if (expression.Object != null)
+            {
+                if (!IsCallerCalling(expression.Object))
                 {
-                    if (item.LinkingOperator == Markers.Open)
+                    if (expression.Arguments.Count == 0)
                     {
-                        builder.Append("(");
-                        bracketOpened = true;
-                        pendingClose++;
-                    }
-                    else if (item.LinkingOperator == Markers.Close)
-                    {
-                        builder.Append(")");
-                        bracketOpened = false;
-                        pendingClose--;
-                    }
-                    else if (item.LinkingOperator == Markers.ContainsStart)
-                    {
-                        containsOpened = true;
-                    }
-                    else if (item.LinkingOperator == Markers.StartsWithStart)
-                    {
-                        startsWith = true;
-                    }
-                    else if (item.LinkingOperator == Markers.EndsWithStart)
-                    {
-                        endsWith = true;
-                    }
-                    else if (item.LinkingOperator == Markers.Not)
-                    {
-                        builder.Append(" NOT ");
+                        return EvaluateAndAdd(expression);
                     }
                     else
                     {
-                        builder.Append(" " + item.LinkingOperator + " ");
-                    }
-                }
-                else if (containsOpened)
-                {
-                    if (item.PropertyValue is IList)
-                    {
-                        var inItemCounter = 0;
-                        //add parameters for each of the property value
-                        builder.Append($"{item.PropertyName} {item.QueryOperator} (");
-                        var itemCollection = (IList) item.PropertyValue;
-                        for (var itemIndex = 0; itemIndex < itemCollection.Count; itemIndex++)
+                        var propertyName = (string)Visit(expression.Arguments[0], out bool isProperty);
+                        var propertyValue = Visit(expression.Object, out isProperty);
+                        var operatorName = "";
+                        if (expression.Method.Name == "Contains")
                         {
-                            var paramName = "InParam_" + (itemIndex + 1);
-                            var inItemValue = itemCollection[itemIndex];
-                            extraQueryProperties.Add(new QueryParameter("", "inner_" + item.PropertyName, inItemValue, "", paramName));
+                            operatorName = _notCount > 0 ? "NOT IN" : "IN";
                         }
-                        var inParameterString = "@" + string.Join(",@", extraQueryProperties.Select(x => x.ParameterName));
-                        builder.Append(inParameterString);
-                        builder.Append(") ");
 
-                        //mark the current query parameter as support one now
-                        item.SupportOperator = true;
+                        AddQueryParameter(Markers.Contains, propertyName, propertyValue, operatorName, propertyName, isProperty);
+                        return null;
                     }
-                    else if (item.PropertyValue is string)
-                    {
-                        builder.Append($"{item.PropertyName} {item.QueryOperator} '%' + @{item.ParameterName} + '%'");
-                    }
-                    containsOpened = false;
-                }
-                else if (startsWith)
-                {
-                    builder.Append($"{item.PropertyName} {item.QueryOperator} @{item.ParameterName} + '%'");
-                    startsWith = false;
-                }
-                else if (endsWith)
-                {
-                    builder.Append($"{item.PropertyName} {item.QueryOperator} '%' + @{item.ParameterName}");
-                    endsWith = false;
-                }
-                else if (!string.IsNullOrEmpty(item.LinkingOperator) && i > 0 && !bracketOpened)
-                {
-                    builder.Append(IncludeParamSymbol(item, out string propertyValue)
-                        ? $" {item.LinkingOperator} {item.PropertyName} {item.QueryOperator} {propertyValue}"
-                        : $" {item.LinkingOperator} {item.PropertyName} {item.QueryOperator} @{item.ParameterName}");
+
                 }
                 else
                 {
-                    builder.Append(IncludeParamSymbol(item, out string propertyValue)
-                        ? $"{item.PropertyName} {item.QueryOperator} {propertyValue}"
-                        : $"{item.PropertyName} {item.QueryOperator} @{item.ParameterName}");
-                    bracketOpened = false;
+                    var propertyName = (string)VisitMemberExpression(expression.Object as MemberExpression, out bool isProperty);
+                    if (expression.Arguments[0].Type == typeof(string))
+                    {
+                        var propertyValue = Visit(expression.Arguments[0], out isProperty);
+                        var linkingOperator = "";
+                        var opr = _notCount > 0 ? "NOT LIKE" : "LIKE";
+                        switch (expression.Method.Name)
+                        {
+                            case "Contains":
+                                linkingOperator = _notCount > 0 ? Markers.NotContains : Markers.Contains;
+                                break;
+                            case "StartsWith":
+                                linkingOperator = _notCount > 0 ? Markers.NotStartsWith : Markers.StartsWith;
+                                break;
+                            case "EndsWith":
+                                linkingOperator = _notCount > 0 ? Markers.NotEndsWith : Markers.EndsWith;
+                                break;
+                            default:
+                                throw new Exception("Unsupported method");
+                        }
+                        AddQueryParameter(linkingOperator, propertyName, propertyValue, opr, propertyName, isProperty);
+                        return null;
+                    }
+                    throw new Exception("Unsupported expression");
                 }
-
             }
-
-            //add any extra parameters to the response
-            queryProperties = queryProperties.Concat(extraQueryProperties).ToList();
-            return builder.ToString();
+            return Compile(expression);
         }
 
-        internal static bool IncludeParamSymbol(QueryParameter parameter, out string value)
+        private object VisitInvocationExpression(InvocationExpression expression)
         {
-            value = null;
-            if (parameter.ParameterName == Markers.NoParam)
-                value = parameter.PropertyValue.ToString();
-            var propertyValue = parameter.PropertyValue as TablePropertyValue;
-            if (propertyValue != null)
-                value = propertyValue.Value;
-            return value != null;
-        }
-        internal static string ParseAsOrderByString(LambdaExpression orderBy)
-        {
-            if (orderBy == null)
-                return string.Empty;
-
-            var ob = EvaluateExpression(orderBy);
-            return ob?.ToString();
+            EvaluateAndAdd(expression);
+            return null;
         }
 
-        /// <summary>
-        /// Gets the name of the property.
-        /// </summary>
-        /// <param name="body">The body.</param>
-        /// <returns>The property name for the property expression.</returns>
-        private static string GetPropertyName(BinaryExpression body)
+        private object VisitUnaryExpression(UnaryExpression expression)
         {
-            var propertyName = body.Left.ToString().Split('.')[1];
-
-            if (body.Left.NodeType == ExpressionType.Convert)
+            if (expression.NodeType == ExpressionType.Not)
             {
-                // hack to remove the trailing ) when convering.
-                propertyName = propertyName.Replace(")", string.Empty);
+                _notCount++;
             }
-
-            return propertyName;
+            return Visit(expression.Operand, out bool isProperty);
         }
 
-        /// <summary>
-        /// Gets the operator.
-        /// </summary>
-        /// <param name="type">The type.</param>
-        /// <returns>
-        /// The expression types SQL server equivalent operator.
-        /// </returns>
-        private static string GetOperator(ExpressionType type)
+        private string VisitParameterExpression(ParameterExpression expression)
         {
-            switch (type)
+            return expression.Name;
+            //
+        }
+
+        private object VisitMemberExpression(MemberExpression expression, out bool isProperty)
+        {
+            isProperty = false;
+            if (expression.Expression == null)
+            {
+                return Compile(expression);
+            }
+            if (IsCallerCalling(expression))
+            {
+                isProperty = true;
+                return GetAliasedPropertyName(expression, _aliases);
+            }
+            if (expression.Expression.NodeType == ExpressionType.Parameter)
+                return VisitParameterExpression((ParameterExpression)expression.Expression);
+            if (expression.Member.MemberType == MemberTypes.Field || expression.Expression.NodeType == ExpressionType.MemberAccess)
+            {
+                return Compile(expression);
+            }
+            return null;
+        }
+
+        private object Compile(Expression expression)
+        {
+            var objMember = Expression.Convert(expression, typeof(object));
+            var getterLambda = Expression.Lambda<Func<object>>(objMember);
+            var getter = getterLambda.Compile();
+            return getter();
+        }
+        private void VisitUnknown(Expression expression)
+        {
+            
+        }
+
+        private object VisitLambdaExpression(LambdaExpression expression)
+        {
+
+            if (expression.Parameters.Count > 0 && _callerObjectHashCodes == null)
+            {
+                _callerObjectHashCodes = new int[expression.Parameters.Count];
+                for (var i = 0; i < expression.Parameters.Count; i++)
+                {
+                    _callerObjectHashCodes[i] = expression.Parameters[i].GetHashCode();
+                }
+            }
+
+            //foreach (var parameter in expression.Parameters)
+                
+            return Visit(expression.Body, out bool isProperty);
+        }
+
+        private object EvaluateAndAdd(Expression expression)
+        {
+            var propertyValue = Compile(expression);
+            if (propertyValue is bool)
+            {
+                if (!_isBinaryOperation)
+                {
+                    var opr = "";
+                    if ((bool)propertyValue)
+                    {
+                        opr = GetOperator(ExpressionType.Equal, this);
+                    }
+                    else
+                    {
+                        opr = GetOperator(ExpressionType.NotEqual, this);
+                    }
+                    AddQueryParameter("", "1", "1", opr, "1", true);
+                }
+                return null;
+            }
+            else
+            {
+                return propertyValue;
+            }
+        }
+
+        private QueryInfo AddQueryParameter(string linkingOperator, string propertyName, object propertyValue, string queryOperator, string parameterName, bool isPropertyValueAlsoAProperty = false)
+        {
+            parameterName = GetSafeParameterName(_queryInfo, propertyName, propertyValue);
+            var queryInfo = new QueryInfo(linkingOperator, propertyName, propertyValue, queryOperator, parameterName, isPropertyValueAlsoAProperty);
+            _queryInfo.Add(queryInfo);
+            return queryInfo;
+        }
+
+        private static string GetOperator(ExpressionType type, ExpressionTreeParser parser)
+        {
+            var typeToCheck = type;
+            if (parser._notCount > 0)
+            {
+                switch (type)
+                {
+                    case ExpressionType.Equal:
+                        typeToCheck = ExpressionType.NotEqual;
+                        break;
+                    case ExpressionType.NotEqual:
+                        typeToCheck = ExpressionType.Equal;
+                        break;
+                    case ExpressionType.LessThan:
+                        typeToCheck = ExpressionType.GreaterThan;
+                        break;
+                    case ExpressionType.LessThanOrEqual:
+                        typeToCheck = ExpressionType.GreaterThanOrEqual;
+                        break;
+                    case ExpressionType.GreaterThan:
+                        typeToCheck = ExpressionType.LessThan;
+                        break;
+                    case ExpressionType.GreaterThanOrEqual:
+                        typeToCheck = ExpressionType.LessThanOrEqual;
+                        break;
+                    case ExpressionType.AndAlso:
+                    case ExpressionType.And:
+                        typeToCheck = ExpressionType.Or;
+                        break;
+                    case ExpressionType.Or:
+                    case ExpressionType.OrElse:
+                        typeToCheck = ExpressionType.And;
+                        break;
+                    default:
+                        throw new NotImplementedException();
+                }
+            }
+            switch (typeToCheck)
             {
                 case ExpressionType.Equal:
                     return "=";
@@ -330,8 +332,12 @@ namespace SpruceFramework
                     return "!=";
                 case ExpressionType.LessThan:
                     return "<";
+                case ExpressionType.LessThanOrEqual:
+                    return "<=";
                 case ExpressionType.GreaterThan:
                     return ">";
+                case ExpressionType.GreaterThanOrEqual:
+                    return ">=";
                 case ExpressionType.AndAlso:
                 case ExpressionType.And:
                     return "AND";
@@ -344,51 +350,110 @@ namespace SpruceFramework
                     throw new NotImplementedException();
             }
         }
+        #endregion
 
-        internal static object EvaluateExpression(Expression expression)
+        #region query part generators
+
+        public string GetWhereString()
         {
-            switch (expression.NodeType)
+            Visit(_expression, out bool isProperty);
+            var builder = new StringBuilder();
+
+            var extraQueryProperties = new List<QueryInfo>();
+            for (var i = 0; i < _queryInfo.Count(); i++)
             {
-                case ExpressionType.Constant:
-                    return ((ConstantExpression) expression).Value;
-                case ExpressionType.Call:
-                    return Expression.Lambda(expression).Compile().DynamicInvoke();
-                case ExpressionType.ListInit:
-                    var listInit = (ListInitExpression) expression;
-                    return listInit.Initializers.Select(x => EvaluateExpression(x.Arguments.First())).ToList();
-                case ExpressionType.MemberAccess:
-                    var memberExpression = (MemberExpression) expression;
-                    if (memberExpression.Member.ReflectedType.FullName.StartsWith("System"))
+                var item = QueryInfoList[i];
+                if (item.SupportOperator)
+                {
+                    switch (item.LinkingOperator)
                     {
-                        var objMember = Expression.Convert(expression, typeof(object));
-                        var getterLambda = Expression.Lambda<Func<object>>(objMember);
-                        var getter = getterLambda.Compile();
-                        return getter();
+                        case Markers.Open:
+                            builder.Append("(");
+                            break;
+                        case Markers.Close:
+                            builder.Append(")");
+                            break;
+                        default:
+                            builder.Append($" {item.LinkingOperator} ");
+                            break;
                     }
-                    return memberExpression.Member.Name;
-                case ExpressionType.Lambda:
-                    return EvaluateExpression(((LambdaExpression) expression).Body);
-                case ExpressionType.Convert:
-                    return EvaluateExpression(((UnaryExpression) expression).Operand);
+                }
+                else
+                {
+                    if (item.PropertyValue is ICollection)
+                    {
+                        builder.Append($"{item.PropertyName} {item.QueryOperator} (");
+                        var itemCollection = (IList)item.PropertyValue;
+                        for (var itemIndex = 0; itemIndex < itemCollection.Count; itemIndex++)
+                        {
+                            var paramName = $"{item.PropertyName}_InParam_{itemIndex + 1}";
+                            var inItemValue = itemCollection[itemIndex];
+                            extraQueryProperties.Add(new QueryInfo("", "inner_" + item.PropertyName, inItemValue, "", paramName));
+                        }
+                        var inParameterString = "@" + string.Join(",@", extraQueryProperties.Select(x => x.ParameterName));
+                        builder.Append(inParameterString);
+                        builder.Append(") ");
+                    }
+                    else
+                    {
+                        builder.Append($"{item.PropertyName} {item.QueryOperator} ");
+                        if (item.IsPropertyValueAlsoProperty)
+                        {
+                            builder.Append(item.PropertyValue);
+                        }
+                        else
+                        {
+                            switch (item.LinkingOperator)
+                            {
+                                case Markers.Contains:
+                                case Markers.NotContains:
+                                    builder.Append($"'%' + @{item.ParameterName} + '%'");
+                                    break;
+                                case Markers.StartsWith:
+                                case Markers.NotStartsWith:
+                                    builder.Append($"@{item.ParameterName} + '%'");
+                                    break;
+                                case Markers.EndsWith:
+                                case Markers.NotEndsWith:
+                                    builder.Append($"'%' + @{item.ParameterName}");
+                                    break;
+                                default:
+                                    builder.Append($"@{item.ParameterName}");
+                                    break;
+                            }
+                        }
+
+                    }
+
+                }
             }
-            return null;
+
+            //add any extra parameters to the response
+            _queryInfo = _queryInfo.Concat(extraQueryProperties).ToList();
+            return builder.ToString();
         }
 
-        internal static object EvaluateCompiled(MemberExpression expression, Dictionary<string, string> aliases = null)
+        internal static bool IncludeParamSymbol(QueryInfo parameter, out string value)
         {
-            if (expression.Expression?.Type.MemberType == MemberTypes.TypeInfo)
-            {
-                var propertyName = GetAliasedPropertyName(expression, aliases);
-                return new TablePropertyValue($"{propertyName}");
-            }
-            var converted = Expression.Convert(expression, typeof(object));
-            var getterLambda = Expression.Lambda<Func<object>>(converted);
-            var getter = getterLambda.Compile();
-            return getter();
+            value = null;
+            if (parameter.ParameterName == Markers.NoParam)
+                value = parameter.PropertyValue.ToString();
+            var propertyValue = parameter.PropertyValue as TablePropertyValue;
+            if (propertyValue != null)
+                value = propertyValue.Value;
+            return value != null;
         }
 
-        private static string GetSafeParameterName(IList<QueryParameter> queryParameters, string propertyName, object propertyValue)
+        public string GetOrderByString()
         {
+            
+            var ob = Visit(_expression, out bool _);
+            return ob.ToString();
+        }
+
+        private static string GetSafeParameterName(IList<QueryInfo> queryParameters, string propertyName, object propertyValue)
+        {
+            var parameterName = propertyName.Replace("[", "").Replace("]", "").Replace(".", "_");
             //do we have any existing parameter with same name, we'll have to then rename the parameter
             var qp = queryParameters.FirstOrDefault(x => x.PropertyName == propertyName);
             if (qp != null)
@@ -396,14 +461,14 @@ namespace SpruceFramework
                 if (qp.PropertyValue != propertyValue)
                 {
                     //change propertyName to something else
-                    propertyName = propertyName +
-                                    (queryParameters.Count(x => x.PropertyName == propertyName) + 1);
+                    parameterName = propertyName +
+                                   (queryParameters.Count(x => x.PropertyName == propertyName) + 1);
                 }
             }
-            return propertyName;
+            return parameterName;
         }
 
-        public static string GetAliasedPropertyName(MemberExpression memberExpression, Dictionary<string, string> aliases)
+        private static string GetAliasedPropertyName(MemberExpression memberExpression, Dictionary<string, string> aliases)
         {
             var propertyName = memberExpression.Member.Name;
             if (aliases == null)
@@ -416,40 +481,8 @@ namespace SpruceFramework
 
             return $"[{prefix}].[{propertyName}]";
         }
-    }
 
-    /// <summary>
-    /// Class that models the data structure in coverting the expression tree into SQL and Params.
-    /// </summary>
-    internal class QueryParameter
-    {
-        public string LinkingOperator { get; set; }
-        public string PropertyName { get; set; }
-        public string ParameterName { get; set; }
-        public object PropertyValue { get; set; }
-        public string QueryOperator { get; set; }
+        #endregion;
 
-        public bool SupportOperator { get; set; }
-        /// <summary>
-        /// Initializes a new instance of the <see cref="QueryParameter" /> class.
-        /// </summary>
-        /// <param name="linkingOperator">The linking operator.</param>
-        /// <param name="propertyName">Name of the property.</param>
-        /// <param name="propertyValue">The property value.</param>
-        /// <param name="queryOperator">The query operator.</param>
-        internal QueryParameter(string linkingOperator, string propertyName, object propertyValue, string queryOperator, string parameterName)
-        {
-            LinkingOperator = linkingOperator;
-            PropertyName = propertyName;
-            PropertyValue = propertyValue;
-            QueryOperator = queryOperator;
-            ParameterName = parameterName;
-        }
-
-        internal QueryParameter(bool supportOperator, string linkingOperator)
-        {
-            SupportOperator = supportOperator;
-            LinkingOperator = linkingOperator;
-        }
     }
 }

@@ -13,14 +13,14 @@ namespace SpruceFramework
 {
     internal class QueryProcessor
     {
-        public IDbCommand GetQueryCommand(IDbConnection connection, string sqlQuery, IList<QueryParameter> parameters, bool loadIdOfAffectedRow = false, string idParameterName = "", CommandType commandType = CommandType.Text)
+        public IDbCommand GetQueryCommand(IDbConnection connection, string sqlQuery, IList<QueryInfo> parameters, bool loadIdOfAffectedRow = false, string idParameterName = "", CommandType commandType = CommandType.Text)
         {
             var command = connection.CreateCommand();
             command.CommandText = sqlQuery;
             command.CommandType = commandType;
             if (parameters != null)
             {
-                foreach (var parameter in parameters.Where(x => !x.SupportOperator))
+                foreach (var parameter in parameters.Where(x => !x.SupportOperator && !x.IsPropertyValueAlsoProperty))
                 {
                     var cmdParameter = command.CreateParameter();
                     cmdParameter.ParameterName = parameter.ParameterName;

@@ -6,10 +6,13 @@
 // #endregion
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 namespace SpruceFramework.Extensions
 {
-    public static class TypeCastExtensions
+    internal static class TypeExtensions
     {
         internal static SpruceQueryManager AsSpruceQueryManager(this ISpruceQueryManager manager)
         {
@@ -18,6 +21,16 @@ namespace SpruceFramework.Extensions
                 throw new Exception("Can't cast provided manager");
 
             return asObj;
+        }
+
+        internal static bool IsNullable(this Type type)
+        {
+            return Nullable.GetUnderlyingType(type) != null;
+        }
+
+        public static IEnumerable<PropertyInfo> GetDatabaseUsableProperties(this Type type)
+        {
+            return type.GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(x => !x.GetAccessors()[0].IsVirtual);
         }
     }
 }

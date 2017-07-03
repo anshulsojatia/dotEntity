@@ -5,6 +5,7 @@
 // // 
 // #endregion
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -43,6 +44,19 @@ namespace SpruceFramework
 
             }
           
+            return true;
+        }
+
+        public static bool AreAllColumnsNull(DataReaderRow row, string[] columnNames, int skipColumns)
+        {
+            var maxLoopValue = skipColumns + columnNames.Length;
+            for (var i = skipColumns; i < maxLoopValue; i++)
+            {
+                var columnName = row.Columns[i];
+                if (row[columnName] != DBNull.Value)
+                    return false;
+
+            }
             return true;
         }
     }

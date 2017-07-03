@@ -19,24 +19,32 @@ namespace SpruceFramework
 {
     internal abstract class QueryGenerator : IQueryGenerator
     {
-        public virtual string GenerateInsert(string tableName, dynamic entity, out IList<QueryParameter> parameters)
+        private static Dictionary<JoinType, string> _joinMap = new Dictionary<JoinType, string>
+        {
+            { JoinType.Inner, "INNER JOIN" },
+            { JoinType.LeftOuter, "LEFT OUTER JOIN" },
+            { JoinType.RightOuter, "RIGHT OUTER JOIN" },
+            { JoinType.FullOuter, "FULL OUTER JOIN" }
+        };
+
+        public virtual string GenerateInsert(string tableName, dynamic entity, out IList<QueryInfo> parameters)
         {
             Dictionary<string, object> columnValueMap = QueryParserUtilities.ParseObjectKeyValues(entity, exclude: "Id");
             var insertColumns = columnValueMap.Keys.ToArray();
             var joinInsertString = string.Join(",", insertColumns);
             var joinValueString = "@" + string.Join(",@", insertColumns); ;
-            parameters = ToQueryParameters(columnValueMap);
+            parameters = ToQueryInfos(columnValueMap);
 
             return $"INSERT INTO {tableName} ({joinInsertString}) OUTPUT inserted.Id VALUES ({joinValueString})";
         }
 
-        public virtual string GenerateInsert<T>(T entity, out IList<QueryParameter> parameters) where T : class
+        public virtual string GenerateInsert<T>(T entity, out IList<QueryInfo> parameters) where T : class
         {
             var tableName = Spruce.GetTableNameForType<T>();
             return GenerateInsert(tableName, entity, out parameters);
         }
 
-        public virtual string GenerateUpdate<T>(T entity, out IList<QueryParameter> queryParameters) where T : class
+        public virtual string GenerateUpdate<T>(T entity, out IList<QueryInfo> queryParameters) where T : class
         {
             var tableName = Spruce.GetTableNameForType<T>();
             var deserializer = DataDeserializer<T>.Instance;
@@ -48,37 +56,37 @@ namespace SpruceFramework
             return GenerateUpdate(tableName, entity, dataDictionary, out queryParameters, keyColumn);
         }
 
-        public virtual string GenerateUpdate(string tableName, dynamic entity, dynamic where, out IList<QueryParameter> queryParameters, params string[] exclude)
+        public virtual string GenerateUpdate(string tableName, dynamic entity, dynamic where, out IList<QueryInfo> queryParameters, params string[] exclude)
         {
             Dictionary<string, object> updateValueMap = QueryParserUtilities.ParseObjectKeyValues(entity, exclude);
             var whereString = "";
             Dictionary<string, object> whereMap = QueryParserUtilities.ParseObjectKeyValues(where);
             whereString = string.Join(" AND ", whereMap.Select(x => $"{x.Key} = @{x.Key}"));
-            queryParameters = ToQueryParameters(updateValueMap, whereMap);
+            queryParameters = ToQueryInfos(updateValueMap, whereMap);
 
             var updateString = string.Join(",", updateValueMap.Select(x => $"{x.Key} = @{x.Key}"));
 
             return $"UPDATE {tableName} SET {updateString} WHERE {whereString}";
         }
 
-        public virtual string GenerateUpdate<T>(Expression<Func<T, bool>> where, out IList<QueryParameter> queryParameters) where T : class
+        public virtual string GenerateUpdate<T>(Expression<Func<T, bool>> where, out IList<QueryInfo> queryParameters) where T : class
         {
             var tableName = Spruce.GetTableNameForType<T>();
-            var parameters = QueryParserUtilities.ParseTypeKeyValues(typeof(T), DataDeserializer<T>.Instance.GetKeyColumn());
-            var updateString = string.Join(",", parameters);
+            var parser = new ExpressionTreeParser(where);
+            var whereString = parser.GetWhereString();
+            queryParameters = parser.QueryInfoList;
 
-            var whereString = ExpressionTreeParser.ParseAsWhereString(where, out queryParameters);
             if (!string.IsNullOrEmpty(whereString))
             {
                 whereString = "WHERE " + whereString;
                 whereString = whereString.Trim();
             }
-            return $"UPDATE {tableName} SET {updateString} {whereString}";
+            return $"UPDATE {tableName} {whereString}";
         }
 
 
 
-        public virtual string GenerateUpdate<T>(dynamic item, Expression<Func<T, bool>> where, out IList<QueryParameter> queryParameters) where T : class
+        public virtual string GenerateUpdate<T>(dynamic item, Expression<Func<T, bool>> where, out IList<QueryInfo> queryParameters) where T : class
         {
             var tableName = Spruce.GetTableNameForType<T>();
             var builder = new StringBuilder();
@@ -91,10 +99,11 @@ namespace SpruceFramework
             var updateString = string.Join(",", updateValueMap.Select(x => $"{x.Key} = @{x.Key}"));
 
             builder.Append(updateString);
+            var parser = new ExpressionTreeParser(where);
+            var whereString = parser.GetWhereString();
+            queryParameters = parser.QueryInfoList;
 
-            var whereString = ExpressionTreeParser.ParseAsWhereString(where, out queryParameters);
-
-            queryParameters = MergeParameters(queryParameters, ToQueryParameters(updateValueMap));
+            queryParameters = MergeParameters(queryParameters, ToQueryInfos(updateValueMap));
 
             if (string.IsNullOrEmpty(whereString))
             {
@@ -104,23 +113,25 @@ namespace SpruceFramework
             return builder.ToString().Trim();
         }
 
-        public virtual string GenerateDelete(string tableName, dynamic where, out IList<QueryParameter> parameters)
+        public virtual string GenerateDelete(string tableName, dynamic where, out IList<QueryInfo> parameters)
         {
             Dictionary<string, object> whereMap = QueryParserUtilities.ParseObjectKeyValues(where);
             var whereString = string.Join(" AND ", whereMap.Select(x => $"{x.Key} = @{x.Key}"));
-            parameters = ToQueryParameters(whereMap);
+            parameters = ToQueryInfos(whereMap);
             return $"DELETE FROM {tableName} WHERE {whereString}";
         }
 
-        public virtual string GenerateDelete<T>(Expression<Func<T, bool>> where, out IList<QueryParameter> parameters) where T : class
+        public virtual string GenerateDelete<T>(Expression<Func<T, bool>> where, out IList<QueryInfo> parameters) where T : class
         {
             var tableName = Spruce.GetTableNameForType<T>();
-            var whereString = ExpressionTreeParser.ParseAsWhereString(where, out parameters).Trim();
+            var parser = new ExpressionTreeParser(where);
+            var whereString = parser.GetWhereString().Trim();
+            parameters = parser.QueryInfoList;
             return $"DELETE FROM {tableName} WHERE {whereString}";
         }
-        public virtual string GenerateSelect<T>(out IList<QueryParameter> parameters, List<Expression<Func<T, bool>>> where = null, Dictionary<Expression<Func<T, object>>, RowOrder> orderBy = null, int page = 1, int count = int.MaxValue) where T : class
+        public virtual string GenerateSelect<T>(out IList<QueryInfo> parameters, List<Expression<Func<T, bool>>> where = null, Dictionary<Expression<Func<T, object>>, RowOrder> orderBy = null, int page = 1, int count = int.MaxValue) where T : class
         {
-            parameters = new List<QueryParameter>();
+            parameters = new List<QueryInfo>();
             var builder = new StringBuilder();
             var tableName = Spruce.GetTableNameForType<T>();
 
@@ -131,9 +142,9 @@ namespace SpruceFramework
             {
                 foreach (var wh in where)
                 {
-                    whereStringBuilder.Add(
-                        ExpressionTreeParser.ParseAsWhereString(wh, out IList<QueryParameter> queryParameters));
-
+                    var parser = new ExpressionTreeParser(wh);
+                    whereStringBuilder.Add(parser.GetWhereString());
+                    var queryParameters = parser.QueryInfoList;
                     parameters = parameters.Concat(queryParameters).ToList();
                 }
                 whereString = string.Join(" AND ", whereStringBuilder).Trim();
@@ -145,8 +156,8 @@ namespace SpruceFramework
             {
                 foreach (var ob in orderBy)
                 {
-
-                    orderByStringBuilder.Add(ExpressionTreeParser.ParseAsOrderByString(ob.Key) + (ob.Value == RowOrder.Descending ? " DESC" : ""));
+                    var parser = new ExpressionTreeParser(ob.Key);
+                    orderByStringBuilder.Add(parser.GetOrderByString() + (ob.Value == RowOrder.Descending ? " DESC" : ""));
                 }
 
                 orderByString = string.Join(", ", orderByStringBuilder).Trim(',');
@@ -180,10 +191,10 @@ namespace SpruceFramework
             return query;
         }
 
-        public virtual string GenerateJoin<T>(out IList<QueryParameter> parameters, List<IJoinMeta> joinMetas, List<LambdaExpression> @where = null, Dictionary<LambdaExpression, RowOrder> orderBy = null,
+        public virtual string GenerateJoin<T>(out IList<QueryInfo> parameters, List<IJoinMeta> joinMetas, List<LambdaExpression> @where = null, Dictionary<LambdaExpression, RowOrder> orderBy = null,
             int page = 1, int count = int.MaxValue) where T : class
         {
-            parameters = new List<QueryParameter>();
+            parameters = new List<QueryInfo>();
             var typedAliases = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
             var builder = new StringBuilder();
             var tableName = Spruce.GetTableNameForType<T>();
@@ -206,7 +217,7 @@ namespace SpruceFramework
                     sourceAlias = parentAliasUsed;
                 }
                 joinBuilder.Append(
-                    $"INNER JOIN {joinedTableName} {newAlias} ON {sourceAlias}.[{joinMeta.SourceColumnName}] = {newAlias}.[{joinMeta.DestinationColumnName}] ");
+                    $"{_joinMap[joinMeta.JoinType]} {joinedTableName} {newAlias} ON {sourceAlias}.[{joinMeta.SourceColumnName}] = {newAlias}.[{joinMeta.DestinationColumnName}] ");
 
                 lastAliasUsed = newAlias;
 
@@ -219,9 +230,9 @@ namespace SpruceFramework
             {
                 foreach (var wh in where)
                 {
-                    whereStringBuilder.Add(
-                        ExpressionTreeParser.ParseAsWhereString(wh, out IList<QueryParameter> queryParameters, typedAliases));
-
+                    var parser = new ExpressionTreeParser(wh, typedAliases);
+                    whereStringBuilder.Add(parser.GetWhereString());
+                    var queryParameters = parser.QueryInfoList;
                     parameters = parameters.Concat(queryParameters).ToList();
                 }
                 whereString = string.Join(" AND ", whereStringBuilder).Trim();
@@ -233,8 +244,8 @@ namespace SpruceFramework
             {
                 foreach (var ob in orderBy)
                 {
-
-                    orderByStringBuilder.Add(ExpressionTreeParser.ParseAsOrderByString(ob.Key) + (ob.Value == RowOrder.Descending ? " DESC" : ""));
+                    var parser = new ExpressionTreeParser(ob.Key);
+                    orderByStringBuilder.Add(parser.GetOrderByString() + (ob.Value == RowOrder.Descending ? " DESC" : ""));
                 }
 
                 orderByString = string.Join(", ", orderByStringBuilder).Trim(',');
@@ -272,18 +283,18 @@ namespace SpruceFramework
             return query;
         }
 
-        public virtual string Query(string query, dynamic inParameters, out IList<QueryParameter> parameters)
+        public virtual string Query(string query, dynamic inParameters, out IList<QueryInfo> parameters)
         {
             var columnValueMap = QueryParserUtilities.ParseObjectKeyValues(inParameters);
-            parameters = ToQueryParameters(columnValueMap);
+            parameters = ToQueryInfos(columnValueMap);
             return query;
         }
 
-        private static IList<QueryParameter> ToQueryParameters(params Dictionary<string, object>[] dict)
+        private static IList<QueryInfo> ToQueryInfos(params Dictionary<string, object>[] dict)
         {
             if (dict == null)
                 return null;
-            var queryParameters = new List<QueryParameter>();
+            var queryParameters = new List<QueryInfo>();
             foreach (var dictionary in dict)
             {
                 foreach (var strObj in dictionary)
@@ -296,16 +307,16 @@ namespace SpruceFramework
                     {
                         parameterName = propertyName + (queryParameters.Count(x => x.PropertyName == propertyName) + 1);
                     }
-                    queryParameters.Add(new QueryParameter(string.Empty, propertyName, propertyValue, string.Empty, parameterName));
+                    queryParameters.Add(new QueryInfo(string.Empty, propertyName, propertyValue, string.Empty, parameterName));
                 }
             }
             return queryParameters;
         }
 
-        private static IList<QueryParameter> MergeParameters(IEnumerable<QueryParameter> baseList, params IList<QueryParameter>[] queryParameterList)
+        private static IList<QueryInfo> MergeParameters(IEnumerable<QueryInfo> baseList, params IList<QueryInfo>[] queryParameterList)
         {
             //update all the parameter names first
-            var queryParameters = baseList as IList<QueryParameter> ?? baseList.ToList();
+            var queryParameters = baseList as IList<QueryInfo> ?? baseList.ToList();
             foreach (var list in queryParameterList)
             {
                 foreach (var qp in list)

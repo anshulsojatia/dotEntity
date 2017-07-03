@@ -18,17 +18,18 @@ namespace SpruceFramework
 
         public string Query { get; set; }
 
-        public IList<QueryParameter> QueryParameters { get; set; }
+        public IList<QueryInfo> QueryInfos { get; set; }
 
         public string KeyColumn { get; set; }
 
         public bool ContinueNextCommand { get; set; }
 
-        public SpruceDbCommand(DbOperationType operationType, string query, IList<QueryParameter> queryParameters, string keyColumn = "Id")
+        public SpruceDbCommand(DbOperationType operationType, string query, IList<QueryInfo> queryParameters, string keyColumn = "Id")
         {
             OperationType = operationType;
             Query = query;
-            QueryParameters = queryParameters;
+            QueryInfos = queryParameters;
+            ContinueNextCommand = true;
         }
 
         private Func<IDataReader, object> _readerAction;

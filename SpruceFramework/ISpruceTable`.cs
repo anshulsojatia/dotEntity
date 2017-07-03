@@ -21,7 +21,7 @@ namespace SpruceFramework
 
         ISpruceTable<T> Where(LambdaExpression where);
         
-        ISpruceTable<T> Join<T1>(string sourceColumnName, string destinationColumnName) where T1 : class;
+        ISpruceTable<T> Join<T1>(string sourceColumnName, string destinationColumnName, SourceColumn sourceColumn = SourceColumn.Chained, JoinType joinType = JoinType.Inner) where T1 : class;
 
         ISpruceTable<T> Relate<T1>(Action<T, T1> relateAction) where T1 : class;
 

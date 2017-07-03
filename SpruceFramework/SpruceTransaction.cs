@@ -4,6 +4,9 @@
 // // (c) Apexol Technologies. All Rights Reserved.
 // // 
 // #endregion
+
+using SpruceFramework.Extensions;
+
 namespace SpruceFramework
 {
     internal sealed class SpruceTransaction : ISpruceTransaction
@@ -24,15 +27,24 @@ namespace SpruceFramework
 
         public void Commit()
         {
-            //todo: throw exception here
-            (Manager as SpruceQueryManager).CommitTransaction();
+            if (!IsInternalTransaction)
+                Success = Manager.AsSpruceQueryManager().CommitTransaction();
         }
 
-        internal SpruceTransaction()
+        public void CommitInternal()
+        {
+            Success = Manager.AsSpruceQueryManager().CommitTransaction();
+        }
+
+        internal SpruceTransaction(bool internalTransaction = false)
         {
             Manager = new SpruceQueryManager(true);
+            IsInternalTransaction = internalTransaction;
         }
 
         public ISpruceQueryManager Manager { get; }
+
+        public bool Success { get; set; }
+        public bool IsInternalTransaction { get; }
     }
 }

@@ -14,5 +14,9 @@ namespace SpruceFramework
         void Commit();
 
         ISpruceQueryManager Manager { get; }
+
+        bool Success { get; set; }
+
+        bool IsInternalTransaction { get; }
     }
 }

@@ -55,7 +55,7 @@ namespace SpruceFramework.Extensions
                 for (var i = 0; i < columnNames.Count; i++)
                 {
                     var c = columnNames[i];
-                    row[c] = dataReader[i];
+                    row[c] = dataReader[i] ?? DBNull.Value;
                 }
                 dataReaderRows.Add(row);
             }

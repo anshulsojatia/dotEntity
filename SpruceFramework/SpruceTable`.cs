@@ -12,7 +12,7 @@ using SpruceFramework.Extensions;
 
 namespace SpruceFramework
 {
-    public sealed class SpruceTable<T> : ISpruceTable<T> where T : class
+    public sealed partial class SpruceTable<T> : ISpruceTable<T> where T : class
     {
         private readonly List<Expression<Func<T, bool>>> _whereList;
         private readonly Dictionary<Expression<Func<T, object>>, RowOrder> _orderBy;
@@ -36,6 +36,14 @@ namespace SpruceFramework
             }
         }
 
+        public static void Insert(T[] entities)
+        {
+            using (var manager = new SpruceQueryManager())
+            {
+                manager.DoInsert(entities);
+            }
+        }
+
         public static void Insert(T entity, ISpruceTransaction transaction, Func<T, bool> action = null)
         {
             if (!transaction.IsNullOrDisposed())
@@ -44,7 +52,7 @@ namespace SpruceFramework
             }
         }
 
-        public static void Delete(T entity)
+       /* public static void Delete(T entity)
         {
             using (var manager = new SpruceQueryManager())
             {
@@ -58,7 +66,7 @@ namespace SpruceFramework
             {
                 transaction.Manager.AsSpruceQueryManager().DoDelete(entity, action);
             }
-        }
+        }*/
 
         public static void Delete(Expression<Func<T, bool>> where)
         {
@@ -71,11 +79,10 @@ namespace SpruceFramework
         {
             if (!transaction.IsNullOrDisposed())
             {
-                transaction.Manager.AsSpruceQueryManager().DoDelete(where);
+                transaction.Manager.AsSpruceQueryManager().DoDelete<T>(where);
             }
         }
-
-
+        
         public static void Update(T entity)
         {
             using (var manager = new SpruceQueryManager())
@@ -84,11 +91,27 @@ namespace SpruceFramework
             }
         }
 
+        public static void Update(dynamic entity, Expression<Func<T, bool>> where)
+        {
+            using (var manager = new SpruceQueryManager())
+            {
+                manager.DoUpdate(entity, where);
+            }
+        }
+
         public static void Update(T entity, ISpruceTransaction transaction, Func<T, bool> action = null)
         {
             if (!transaction.IsNullOrDisposed())
             {
                 transaction.Manager.AsSpruceQueryManager().DoUpdate(entity, action);
+            }
+        }
+
+        public static void Update(dynamic entity, Expression<Func<T, bool>> where, ISpruceTransaction transaction, Func<T, bool> action = null)
+        {
+            if (!transaction.IsNullOrDisposed())
+            {
+                transaction.Manager.AsSpruceQueryManager().DoUpdate(entity, where, action);
             }
         }
 
@@ -198,12 +221,12 @@ namespace SpruceFramework
             }
         }
 
-        ISpruceTable<T> ISpruceTable<T>.Join<T1>(string sourceColumnName, string destinationColumnName)
+        ISpruceTable<T> ISpruceTable<T>.Join<T1>(string sourceColumnName, string destinationColumnName, SourceColumn sourceColumn, JoinType joinType)
         {
             if(_joinList == null)
                 _joinList = new List<IJoinMeta>();
 
-            _joinList.Add(new JoinMeta<T1>(sourceColumnName, destinationColumnName));
+            _joinList.Add(new JoinMeta<T1>(sourceColumnName, destinationColumnName, sourceColumn, joinType));
             return this;
         }
 

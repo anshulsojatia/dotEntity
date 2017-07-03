@@ -15,5 +15,9 @@ namespace SpruceFramework.Providers
         IDbConnection Connection { get; }
 
         string ProviderName { get; }
+
+        bool IsDatabaseVersioned(string tableName);
+
+        IDatabaseTableGenerator DatabaseTableGenerator { get; }
     }
 }

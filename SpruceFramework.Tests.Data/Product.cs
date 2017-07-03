@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace SpruceFramework.Tests.Data
 {
     public class Product
     {
+        [Key]
         public int Id { get; set; }
 
         public string ProductName { get; set; }
@@ -15,5 +18,7 @@ namespace SpruceFramework.Tests.Data
         public decimal Price { get; set; }
 
         public bool IsActive { get; set; }
+
+        public virtual IList<Category> Categories { get; set; }
     }
 }

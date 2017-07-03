@@ -33,8 +33,9 @@ namespace SpruceFramework
                             case DbOperationType.Insert:
                             case DbOperationType.SelectSingle:
                                 using (var cmd =
-                                    queryProcessor.GetQueryCommand(con, spruceDbCommand.Query, spruceDbCommand.QueryParameters, true, spruceDbCommand.KeyColumn))
+                                    queryProcessor.GetQueryCommand(con, spruceDbCommand.Query, spruceDbCommand.QueryInfos, true, spruceDbCommand.KeyColumn))
                                 {
+                                    cmd.Transaction = trans;
                                     var value = cmd.ExecuteScalar();
 
                                     spruceDbCommand.SetRawResult(value);
@@ -42,16 +43,19 @@ namespace SpruceFramework
                                 break;
                             case DbOperationType.Update:
                             case DbOperationType.Delete:
+                            case DbOperationType.Other:    
                                 using (var cmd =
-                                    queryProcessor.GetQueryCommand(con, spruceDbCommand.Query, spruceDbCommand.QueryParameters))
+                                    queryProcessor.GetQueryCommand(con, spruceDbCommand.Query, spruceDbCommand.QueryInfos))
                                 {
+                                    cmd.Transaction = trans;
                                     spruceDbCommand.SetRawResult(cmd.ExecuteNonQuery());
                                 }
                                 break;
                             case DbOperationType.Select:
                                 using (var cmd =
-                                    queryProcessor.GetQueryCommand(con, spruceDbCommand.Query, spruceDbCommand.QueryParameters))
+                                    queryProcessor.GetQueryCommand(con, spruceDbCommand.Query, spruceDbCommand.QueryInfos))
                                 {
+                                    cmd.Transaction = trans;
                                     using (var reader = cmd.ExecuteReader())
                                     {
                                         spruceDbCommand.SetDataReader(reader);
@@ -60,8 +64,9 @@ namespace SpruceFramework
                                 break;
                             case DbOperationType.Procedure:
                                 using (var cmd =
-                                    queryProcessor.GetQueryCommand(con, spruceDbCommand.Query, spruceDbCommand.QueryParameters, commandType: CommandType.StoredProcedure))
+                                    queryProcessor.GetQueryCommand(con, spruceDbCommand.Query, spruceDbCommand.QueryInfos, commandType: CommandType.StoredProcedure))
                                 {
+                                    cmd.Transaction = trans;
                                     using (var reader = cmd.ExecuteReader())
                                     {
                                         spruceDbCommand.SetDataReader(reader);
@@ -76,7 +81,8 @@ namespace SpruceFramework
                             trans?.Rollback();
                         
                     }
-                    trans?.Commit();
+                    if (trans?.Connection != null)
+                        trans.Commit();
                 }
 
             }
