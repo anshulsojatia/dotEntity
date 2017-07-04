@@ -35,7 +35,7 @@ namespace SpruceFramework
             var joinValueString = "@" + string.Join(",@", insertColumns); ;
             parameters = ToQueryInfos(columnValueMap);
 
-            return $"INSERT INTO {tableName} ({joinInsertString}) OUTPUT inserted.Id VALUES ({joinValueString})";
+            return $"INSERT INTO {tableName} ({joinInsertString}) OUTPUT inserted.Id VALUES ({joinValueString});";
         }
 
         public virtual string GenerateInsert<T>(T entity, out IList<QueryInfo> parameters) where T : class
@@ -66,7 +66,7 @@ namespace SpruceFramework
 
             var updateString = string.Join(",", updateValueMap.Select(x => $"{x.Key} = @{x.Key}"));
 
-            return $"UPDATE {tableName} SET {updateString} WHERE {whereString}";
+            return $"UPDATE {tableName} SET {updateString} WHERE {whereString};";
         }
 
         public virtual string GenerateUpdate<T>(dynamic item, Expression<Func<T, bool>> where, out IList<QueryInfo> queryParameters) where T : class
@@ -93,7 +93,7 @@ namespace SpruceFramework
                 builder.Append(" WHERE " + whereString);
             }
 
-            return builder.ToString().Trim();
+            return builder.ToString().Trim() + ";";
         }
 
         public virtual string GenerateDelete(string tableName, dynamic where, out IList<QueryInfo> parameters)
@@ -101,7 +101,7 @@ namespace SpruceFramework
             Dictionary<string, object> whereMap = QueryParserUtilities.ParseObjectKeyValues(where);
             var whereString = string.Join(" AND ", whereMap.Select(x => $"{x.Key} = @{x.Key}"));
             parameters = ToQueryInfos(whereMap);
-            return $"DELETE FROM {tableName} WHERE {whereString}";
+            return $"DELETE FROM {tableName} WHERE {whereString};";
         }
 
         public virtual string GenerateDelete<T>(Expression<Func<T, bool>> where, out IList<QueryInfo> parameters) where T : class
@@ -110,7 +110,7 @@ namespace SpruceFramework
             var parser = new ExpressionTreeParser(where);
             var whereString = parser.GetWhereString().Trim();
             parameters = parser.QueryInfoList;
-            return $"DELETE FROM {tableName} WHERE {whereString}";
+            return $"DELETE FROM {tableName} WHERE {whereString};";
         }
 
         public string GenerateCount<T>(IList<Expression<Func<T, bool>>> @where, out IList<QueryInfo> parameters) where T : class
@@ -132,8 +132,10 @@ namespace SpruceFramework
                 whereString = string.Join(" AND ", whereStringBuilder).Trim();
             }
 
-            return $"SELECT COUNT(*) FROM {tableName} WHERE {whereString}";
+            return $"SELECT COUNT(*) FROM {tableName} WHERE {whereString};";
         }
+
+      
 
         public string GenerateCount<T>(dynamic @where, out IList<QueryInfo> parameters)
         {
@@ -146,7 +148,7 @@ namespace SpruceFramework
             Dictionary<string, object> whereMap = QueryParserUtilities.ParseObjectKeyValues(where);
             var whereString = string.Join(" AND ", whereMap.Select(x => $"{x.Key} = @{x.Key}"));
             parameters = ToQueryInfos(whereMap);
-            return $"SELECT COUNT(*) FROM {tableName} WHERE {whereString}";
+            return $"SELECT COUNT(*) FROM {tableName} WHERE {whereString};";
         }
 
         public virtual string GenerateSelect<T>(out IList<QueryInfo> parameters, List<Expression<Func<T, bool>>> where = null, Dictionary<Expression<Func<T, object>>, RowOrder> orderBy = null, int page = 1, int count = int.MaxValue) where T : class
@@ -206,8 +208,78 @@ namespace SpruceFramework
             if (paginatedSelect != string.Empty)
             {
                 //wrap everything
-                query = $"SELECT * FROM ({query}) AS __PAGINATEDRESULT__ WHERE {newWhereString}";
+                query = $"SELECT * FROM ({query}) AS __PAGINATEDRESULT__ WHERE {newWhereString};";
             }
+            else
+                query = query + ";";
+            return query;
+        }
+
+        public string GenerateSelectWithTotalMatchingCount<T>(out IList<QueryInfo> parameters, List<Expression<Func<T, bool>>> @where = null, Dictionary<Expression<Func<T, object>>, RowOrder> orderBy = null,
+            int page = 1, int count = Int32.MaxValue) where T : class
+        {
+            parameters = new List<QueryInfo>();
+            var builder = new StringBuilder();
+            var tableName = Spruce.GetTableNameForType<T>();
+
+            var whereString = "";
+
+            if (where != null)
+            {
+                var whereStringBuilder = new List<string>();
+                foreach (var wh in where)
+                {
+                    var parser = new ExpressionTreeParser(wh);
+                    whereStringBuilder.Add(parser.GetWhereString());
+                    var queryParameters = parser.QueryInfoList;
+                    parameters = parameters.Concat(queryParameters).ToList();
+                }
+                whereString = string.Join(" AND ", whereStringBuilder).Trim();
+            }
+
+            var orderByStringBuilder = new List<string>();
+            var orderByString = "";
+            if (orderBy != null)
+            {
+                foreach (var ob in orderBy)
+                {
+                    var parser = new ExpressionTreeParser(ob.Key);
+                    orderByStringBuilder.Add(parser.GetOrderByString() + (ob.Value == RowOrder.Descending ? " DESC" : ""));
+                }
+
+                orderByString = string.Join(", ", orderByStringBuilder).Trim(',');
+            }
+
+            var paginatedSelect = PaginateOrderByString(orderByString, page, count, out string newWhereString);
+            if (paginatedSelect != string.Empty)
+            {
+                paginatedSelect = "," + paginatedSelect;
+                orderByString = string.Empty;
+            }
+            // make the query now
+            builder.Append($"SELECT *{paginatedSelect} FROM ");
+            builder.Append(tableName);
+
+            if (!string.IsNullOrEmpty(whereString))
+            {
+                builder.Append(" WHERE " + whereString);
+            }
+
+            if (!string.IsNullOrEmpty(orderByString))
+            {
+                builder.Append(" ORDER BY " + orderByString);
+            }
+            var query = builder.ToString().Trim();
+            if (paginatedSelect != string.Empty)
+            {
+                //wrap everything
+                query = $"SELECT * FROM ({query}) AS __PAGINATEDRESULT__ WHERE {newWhereString};";
+            }
+
+            //and the count query
+            query = query + $"{Environment.NewLine}SELECT COUNT(*) FROM {tableName}" + (string.IsNullOrEmpty(whereString)
+                ? ""
+                : $" WHERE {whereString}") + ";";
             return query;
         }
 
@@ -300,7 +372,7 @@ namespace SpruceFramework
                 //wrap everything
                 query = $"SELECT * FROM ({query}) AS __PAGINATEDRESULT__ WHERE {newWhereString}";
             }
-            return query;
+            return query + ";";
         }
 
         public virtual string Query(string query, dynamic inParameters, out IList<QueryInfo> parameters)
