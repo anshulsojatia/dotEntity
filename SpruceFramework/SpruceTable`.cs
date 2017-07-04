@@ -244,10 +244,20 @@ namespace SpruceFramework
 
         int ISpruceTable<T>.Count(ISpruceTransaction transaction)
         {
-            using (var manager = new SpruceQueryManager())
+            if (transaction != null)
             {
-                return manager.DoCount<T>(_whereList, null);
+                if (transaction.IsNullOrDisposed())
+                    throw new Exception();
+                return transaction.Manager.AsSpruceQueryManager().DoCount(_whereList);
             }
+            else
+            {
+                using (var manager = new SpruceQueryManager())
+                {
+                    return manager.DoCount<T>(_whereList);
+                }
+            }
+           
         }
 
         ISpruceTable<T> ISpruceTable<T>.Join<T1>(string sourceColumnName, string destinationColumnName, SourceColumn sourceColumn, JoinType joinType)
