@@ -210,6 +210,26 @@ namespace SpruceFramework
             return cmd.GetResultAs<IEnumerable<T>>();
         }
 
+        public virtual Tuple<int, IEnumerable<T>> DoSelectWithTotalMatches<T>(List<Expression<Func<T, bool>>> where = null, Dictionary<Expression<Func<T, object>>, RowOrder> orderBy = null, int page = 1, int count = int.MaxValue) where T : class
+        {
+            ThrowIfInvalidPage(orderBy, page, count);
+
+            var query = _queryGenerator.GenerateSelectWithTotalMatchingCount(out IList<QueryInfo> queryParameters, where, orderBy, page, count);
+
+            var cmd = new SpruceDbCommand(DbOperationType.Select, query, queryParameters);
+            cmd.ProcessReader(reader =>
+            {
+                var ts = DataDeserializer<T>.Instance.DeserializeMany(reader);
+                reader.NextResult();
+                reader.Read();
+                var total = (int) reader[0];
+                return Tuple.Create(total, ts);
+            });
+            SpruceDbConnector.ExecuteCommand(cmd);
+
+            return cmd.GetResultAs<Tuple<int, IEnumerable<T>>>();
+        }
+
         public virtual IEnumerable<T> DoSelect<T>(List<IJoinMeta> joinMetas, Dictionary<Type, Delegate> relationActions, List<LambdaExpression> where = null, Dictionary<LambdaExpression, RowOrder> orderBy = null, int page = 1, int count = int.MaxValue) where T : class
         {
             ThrowIfInvalidPage(orderBy, page, count);

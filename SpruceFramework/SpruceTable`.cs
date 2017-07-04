@@ -164,6 +164,12 @@ namespace SpruceFramework
             return Instance.Count();
         }
 
+        public static IEnumerable<T> SelectWithTotalMatches(out int totalMatches, int page = 1,
+            int count = Int32.MaxValue, ISpruceTransaction transaction = null)
+        {
+            return Instance.SelectWithTotalMatches(out totalMatches, page, count, transaction);
+        }
+
         #endregion
 
         #region implementations
@@ -202,6 +208,16 @@ namespace SpruceFramework
             using (var manager = new SpruceQueryManager())
             {
                 return manager.DoSelect(_whereList, _orderBy, page, count);
+            }
+        }
+
+        IEnumerable<T> ISpruceTable<T>.SelectWithTotalMatches(out int totalMatches, int page, int count, ISpruceTransaction transaction)
+        {
+            using (var manager = new SpruceQueryManager())
+            {
+                var selectWithCount = manager.DoSelectWithTotalMatches(_whereList, _orderBy, page, count);
+                totalMatches = selectWithCount.Item1;
+                return selectWithCount.Item2;
             }
         }
 

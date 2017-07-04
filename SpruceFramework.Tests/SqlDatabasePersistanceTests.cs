@@ -105,6 +105,36 @@ namespace SpruceFramework.Tests
         }
 
         [Test]
+        public void SqlServer_Select_With_Matching_Count_Succeeds()
+        {
+            var product1 = new Product()
+            {
+                ProductName = "SqlServer_Select_With_Matching_Count_Succeeds One",
+                ProductDescription = "Some descriptoin won't hurt",
+                DateCreated = DateTime.Now,
+                Price = 10
+            };
+
+            var product2 = new Product()
+            {
+                ProductName = "SqlServer_Select_With_Matching_Count_Succeeds Two",
+                ProductDescription = "Some descriptoin won't hurt",
+                DateCreated = DateTime.Now,
+                Price = 20
+            };
+
+            SpruceTable<Product>.Insert(new[] { product1, product2 });
+
+            var products = SpruceTable<Product>
+                .Where(x => x.ProductName.Contains("SqlServer_Select_With_Matching_Count_Succeeds"))
+                .OrderBy(x => x.Id)
+                .SelectWithTotalMatches(out int totalMatches, page: 1, count: 1);
+
+            Assert.AreEqual(1, products.Count());
+            Assert.AreEqual(2, totalMatches);
+        }
+
+        [Test]
         public void SqlServer_Select_Join_Succeeds()
         {
             var product1 = new Product()

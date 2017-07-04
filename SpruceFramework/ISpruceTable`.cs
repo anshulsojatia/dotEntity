@@ -27,6 +27,8 @@ namespace SpruceFramework
 
         IEnumerable<T> Select(int page = 1, int count = int.MaxValue, ISpruceTransaction transaction = null);
 
+        IEnumerable<T> SelectWithTotalMatches(out int totalMatches, int page = 1, int count = int.MaxValue, ISpruceTransaction transaction = null);
+
         IEnumerable<T> SelectNested(int page = 1, int count = int.MaxValue, ISpruceTransaction transaction = null);
 
         int Count(ISpruceTransaction transaction = null);
