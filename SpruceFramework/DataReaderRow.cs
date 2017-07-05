@@ -31,6 +31,17 @@ namespace SpruceFramework
             set => RowInformation[columnName] = value;
         }
 
+        public object this[int columnIndex] => RowInformation[Columns[columnIndex]];
+
+        public void RenameColumn(string columnName, string newColumnName)
+        {
+            if (columnName == newColumnName)
+                return;
+
+            RowInformation[newColumnName] = RowInformation[columnName];
+            RowInformation.Remove(columnName);
+        }
+
         public static bool AreSameRowsForColumns(DataReaderRow row1, DataReaderRow row2, string[] columnNames, int skipColumns)
         {
             if (row1 == null || row2 == null)

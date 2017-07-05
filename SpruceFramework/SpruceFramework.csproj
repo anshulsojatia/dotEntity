@@ -56,12 +56,14 @@
     <Compile Include="Extensions\WrappedDisposableExtensions.cs" />
     <Compile Include="IDataDeserializer.cs" />
     <Compile Include="IDatabaseTableGenerator.cs" />
+    <Compile Include="IMultiResult.cs" />
     <Compile Include="Internals\System\InformationSchema.cs" />
     <Compile Include="ISpruceQueryManager.cs" />
     <Compile Include="ISpruceTransaction.cs" />
     <Compile Include="ITypeMapProvider.cs" />
     <Compile Include="IWrappedDisposable.cs" />
     <Compile Include="JoinMeta.cs" />
+    <Compile Include="MultiResult.cs" />
     <Compile Include="Providers\IDatabaseProvider.cs" />
     <Compile Include="IQueryGenerator.cs" />
     <Compile Include="ISpruceTable`.cs" />

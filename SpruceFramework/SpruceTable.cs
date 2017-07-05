@@ -21,5 +21,13 @@ namespace SpruceFramework
         {
             return new SpruceTransaction(true);
         }
+
+        public static IMultiResult Query(string query, dynamic parameters)
+        {
+            using (var manager = new SpruceQueryManager())
+            {
+                return manager.DoMultiResult(query, parameters);
+            }
+        }
     }
 }

@@ -135,6 +135,40 @@ namespace SpruceFramework.Tests
         }
 
         [Test]
+        public void SqlServer_MultiQuery_Succeeds()
+        {
+            var product1 = new Product()
+            {
+                ProductName = "SqlServer_MultiQuery_Succeeds One",
+                ProductDescription = "Some descriptoin won't hurt",
+                DateCreated = DateTime.Now,
+                Price = 10
+            };
+
+            var product2 = new Product()
+            {
+                ProductName = "SqlServer_MultiQuery_Succeeds Two",
+                ProductDescription = "Some descriptoin won't hurt",
+                DateCreated = DateTime.Now,
+                Price = 20
+            };
+
+            SpruceTable<Product>.Insert(new[] { product1, product2 });
+
+            IEnumerable<Product> products;
+            var totalMatches = 0;
+            using (var result = SpruceTable.Query(@"SELECT * FROM PRODUCT WHERE ProductName LIKE '%' + @ProductName + '%';
+                        SELECT COUNT(*) FROM PRODUCT WHERE ProductName LIKE '%' + @ProductName + '%';", new { ProductName = "SqlServer_MultiQuery_Succeeds" }))
+            {
+                products = result.SelectAllAs<Product>();
+                totalMatches = result.SelectScalerAs<int>();
+            }
+
+            Assert.AreEqual(2, products.Count());
+            Assert.AreEqual(2, totalMatches);
+        }
+
+        [Test]
         public void SqlServer_Select_Join_Succeeds()
         {
             var product1 = new Product()

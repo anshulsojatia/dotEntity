@@ -12,6 +12,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using SpruceFramework.Enumerations;
+using SpruceFramework.Extensions;
 
 namespace SpruceFramework
 {
@@ -34,7 +35,7 @@ namespace SpruceFramework
         public virtual TType DoScaler<TType>(string query, dynamic parameters, Func<TType, bool> resultAction = null)
         {
             query = _queryGenerator.Query(query, parameters, out IList<QueryInfo> queryParameters);
-            var cmd = new SpruceDbCommand(DbOperationType.SelectSingle, query, queryParameters);
+            var cmd = new SpruceDbCommand(DbOperationType.SelectScaler, query, queryParameters);
             cmd.ProcessResult(o =>
             {
                 if (_withTransaction)
@@ -85,6 +86,19 @@ namespace SpruceFramework
                 return;
             }
             SpruceDbConnector.ExecuteCommand(cmd);
+        }
+
+        public virtual IMultiResult DoMultiResult(string query, dynamic parameters)
+        {
+            query = _queryGenerator.Query(query, parameters, out IList<QueryInfo> queryParameters);
+            var cmd = new SpruceDbCommand(DbOperationType.MultiQuery, query, queryParameters);
+            cmd.ProcessReader(reader =>
+            {
+                var multiResultRows = reader.GetRawDataReaderRows();
+                return new MultiResult(multiResultRows);
+            });
+            SpruceDbConnector.ExecuteCommand(cmd);
+            return cmd.GetResultAs<IMultiResult>();
         }
 
         public virtual int DoInsert<T>(T entity, Func<T, bool> resultAction = null) where T : class
@@ -253,7 +267,7 @@ namespace SpruceFramework
         public virtual int DoCount<T>(List<Expression<Func<T, bool>>> where, Func<int, bool> resultAction = null) where T : class
         {
             var query = _queryGenerator.GenerateCount(where, out IList<QueryInfo> queryParameters);
-            var cmd = new SpruceDbCommand(DbOperationType.SelectSingle, query, queryParameters);
+            var cmd = new SpruceDbCommand(DbOperationType.SelectScaler, query, queryParameters);
             if (_withTransaction)
             {
                 cmd.ProcessResult(o => cmd.ContinueNextCommand = resultAction?.Invoke((int) o) ?? true);

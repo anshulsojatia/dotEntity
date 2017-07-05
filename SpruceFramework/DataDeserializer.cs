@@ -64,11 +64,21 @@ namespace SpruceFramework
             return DeserializeMany(reader).FirstOrDefault();
         }
 
+        public T DeserializeSingle(List<DataReaderRow> rows)
+        {
+            return DeserializeMany(rows).FirstOrDefault();
+        }
+
         public IEnumerable<T> DeserializeMany(IDataReader reader)
         {
             var columnNames = GetColumns();
             var rows = reader.GetDataReaderRows(columnNames, _typeofT.Name);
-            var tArray = FurnishInstances(reader, rows);
+            return DeserializeMany(rows);
+        }
+
+        public IEnumerable<T> DeserializeMany(List<DataReaderRow> rows)
+        {
+            var tArray = FurnishInstances(rows);
             return tArray;
         }
 
@@ -94,7 +104,7 @@ namespace SpruceFramework
             }
         }
        
-        private IEnumerable<T> FurnishInstances(IDataReader reader, List<DataReaderRow> rows)
+        private IEnumerable<T> FurnishInstances(List<DataReaderRow> rows)
         {
             var columnNames = GetColumns();
             var tInstances = Instantiator<T>.Instances(rows.Count);

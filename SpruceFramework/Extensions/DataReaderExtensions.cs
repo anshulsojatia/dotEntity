@@ -16,6 +16,9 @@ namespace SpruceFramework.Extensions
     {
         internal static List<DataReaderRow> GetDataReaderRows(this IDataReader dataReader, string[] columnNames, string typeName)
         {
+            if(string.IsNullOrEmpty(typeName))
+                throw new Exception("Must provide a valid type name");
+
             var dataReaderRows = new List<DataReaderRow>();
             while (dataReader.Read())
             {
@@ -63,36 +66,55 @@ namespace SpruceFramework.Extensions
             return dataReaderRows;
         }
 
-        public static DataTable GetDataTable(this IDataReader dataReader)
+        internal static List<List<DataReaderRow>> GetRawDataReaderRows(this IDataReader dataReader)
+        {
+            var dataReaderRows = new List<List<DataReaderRow>>();
+            var hasResultSet = true;
+            var resultIndex = 0;
+            while (hasResultSet)
+            {
+                var newList = new List<DataReaderRow>();
+                var columnNames = GetColumnNames(dataReader);
+                while (dataReader.Read())
+                {
+                    var row = new DataReaderRow();
+                    foreach (var c in columnNames)
+                    {
+                        row[c] = dataReader[c];
+                    }
+
+                    newList.Add(row);
+                }
+                dataReaderRows.Add(newList);
+                hasResultSet = dataReader.NextResult();
+            }
+            return dataReaderRows;
+        }
+
+        public static string[] GetColumnNames(this IDataReader dataReader)
         {
             var schemaTable = dataReader.GetSchemaTable();
-            var resultTable = new DataTable();
-
+            var resultColumns = new string[schemaTable.Rows.Count];
+            var i = 0;
             foreach (DataRow dataRow in schemaTable.Rows)
             {
-                var dataColumn = new DataColumn
-                {
-                    ColumnName = dataRow["ColumnName"].ToString(),
-                    DataType = Type.GetType(dataRow["DataType"].ToString()),
-                    ReadOnly = (bool) dataRow["IsReadOnly"],
-                    AutoIncrement = (bool) dataRow["IsAutoIncrement"],
-                    Unique = (bool) dataRow["IsUnique"]
-                };
-
-                resultTable.Columns.Add(dataColumn);
+                resultColumns[i++] = dataRow["ColumnName"].ToString();
             }
+            return resultColumns;
+        }
 
-            while (dataReader.Read())
+        public static void PrefixTypeName(this List<DataReaderRow> rows, string typeName)
+        {
+            if (rows == null || rows.Count == 0)
+                return;
+            var columns = rows[0].Columns;
+            foreach (var row in rows)
             {
-                var dataRow = resultTable.NewRow();
-                for (var i = 0; i < resultTable.Columns.Count; i++)
+                foreach (var column in columns)
                 {
-                    dataRow[i] = dataReader[i];
+                    row.RenameColumn(column, typeName + "." + column);
                 }
-                resultTable.Rows.Add(dataRow);
             }
-
-            return resultTable;
         }
     }
 }

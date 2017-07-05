@@ -31,7 +31,7 @@ namespace SpruceFramework
                         switch (spruceDbCommand.OperationType)
                         {
                             case DbOperationType.Insert:
-                            case DbOperationType.SelectSingle:
+                            case DbOperationType.SelectScaler:
                                 using (var cmd =
                                     queryProcessor.GetQueryCommand(con, spruceDbCommand.Query, spruceDbCommand.QueryInfos, true, spruceDbCommand.KeyColumn))
                                 {
@@ -60,6 +60,19 @@ namespace SpruceFramework
                                     {
                                         spruceDbCommand.SetDataReader(reader);
                                     }
+                                }
+                                break;
+                            case DbOperationType.MultiQuery:
+                                //the difference between a multiquery and select is that in multiquery,
+                                //we don't dispose the reader immediately. It's the responsibility of the
+                                //reader processor to dispose it manually
+                                //todo: Can we have a better solution than this?
+                                using (var cmd =
+                                    queryProcessor.GetQueryCommand(con, spruceDbCommand.Query, spruceDbCommand.QueryInfos))
+                                {
+                                    cmd.Transaction = trans;
+                                    var reader = cmd.ExecuteReader();
+                                    spruceDbCommand.SetDataReader(reader);
                                 }
                                 break;
                             case DbOperationType.Procedure:

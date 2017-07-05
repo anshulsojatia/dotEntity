@@ -12,8 +12,9 @@ namespace SpruceFramework.Enumerations
         Update, //u
         Delete, //d
         Select,  //r
-        SelectSingle,
+        SelectScaler,
         Procedure,
-        Other
+        Other,
+        MultiQuery
     }
 }
