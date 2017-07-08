@@ -20,3 +20,5 @@ DotEntity.Tests.Data/obj/
 DotEntity.Tests.Data/bin/
 SampleApp.Core/obj/
 SampleApp.Core/bin/
+SampleApp
+SampleApp.Core
