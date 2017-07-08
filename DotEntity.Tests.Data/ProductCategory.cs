@@ -1,5 +1,5 @@
 ﻿// #region Author Information
-// // Category.cs
+// // ProductCategory.cs
 // // 
 // // (c) Apexol Technologies. All Rights Reserved.
 // // 
@@ -7,13 +7,15 @@
 
 using System.ComponentModel.DataAnnotations;
 
-namespace SampleApp.Entity
+namespace DotEntity.Tests.Data
 {
-    public class Category
+    public class ProductCategory
     {
-        public string CategoryName { get; set; }
-
         [Key]
         public int Id { get; set; }
+
+        public int ProductId { get; set; }
+
+        public int CategoryId { get; set; }
     }
 }

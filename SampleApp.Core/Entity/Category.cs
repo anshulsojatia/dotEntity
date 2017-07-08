@@ -7,7 +7,7 @@
 
 using System.ComponentModel.DataAnnotations;
 
-namespace SampleApp.Entity
+namespace SampleApp.Core.Entity
 {
     public class Category
     {

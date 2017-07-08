@@ -1,5 +1,5 @@
 ﻿// #region Author Information
-// // Category.cs
+// // DotEntityVersion.cs
 // // 
 // // (c) Apexol Technologies. All Rights Reserved.
 // // 
@@ -7,13 +7,13 @@
 
 using System.ComponentModel.DataAnnotations;
 
-namespace SampleApp.Entity
+namespace DotEntity.Versioning
 {
-    public class Category
+    public class DotEntityVersion
     {
-        public string CategoryName { get; set; }
-
         [Key]
         public int Id { get; set; }
+
+        public string VersionKey { get; set; }
     }
 }

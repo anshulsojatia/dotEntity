@@ -7,13 +7,13 @@
 
 using System.ComponentModel.DataAnnotations;
 
-namespace SampleApp.Entity
+namespace DotEntity.Tests.Data
 {
     public class Category
     {
-        public string CategoryName { get; set; }
-
         [Key]
         public int Id { get; set; }
+
+        public string CategoryName { get; set; }
     }
 }

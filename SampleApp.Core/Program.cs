@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using DotEntity;
+using DotEntity.Providers;
 using DotEntity.SqlServer;
-using SampleApp.Entity;
+using SampleApp.Core.Entity;
 
-namespace SampleApp
+namespace SampleApp.Core
 {
     class Program
     {
@@ -20,7 +21,7 @@ namespace SampleApp
             var s = new Stopwatch();
 
             s.Start();
-            var p1 = EntitySet<Product>.Query("SELECT * FROM Product WHERE Id < @Id", new {Id = 10});
+            var p1 = EntitySet<Product>.Query("SELECT * FROM Product WHERE Id < @Id", new { Id = 10 });
             Console.WriteLine("Time Taken :{0}ms", s.ElapsedMilliseconds);
             s.Reset();
 
@@ -29,7 +30,7 @@ namespace SampleApp
             var p2 = EntitySet<Product>.Where(x => x.Id < 10).Select();
             Console.WriteLine("Time Taken :{0}ms", s.ElapsedMilliseconds);
             s.Reset();
-            
+
             s.Start();
             var p = EntitySet<Product>.Where(x => true)
                 .Join<ProductCategory>("Id", "ProductId")
@@ -53,45 +54,8 @@ namespace SampleApp
             Console.WriteLine("Time Taken :{0}ms", s.ElapsedMilliseconds);
             s.Reset();
 
-            s.Start();
-            p = EntitySet<Product>.Where(x => x.IsActive)
-                .Join<ProductCategory>("Id", "ProductId")
-                .Join<Category>("CategoryId", "Id")
-                .Relate<ProductCategory>((product, category) =>
-                {
-                    if (product.ProductCategories == null)
-                        product.ProductCategories = new List<ProductCategory>();
-                    product.ProductCategories.Add(category);
-                })
-                .Relate<Category>((product, category) =>
-                {
-                    var pc = product.ProductCategories.FirstOrDefault(x => x.CategoryId == category.Id);
-                    if (pc != null)
-                    {
-                        pc.Category = category;
-                        pc.Product = product;
-                    }
-                })
-                .SelectNested();
-
-
-            Console.WriteLine("Time Taken :{0}ms", s.ElapsedMilliseconds);
-            s.Reset();
-
-            using (var result = EntitySet.Query(@"SELECT * FROM PRODUCT
-                        SELECT COUNT(*) FROM PRODUCT", null))
-            {
-                result.SelectAs<Product>();
-                result.SelectScalerAs<int>();
-            }
-
-             
 
             Console.ReadKey();
-
-
         }
-
-
     }
 }

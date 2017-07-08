@@ -10,3 +10,13 @@ SampleApp/bin/
 SpruceFramework/bin/
 .vs/
 SpruceFramework.sln.DotSettings.user
+DotEntity/obj/
+DotEntity/bin/
+DotEntity.SqlServer/bin/
+DotEntity.Tests/bin/
+DotEntity.SqlServer/obj/
+DotEntity.Tests/obj/
+DotEntity.Tests.Data/obj/
+DotEntity.Tests.Data/bin/
+SampleApp.Core/obj/
+SampleApp.Core/bin/

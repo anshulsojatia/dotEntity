@@ -8,9 +8,10 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>SampleApp</RootNamespace>
     <AssemblyName>SampleApp</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -53,9 +54,13 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SpruceFramework\SpruceFramework.csproj">
-      <Project>{2e50d3d8-6987-4572-8097-f01545bb9c2b}</Project>
-      <Name>SpruceFramework</Name>
+    <ProjectReference Include="..\DotEntity.SqlServer\DotEntity.SqlServer.csproj">
+      <Project>{d9361ca9-90ec-4f43-8df9-01bb3d716105}</Project>
+      <Name>DotEntity.SqlServer</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DotEntity\DotEntity.csproj">
+      <Project>{2eadd69a-ec3a-4d2a-b322-4e9a10f6a7f6}</Project>
+      <Name>DotEntity</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
