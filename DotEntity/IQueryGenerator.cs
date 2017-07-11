@@ -18,6 +18,8 @@ namespace DotEntity
 
         string GenerateInsert<T>(T entity, out IList<QueryInfo> parameters) where T : class;
 
+        string GenerateBatchInsert<T>(T[] entity, out IList<QueryInfo> parameters) where T : class;
+
         string GenerateUpdate<T>(dynamic item, Expression<Func<T, bool>> where, out IList<QueryInfo> parameters) where T : class;
 
         string GenerateUpdate<T>(T entity, out IList<QueryInfo> queryParameters) where T : class;

@@ -31,5 +31,6 @@ namespace DotEntity.SqlServer
         public IDatabaseTableGenerator DatabaseTableGenerator { get; }
 
         public IQueryGenerator QueryGenerator { get; }
+        public int MaximumParametersPerQuery => 2100; //sql server
     }
 }

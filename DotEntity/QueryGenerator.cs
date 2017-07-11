@@ -13,6 +13,7 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using System.Text.RegularExpressions;
 using DotEntity.Enumerations;
 
 namespace DotEntity
@@ -42,6 +43,30 @@ namespace DotEntity
         {
             var tableName = DotEntityDb.GetTableNameForType<T>();
             return GenerateInsert(tableName, entity, out parameters);
+        }
+
+        public string GenerateBatchInsert<T>(T[] entities, out IList<QueryInfo> parameters) where T : class
+        {
+            if (entities.Length == 0)
+                throw new Exception("At least one entity must be provided to batch");
+
+            var queryBuilder = new StringBuilder();
+            var tableName = DotEntityDb.GetTableNameForType<T>();
+            parameters = new List<QueryInfo>();
+            const string pattern = "@([a-zA-Z0-9_]+)";
+            var regEx = new Regex(pattern);
+            for (var i = 0; i < entities.Length; i++)
+            {
+                var e = entities[i];
+                var sql = GenerateInsert(tableName, e, out IList<QueryInfo> newParameters);
+                parameters = MergeParameters(parameters, newParameters);
+                if (i > 0)
+                {
+                    sql = regEx.Replace(sql, "@${1}" + (i + 1));
+                }
+                queryBuilder.Append(sql + Environment.NewLine);
+            }
+            return queryBuilder.ToString();
         }
 
         public virtual string GenerateUpdate<T>(T entity, out IList<QueryInfo> queryParameters) where T : class
@@ -147,7 +172,7 @@ namespace DotEntity
             return $"SELECT COUNT(*) FROM {tableName} WHERE {whereString};";
         }
 
-      
+
 
         public string GenerateCount<T>(dynamic @where, out IList<QueryInfo> parameters)
         {

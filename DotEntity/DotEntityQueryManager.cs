@@ -39,7 +39,7 @@ namespace DotEntity
             cmd.ProcessResult(o =>
             {
                 if (_withTransaction)
-                   cmd.ContinueNextCommand = resultAction?.Invoke((TType) o) ?? true;
+                    cmd.ContinueNextCommand = resultAction?.Invoke((TType)o) ?? true;
             });
 
             if (_withTransaction)
@@ -58,7 +58,7 @@ namespace DotEntity
             var cmd = new DotEntityDbCommand(DbOperationType.Select, query, queryParameters);
             cmd.ProcessReader(reader =>
             {
-                if(!_withTransaction)
+                if (!_withTransaction)
                     return DataDeserializer<T>.Instance.DeserializeMany(reader);
                 if (resultAction != null)
                 {
@@ -108,7 +108,7 @@ namespace DotEntity
             var cmd = new DotEntityDbCommand(DbOperationType.Insert, query, queryParameters, keyColumn);
             cmd.ProcessResult(result =>
             {
-                var id = (int) result;
+                var id = (int)result;
                 DataDeserializer<T>.Instance.SetPropertyAs<int>(entity, keyColumn, id);
                 if (_withTransaction)
                     //has somebody called for a rollback?
@@ -151,6 +151,45 @@ namespace DotEntity
 
             DotEntityDbConnector.ExecuteCommands(commands.ToArray());
             return 1;
+        }
+
+        [Obsolete("Doesn't give good performance", true)]
+        public virtual int DoInsert2<T>(T[] entities, Func<T, bool> resultAction = null) where T : class
+        {
+            /*In batch inserts, the parameters may exceed the maximum number of command parameters supported by the server.
+             e.g. SqlServer supports 2100 command parameters at max. We'll therefore check if the parameter counts don't exceed that limit*/
+            var usablePropertiesCount = typeof(T).GetDatabaseUsableProperties().Count();
+            var parameterCount = usablePropertiesCount * entities.Length;
+            if (parameterCount > DotEntityDb.Provider.MaximumParametersPerQuery)
+                throw new Exception(
+                    "The batch insert can't continue because the resultant query will have more parameters that allowed by the provider");
+
+            //safe to proceed
+            var keyColumn = DataDeserializer<T>.Instance.GetKeyColumn();
+            var query = _queryGenerator.GenerateBatchInsert(entities, out IList<QueryInfo> queryParameters);
+            var cmd = new DotEntityDbCommand(DbOperationType.MultiQuery, query, queryParameters, keyColumn);
+
+            cmd.ProcessReader(reader =>
+            {
+                var entityIndex = 0;
+                var multiResultRows = reader.GetRawDataReaderRows();
+                foreach (var rowList in multiResultRows)
+                {
+                    var id = (int)rowList[0][0];
+                    DataDeserializer<T>.Instance.SetPropertyAs<int>(entities[entityIndex++], keyColumn, id);
+                }
+                return multiResultRows.Count;
+            });
+            if (_withTransaction)
+            {
+                _transactionCommands.Add(cmd);
+            }
+
+            if (_withTransaction)
+                return default(int);
+
+            DotEntityDbConnector.ExecuteCommand(cmd, useTransaction: true);
+            return cmd.GetResultAs<int>();
         }
 
         public virtual int DoUpdate<T>(T entity, Func<T, bool> resultAction = null) where T : class
@@ -236,7 +275,7 @@ namespace DotEntity
                 var ts = DataDeserializer<T>.Instance.DeserializeMany(reader);
                 reader.NextResult();
                 reader.Read();
-                var total = (int) reader[0];
+                var total = (int)reader[0];
                 return Tuple.Create(total, ts);
             });
             DotEntityDbConnector.ExecuteCommand(cmd);
@@ -270,7 +309,7 @@ namespace DotEntity
             var cmd = new DotEntityDbCommand(DbOperationType.SelectScaler, query, queryParameters);
             if (_withTransaction)
             {
-                cmd.ProcessResult(o => cmd.ContinueNextCommand = resultAction?.Invoke((int) o) ?? true);
+                cmd.ProcessResult(o => cmd.ContinueNextCommand = resultAction?.Invoke((int)o) ?? true);
                 _transactionCommands.Add(cmd);
                 return default(int);
             }
@@ -280,7 +319,7 @@ namespace DotEntity
 
         public virtual bool CommitTransaction()
         {
-            if(!_withTransaction)
+            if (!_withTransaction)
                 throw new Exception("Can not call Commit on a non-transactional execution");
 
             DotEntityDbConnector.ExecuteCommands(_transactionCommands.ToArray(), true);

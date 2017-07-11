@@ -20,8 +20,8 @@ namespace DotEntity
 {
     internal class DataDeserializer<T> : IDataDeserializer<T> where T : class
     {
-        private PropertyWriter _setterMap = null;
-        private PropertyReader _getterMap = null;
+        private PropertyWriter _setter = null;
+        private PropertyReader _getter = null;
         private readonly Type _typeofT;
 
         public DataDeserializer()
@@ -32,7 +32,7 @@ namespace DotEntity
 
         private void CreateMapIfNotDone()
         {
-            _setterMap = PropertyCallerCache.SetterOfType(_typeofT);
+            _setter = PropertyCallerCache.SetterOfType(_typeofT);
         }
       
 
@@ -67,19 +67,7 @@ namespace DotEntity
                 var fieldName = columnNames[i];
                 //if (!_setterMap.ContainsKey(fieldName)) continue;
                 var fieldValue = row[_typeofT.Name + "." + fieldName];
-                var fieldType = fieldValue.GetType();
-                _setterMap.Set(instance, fieldName, fieldValue);
-                /*
-                if (fieldType == typeof(int))
-                    SetPropertyAs<int>(instance, fieldName, fieldValue);
-                else if (fieldType == typeof(string))
-                    SetPropertyAs<string>(instance, fieldName, fieldValue);
-                else if (fieldType == typeof(DateTime))
-                    SetPropertyAs<DateTime>(instance, fieldName, fieldValue);
-                else if (fieldType == typeof(decimal))
-                    SetPropertyAs<decimal>(instance, fieldName, fieldValue);
-                else if (fieldType == typeof(bool))
-                    SetPropertyAs<bool>(instance, fieldName, fieldValue);*/
+                _setter.Set(instance, fieldName, fieldValue);
             }
         }
        
@@ -198,26 +186,15 @@ namespace DotEntity
 
         internal void SetPropertyAs<TType>(T instance, string fieldName, object value)
         {
-            _setterMap.Set(instance, fieldName, value);
-          //  ((Action<T, TType>)_setterMap[fieldName]).Invoke(instance, Parse<TType>(value));
+            _setter.Set(instance, fieldName, value);
         }
 
         internal TType GetPropertyAs<TType>(T instance, string fieldName)
         {
-            if (_getterMap == null)
-                _getterMap = PropertyCallerCache.GetterOfType(_typeofT);
+            if (_getter == null)
+                _getter = PropertyCallerCache.GetterOfType(_typeofT);
 
-            return _getterMap.Get<TType>(instance, fieldName);
-            /*if(!_getterMap.TryGetValue(fieldName, out Delegate getter))
-            {
-
-                var propertyInfo = _typeofT.GetProperty(fieldName);
-                if(propertyInfo == null)
-                    throw new Exception("Can't find property");
-
-                getter = propertyInfo.CreateGetter<T, TType>();
-            }
-            return ((Func<T, TType>) getter).Invoke(instance);*/
+            return _getter.Get<TType>(instance, fieldName);
         }
 
         private static TType Parse<TType>(object value)
@@ -248,7 +225,7 @@ namespace DotEntity
         private string[] _columnsAsArray;
         public string[] GetColumns()
         {
-            return _columnsAsArray ?? (_columnsAsArray = _setterMap.Keys.ToArray());
+            return _columnsAsArray ?? (_columnsAsArray = _setter.Keys.ToArray());
         }
 
         private string _keyColumnName = null;

@@ -13,9 +13,9 @@ namespace DotEntity
 {
     internal static class DotEntityDbConnector
     {
-        public static void ExecuteCommand(DotEntityDbCommand command)
+        public static void ExecuteCommand(DotEntityDbCommand command, bool useTransaction = false, IsolationLevel isolationLevel = IsolationLevel.Serializable)
         {
-            ExecuteCommands(new[] {command});
+            ExecuteCommands(new[] {command}, useTransaction, isolationLevel);
         }
 
         public static void ExecuteCommands(DotEntityDbCommand[] commands, bool useTransaction = false, IsolationLevel isolationLevel = IsolationLevel.Serializable)
@@ -71,8 +71,10 @@ namespace DotEntity
                                     queryProcessor.GetQueryCommand(con, DotEntityDbCommand.Query, DotEntityDbCommand.QueryInfos))
                                 {
                                     cmd.Transaction = trans;
-                                    var reader = cmd.ExecuteReader();
-                                    DotEntityDbCommand.SetDataReader(reader);
+                                    using (var reader = cmd.ExecuteReader())
+                                    {
+                                        DotEntityDbCommand.SetDataReader(reader);
+                                    }
                                 }
                                 break;
                             case DbOperationType.Procedure:

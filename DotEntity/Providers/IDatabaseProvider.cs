@@ -21,5 +21,7 @@ namespace DotEntity.Providers
         IDatabaseTableGenerator DatabaseTableGenerator { get; }
 
         IQueryGenerator QueryGenerator { get; }
+
+        int MaximumParametersPerQuery { get; }
     }
 }
