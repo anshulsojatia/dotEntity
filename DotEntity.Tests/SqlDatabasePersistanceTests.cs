@@ -54,28 +54,25 @@ namespace DotEntity.Tests
         [Test]
         public void SqlServer_Select_Simple_Succeeds()
         {
-            var product1 = new Product()
+            var productCount = 500;
+            var products = new List<Product>();
+            for (var i = 0; i < productCount; i++)
             {
-                ProductName = "SqlServer_Select_Simple_Succeeds One",
-                ProductDescription = "Some descriptoin won't hurt",
-                DateCreated = DateTime.Now,
-                Price = 10
-            };
+                products.Add(new Product()
+                {
+                    ProductName = $"SqlServer_Select_Simple_Succeeds {i + 1}",
+                    ProductDescription = $"Some descriptoin won't hurt {i + 1}",
+                    DateCreated = DateTime.Now,
+                    Price = 10
+                });
+            }
 
-            var product2 = new Product()
-            {
-                ProductName = "SqlServer_Select_Simple_Succeeds Two",
-                ProductDescription = "Some descriptoin won't hurt",
-                DateCreated = DateTime.Now,
-                Price = 20
-            };
+            EntitySet<Product>.Insert(products.ToArray());
 
-            EntitySet<Product>.Insert(new [] { product1, product2});
-
-            var products = EntitySet<Product>.Where(x => x.ProductName.Contains("SqlServer_Select_Simple_Succeeds"))
+            var savedProducts = EntitySet<Product>.Where(x => x.ProductName.Contains("SqlServer_Select_Simple_Succeeds"))
                 .Select();
 
-            Assert.AreEqual(2, products.Count());
+            Assert.AreEqual(productCount, savedProducts.Count());
         }
 
         [Test]
@@ -133,6 +130,31 @@ namespace DotEntity.Tests
             Assert.AreEqual(1, products.Count());
             Assert.AreEqual(2, totalMatches);
         }
+
+        [Test]
+        public void SqlServer_SingleQuery_Succeeds()
+        {
+            var productCount = 500;
+            var ps = new List<Product>();
+            for (var i = 0; i < productCount; i++)
+            {
+                ps.Add(new Product()
+                {
+                    ProductName = $"SqlServer_SingleQuery_Succeeds {i + 1}",
+                    ProductDescription = $"Some descriptoin won't hurt {i + 1}",
+                    DateCreated = DateTime.Now,
+                    Price = 10
+                });
+            }
+
+            EntitySet<Product>.Insert(ps.ToArray());
+
+            var products = EntitySet<Product>.Query(@"SELECT * FROM PRODUCT WHERE ProductName LIKE '%' + @ProductName + '%';",
+                new {ProductName = "SqlServer_SingleQuery_Succeeds"}).ToList();
+
+            Assert.AreEqual(productCount, products.Count());
+        }
+
 
         [Test]
         public void SqlServer_MultiQuery_Succeeds()
