@@ -6,11 +6,12 @@
 // #endregion
 
 using System;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace DotEntity.Reflection
 {
-    public static class PropertyAccessor
+    internal static class PropertyAccessor
     {
         internal static Action<T, TClass> CreateSetter<T, TClass>(this PropertyInfo propertyInfo)
         {
@@ -21,5 +22,18 @@ namespace DotEntity.Reflection
         {
             return (Func<T, TType>) propertyInfo.GetGetMethod().CreateDelegate(typeof(Func<T, TType>));
         }
+
+        internal static Delegate CreateSetter<TType>(this PropertyInfo propertyInfo, Type objType)
+        {
+            var genericType = typeof(Action<,>).MakeGenericType(objType, typeof(TType));
+            return propertyInfo.GetSetMethod().CreateDelegate(genericType);
+        }
+
+        internal static Delegate CreateGetter<TType>(this PropertyInfo propertyInfo, Type objType)
+        {
+            var genericType = typeof(Func<,>).MakeGenericType(objType, typeof(TType));
+            return propertyInfo.GetGetMethod().CreateDelegate(genericType);
+        }
+
     }
 }

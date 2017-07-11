@@ -12,6 +12,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using DotEntity.Caching;
 using DotEntity.Extensions;
 
 namespace DotEntity
@@ -32,13 +33,17 @@ namespace DotEntity
         {
             if (obj == null)
                 return null;
-            var props = ((Type) obj.GetType()).GetDatabaseUsableProperties().ToArray();
+            Type typeOfObj = obj.GetType();
+            var props = typeOfObj.GetDatabaseUsableProperties().ToArray();
             props = props.Where(x => !exclude.Contains(x.Name)).ToArray();
+            var getterMap = PropertyCallerCache.GetterOfType(typeOfObj);
             var dict = new Dictionary<string, object>();
+            
             foreach(var p in props)
             {
                 var propertyName = p.Name;
-                var propertyValue = p.GetValue(obj);
+
+                var propertyValue = getterMap.Get<object>(obj, propertyName); // p.GetValue(obj);
                 dict.Add(propertyName, propertyValue);
             }
 

@@ -12,6 +12,7 @@ using System.Data;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using DotEntity.Caching;
 using DotEntity.Extensions;
 using DotEntity.Reflection;
 
@@ -19,8 +20,8 @@ namespace DotEntity
 {
     internal class DataDeserializer<T> : IDataDeserializer<T> where T : class
     {
-        private ConcurrentDictionary<string, object> _typeMap = null;
-        private ConcurrentDictionary<string, object> _getterMap = null;
+        private PropertyWriter _setterMap = null;
+        private PropertyReader _getterMap = null;
         private readonly Type _typeofT;
 
         public DataDeserializer()
@@ -31,30 +32,7 @@ namespace DotEntity
 
         private void CreateMapIfNotDone()
         {
-            if (_typeMap != null && _typeMap.Count > 0)
-                return;
-
-            _typeMap = new ConcurrentDictionary<string, object>();
-            //exclude virtual properties
-            var typeProperties = _typeofT.GetDatabaseUsableProperties();
-            foreach (var property in typeProperties)
-            {
-
-                var propertyType = property.PropertyType;
-                object setter = null;
-                if (propertyType == typeof(int))
-                    setter = property.CreateSetter<T, int>();
-                else if (propertyType == typeof(string))
-                    setter = property.CreateSetter<T, string>();
-                else if (propertyType == typeof(DateTime))
-                    setter = property.CreateSetter<T, DateTime>();
-                else if (propertyType == typeof(decimal))
-                    setter = property.CreateSetter<T, decimal>();
-                else if (propertyType == typeof(bool))
-                    setter = property.CreateSetter<T, bool>();
-
-                _typeMap.TryAdd(property.Name, setter);
-            }
+            _setterMap = PropertyCallerCache.SetterOfType(_typeofT);
         }
       
 
@@ -87,10 +65,11 @@ namespace DotEntity
             for(var i = 0; i < columnNames.Length; i++)
             {
                 var fieldName = columnNames[i];
-                if (!_typeMap.ContainsKey(fieldName)) continue;
+                //if (!_setterMap.ContainsKey(fieldName)) continue;
                 var fieldValue = row[_typeofT.Name + "." + fieldName];
                 var fieldType = fieldValue.GetType();
-
+                _setterMap.Set(instance, fieldName, fieldValue);
+                /*
                 if (fieldType == typeof(int))
                     SetPropertyAs<int>(instance, fieldName, fieldValue);
                 else if (fieldType == typeof(string))
@@ -100,7 +79,7 @@ namespace DotEntity
                 else if (fieldType == typeof(decimal))
                     SetPropertyAs<decimal>(instance, fieldName, fieldValue);
                 else if (fieldType == typeof(bool))
-                    SetPropertyAs<bool>(instance, fieldName, fieldValue);
+                    SetPropertyAs<bool>(instance, fieldName, fieldValue);*/
             }
         }
        
@@ -219,15 +198,17 @@ namespace DotEntity
 
         internal void SetPropertyAs<TType>(T instance, string fieldName, object value)
         {
-            ((Action<T, TType>)_typeMap[fieldName]).Invoke(instance, Parse<TType>(value));
+            _setterMap.Set(instance, fieldName, value);
+          //  ((Action<T, TType>)_setterMap[fieldName]).Invoke(instance, Parse<TType>(value));
         }
 
         internal TType GetPropertyAs<TType>(T instance, string fieldName)
         {
-            if(_getterMap == null)
-                _getterMap = new ConcurrentDictionary<string, object>();
+            if (_getterMap == null)
+                _getterMap = PropertyCallerCache.GetterOfType(_typeofT);
 
-            if(!_getterMap.TryGetValue(fieldName, out object getter))
+            return _getterMap.Get<TType>(instance, fieldName);
+            /*if(!_getterMap.TryGetValue(fieldName, out Delegate getter))
             {
 
                 var propertyInfo = _typeofT.GetProperty(fieldName);
@@ -236,7 +217,7 @@ namespace DotEntity
 
                 getter = propertyInfo.CreateGetter<T, TType>();
             }
-            return ((Func<T, TType>) getter).Invoke(instance);
+            return ((Func<T, TType>) getter).Invoke(instance);*/
         }
 
         private static TType Parse<TType>(object value)
@@ -267,7 +248,7 @@ namespace DotEntity
         private string[] _columnsAsArray;
         public string[] GetColumns()
         {
-            return _columnsAsArray ?? (_columnsAsArray = _typeMap.Keys.ToArray());
+            return _columnsAsArray ?? (_columnsAsArray = _setterMap.Keys.ToArray());
         }
 
         private string _keyColumnName = null;

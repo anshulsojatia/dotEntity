@@ -11,17 +11,23 @@ namespace DotEntity
 {
     public class Singleton<T> where T : class
     {
-        private static T instance;
-        private static readonly object padlock = new object();
+        private static T instance = Instantiator<T>.Instance();
+       // private static readonly object padlock = new object();
 
         public static T Instance
         {
             get
             {
-                lock (padlock)
+               /* if (instance == null)
                 {
-                    return instance ?? (instance = Instantiator<T>.Instance());
-                }
+                    lock (padlock)
+                    {
+                        if (instance == null)
+                            instance = Instantiator<T>.Instance();
+                    }
+                }*/
+                return instance;
+
             }
         }
     }
