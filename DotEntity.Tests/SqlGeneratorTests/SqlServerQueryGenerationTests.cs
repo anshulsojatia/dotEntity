@@ -500,7 +500,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
         public void UpdateGenerator_DynamicType_With_Multiple_Where_Valid()
         {
             var sql = generator.GenerateUpdate("Product", new { ProductName = "x", ProductDescription = "y", DateCreated = DateTime.Now, Price = 1.2d }, new { Id = 5, DateCreated = DateTime.Now }, out IList<QueryInfo> queryParameters);
-            var expected = "UPDATE Product SET ProductName = @ProductName,ProductDescription = @ProductDescription,DateCreated = @DateCreated,Price = @Price WHERE Id = @Id AND DateCreated = @DateCreated;";
+            var expected = "UPDATE Product SET ProductName = @ProductName,ProductDescription = @ProductDescription,DateCreated = @DateCreated,Price = @Price WHERE Id = @Id AND DateCreated = @DateCreated2;";
 
             Assert.AreEqual(expected, sql);
             Assert.AreEqual("x", queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue);
@@ -511,7 +511,27 @@ namespace DotEntity.Tests.SqlGeneratorTests
             Assert.AreEqual(5, queryParameters.First(x => x.ParameterName == "Id").PropertyValue);
         }
 
+        [Test]
+        public void UpdateGenerator_DynamicType_With_Same_Where_Valid()
+        {
+            var sql = generator.GenerateUpdate("Product", new { ProductName = "x" }, new { ProductName = "y" }, out IList<QueryInfo> queryParameters);
+            var expected = "UPDATE Product SET ProductName = @ProductName WHERE ProductName = @ProductName2;";
 
+            Assert.AreEqual("x", queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue);
+            Assert.AreEqual("y", queryParameters.First(x => x.ParameterName == "ProductName2").PropertyValue);
+            Assert.AreEqual(expected, sql);
+        }
+
+        [Test]
+        public void UpdateGenerator_Expression_With_Same_Where_Valid()
+        {
+            var sql = generator.GenerateUpdate<Product>(new { ProductName = "x" }, x => x.ProductName == "y", out IList<QueryInfo> queryParameters);
+            var expected = "UPDATE Product SET ProductName = @ProductName WHERE ProductName = @ProductName2;";
+
+            Assert.AreEqual("x", queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue);
+            Assert.AreEqual("y", queryParameters.First(x => x.ParameterName == "ProductName2").PropertyValue);
+            Assert.AreEqual(expected, sql);
+        }
 
         [Test]
         public void DeleteGenerator_EntityType_Valid()

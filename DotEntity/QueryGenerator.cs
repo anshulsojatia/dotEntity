@@ -59,13 +59,18 @@ namespace DotEntity
         public virtual string GenerateUpdate(string tableName, dynamic entity, dynamic where, out IList<QueryInfo> queryParameters, params string[] exclude)
         {
             Dictionary<string, object> updateValueMap = QueryParserUtilities.ParseObjectKeyValues(entity, exclude);
-            var whereString = "";
             Dictionary<string, object> whereMap = QueryParserUtilities.ParseObjectKeyValues(where);
-            whereString = string.Join(" AND ", whereMap.Select(x => $"{x.Key} = @{x.Key}"));
+
             queryParameters = ToQueryInfos(updateValueMap, whereMap);
 
             var updateString = string.Join(",", updateValueMap.Select(x => $"{x.Key} = @{x.Key}"));
-
+            //get the common keys
+            var commonKeys = updateValueMap.Keys.Intersect(whereMap.Keys);
+            var whereString = string.Join(" AND ", whereMap.Select(x =>
+            {
+                var prefix = commonKeys.Contains(x.Key) ? "2" : "";
+                return $"{x.Key} = @{x.Key}{prefix}";
+            }));
             return $"UPDATE {tableName} SET {updateString} WHERE {whereString};";
         }
 
@@ -86,9 +91,16 @@ namespace DotEntity
             var whereString = parser.GetWhereString();
             queryParameters = parser.QueryInfoList;
 
-            queryParameters = MergeParameters(queryParameters, ToQueryInfos(updateValueMap));
+            if (!string.IsNullOrEmpty(whereString))
+            {
+                //update where string to handle common parameters
+                var commonKeys = updateValueMap.Keys.Intersect(queryParameters.Select(x => x.PropertyName));
+                whereString = commonKeys.Aggregate(whereString, (current, ck) => current.Replace($"@{ck}", $"@{ck}2"));
+            }
 
-            if (string.IsNullOrEmpty(whereString))
+            queryParameters = MergeParameters(ToQueryInfos(updateValueMap), queryParameters);
+
+            if (!string.IsNullOrEmpty(whereString))
             {
                 builder.Append(" WHERE " + whereString);
             }
