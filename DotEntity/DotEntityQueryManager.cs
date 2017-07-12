@@ -319,8 +319,7 @@ namespace DotEntity
 
         public virtual bool CommitTransaction()
         {
-            if (!_withTransaction)
-                throw new Exception("Can not call Commit on a non-transactional execution");
+            Throw.IfCommitCalledOnNonTransactionalExecution(_withTransaction);
 
             DotEntityDbConnector.ExecuteCommands(_transactionCommands.ToArray(), true);
             return _transactionCommands.All(x => x.ContinueNextCommand);
@@ -328,10 +327,7 @@ namespace DotEntity
 
         private static void ThrowIfInvalidPage(ICollection orderBy, int page, int count)
         {
-            if (page < 1 || count < 0 || ((page > 1 || count < int.MaxValue) && (orderBy == null || orderBy.Count == 0)))
-            {
-                throw new Exception("Invalid pagination");
-            }
+            Throw.IfInvalidPagination(orderBy, page, count);
         }
 
         private bool _disposed;

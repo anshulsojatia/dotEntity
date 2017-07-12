@@ -171,12 +171,13 @@ namespace DotEntity
                                 linkingOperator = _notCount > 0 ? Markers.NotEndsWith : Markers.EndsWith;
                                 break;
                             default:
-                                throw new Exception("Unsupported method");
+                                Throw.IfMethodNameNotSupported(expression.Method.Name);
+                                break;
                         }
                         AddQueryParameter(linkingOperator, propertyName, propertyValue, opr, propertyName, isProperty);
                         return null;
                     }
-                    throw new Exception("Unsupported expression");
+                    Throw.IfExpressionTypeNotSupported(expression);
                 }
             }
             return Compile(expression);
@@ -323,8 +324,6 @@ namespace DotEntity
                     case ExpressionType.OrElse:
                         typeToCheck = ExpressionType.And;
                         break;
-                    default:
-                        throw new NotImplementedException();
                 }
             }
             switch (typeToCheck)

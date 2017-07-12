@@ -17,9 +17,7 @@ namespace DotEntity.Extensions
         internal static DotEntityQueryManager AsDotEntityQueryManager(this IDotEntityQueryManager manager)
         {
             var asObj = manager as DotEntityQueryManager;
-            if(asObj == null)
-                throw new Exception("Can't cast provided manager");
-
+            Throw.IfArgumentNull(asObj, nameof(manager));
             return asObj;
         }
 

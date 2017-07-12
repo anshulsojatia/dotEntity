@@ -47,8 +47,7 @@ namespace DotEntity
 
         public string GenerateBatchInsert<T>(T[] entities, out IList<QueryInfo> parameters) where T : class
         {
-            if (entities.Length == 0)
-                throw new Exception("At least one entity must be provided to batch");
+            Throw.IfEmptyBatch(entities.Length == 0);
 
             var queryBuilder = new StringBuilder();
             var tableName = DotEntityDb.GetTableNameForType<T>();

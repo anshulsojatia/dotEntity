@@ -41,10 +41,9 @@ namespace DotEntity.Reflection
 
             var genericTypeInstance = baseType.MakeGenericType(genericType);
             property = genericTypeInstance.GetProperty(propertyName);
-            if (property == null)
-            {
-                throw new Exception("Can't find property with name");
-            }
+
+            Throw.IfObjectNull(property, propertyName);
+
             InvokeProperties.Add(genericType, property);
             return property.GetValue(instance, index);
         }
@@ -56,10 +55,9 @@ namespace DotEntity.Reflection
 
             var genericTypeInstance = baseType.MakeGenericType(genericType);
             fieldInfo = genericTypeInstance.GetField(fieldName);
-            if (fieldInfo == null)
-            {
-                throw new Exception("Can't find field with name");
-            }
+
+            Throw.IfObjectNull(fieldInfo, fieldName);
+
             InvokeFields.Add(genericType, fieldInfo);
             return fieldInfo.GetValue(instance);
         }

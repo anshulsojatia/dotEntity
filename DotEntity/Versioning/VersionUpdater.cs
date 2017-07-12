@@ -64,13 +64,8 @@ namespace DotEntity.Versioning
         public void RunDowngrade(string versionKey = null)
         {
             DotEntityDb.MapTableNameForType<DotEntityVersion>(Configuration.VersionTableName);
-
-            //do we have versioning table
-            if (!DotEntityDb.Provider.IsDatabaseVersioned(Configuration.VersionTableName))
-            {
-                throw new Exception("The database is not versioned");
-            }
-
+            Throw.IfDbNotVersioned(!DotEntityDb.Provider.IsDatabaseVersioned(Configuration.VersionTableName));
+           
             //first get all the versions from database
             var appliedDatabaseVersions = EntitySet<DotEntityVersion>.Select().ToList();
 

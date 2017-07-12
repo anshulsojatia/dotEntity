@@ -16,9 +16,7 @@ namespace DotEntity.Extensions
     {
         internal static List<DataReaderRow> GetDataReaderRows(this IDataReader dataReader, string[] columnNames, string typeName)
         {
-            if(string.IsNullOrEmpty(typeName))
-                throw new Exception("Must provide a valid type name");
-
+            Throw.IfArgumentNullOrEmpty(typeName, nameof(typeName));
             var dataReaderRows = new List<DataReaderRow>();
             while (dataReader.Read())
             {

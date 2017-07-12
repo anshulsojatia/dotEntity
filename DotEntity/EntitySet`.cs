@@ -246,8 +246,7 @@ namespace DotEntity
         {
             if (transaction != null)
             {
-                if (transaction.IsNullOrDisposed())
-                    throw new Exception();
+                Throw.IfNullOrDisposed(transaction, nameof(transaction));
                 return transaction.Manager.AsDotEntityQueryManager().DoCount(_whereList);
             }
             else

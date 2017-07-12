@@ -29,10 +29,7 @@ namespace DotEntity
 
         public virtual string GetFormattedDbTypeForType(Type type, int maxLength = 0)
         {
-            if (!TypeMap.TryGetValue(type, out string dbTypeString))
-            {
-                throw new Exception("Can't map type to database type. Either mark the field as virtual or change the datatype to a more concrete type");
-            }
+            Throw.IfInvalidDataTypeMapping(!TypeMap.TryGetValue(type, out string dbTypeString), type);
             var typeBuilder = new StringBuilder(dbTypeString);
             if (maxLength > 0)
                 typeBuilder.Append($"({maxLength})");
@@ -57,8 +54,7 @@ namespace DotEntity
 
             //is key column nullable
             var propertyInfos = properties as PropertyInfo[] ?? properties.ToArray();
-            if(propertyInfos.First(x => x.Name == keyColumn).PropertyType.IsNullable())
-                throw new Exception($"{keyColumn} can't be mapped to a nullable type");
+            Throw.IfKeyTypeNullable(propertyInfos.First(x => x.Name == keyColumn).PropertyType, keyColumn);
 
             foreach (var property in propertyInfos)
             {

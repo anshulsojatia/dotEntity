@@ -18,8 +18,7 @@ namespace DotEntity.Extensions
         {
             var propertyInfos = type.GetProperties().Where(x => x.IsDefined(typeof(KeyAttribute)));
             var keyColumnName = propertyInfos.LastOrDefault()?.Name;
-            if(keyColumnName == null)
-                throw new Exception("No key column specified for entity");
+            Throw.IfKeyNull(keyColumnName, type);
             return keyColumnName;
         }
     }
