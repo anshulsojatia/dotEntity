@@ -16,12 +16,14 @@ namespace DotEntity.Providers
 
         string ProviderName { get; }
 
-        bool IsDatabaseVersioned(string tableName);
+        bool IsDatabaseVersioned(string versionTableName);
 
-        IDatabaseTableGenerator DatabaseTableGenerator { get; }
+        IDatabaseTableGenerator DatabaseTableGenerator { get; set; }
 
-        IQueryGenerator QueryGenerator { get; }
+        IQueryGenerator QueryGenerator { get; set; }
 
-        int MaximumParametersPerQuery { get; }
+        ITypeMapProvider TypeMapProvider { get; set; }
+
+        int MaximumParametersPerQuery { get; set; }
     }
 }

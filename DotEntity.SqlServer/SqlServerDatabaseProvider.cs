@@ -23,14 +23,22 @@ namespace DotEntity.SqlServer
 
         public SqlServerDatabaseProvider()
         {
-            DatabaseTableGenerator = new DefaultDatabaseTableGenerator();
             DotEntityDb.MapTableNameForType<InformationSchema.Tables>("INFORMATION_SCHEMA.TABLES");
             DotEntityDb.MapTableNameForType<InformationSchema.Columns>("INFORMATION_SCHEMA.COLUMNS");
         }
 
-        public IDatabaseTableGenerator DatabaseTableGenerator { get; }
+        public IDatabaseTableGenerator DatabaseTableGenerator { get; set; }
 
-        public IQueryGenerator QueryGenerator { get; }
-        public int MaximumParametersPerQuery => 2100; //sql server
+        public IQueryGenerator QueryGenerator { get; set; }
+
+        public ITypeMapProvider TypeMapProvider { get; set; }
+
+        private int _maximumParameterPerQuery = 2100;
+
+        public int MaximumParametersPerQuery
+        {
+            get => 2100;
+            set => _maximumParameterPerQuery = value;
+        }
     }
 }

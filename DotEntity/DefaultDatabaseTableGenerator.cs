@@ -19,7 +19,7 @@ namespace DotEntity
         private readonly ITypeMapProvider _typeMapProvider;
         public DefaultDatabaseTableGenerator()
         {
-            _typeMapProvider = new DefaultTypeMapProvider();
+            _typeMapProvider = DotEntityDb.Provider.TypeMapProvider ?? new DefaultTypeMapProvider();
         }
         #region typemap
 

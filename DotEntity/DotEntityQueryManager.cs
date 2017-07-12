@@ -21,7 +21,7 @@ namespace DotEntity
         private readonly IQueryGenerator _queryGenerator;
         internal DotEntityQueryManager()
         {
-            _queryGenerator = DotEntityDb.QueryGenerator;
+            _queryGenerator = DotEntityDb.Provider.QueryGenerator;
         }
 
         private readonly bool _withTransaction;
