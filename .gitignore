@@ -23,3 +23,7 @@ SampleApp.Core/bin/
 SampleApp
 SampleApp.Core
 DotEntity.sln.DotSettings.user
+DotEntity/StyleCop.Cache
+DotEntity/Settings.StyleCop
+DotEntity/DotEntity.csproj.user
+DotEntity/DotEntity.licenseheader
