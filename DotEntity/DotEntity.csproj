@@ -65,4 +65,10 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.3.0" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Update="DataDeserializer.cs">
+      <ExcludeFromSourceAnalysis>False</ExcludeFromSourceAnalysis>
+      <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
+    </Compile>
+  </ItemGroup>
 </Project>

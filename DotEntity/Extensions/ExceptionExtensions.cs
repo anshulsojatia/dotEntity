@@ -1,7 +1,7 @@
 ﻿/**
  * Copyright(C) 2017  Apexol Technologies
  * 
- * This file (Relation.cs) is part of dotEntity(https://github.com/RoastedBytes/dotentity).
+ * This file (ExceptionExtensions.cs) is part of dotEntity(https://github.com/RoastedBytes/dotentity).
  * 
  * dotEntity is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -24,30 +24,25 @@
  * visit http://dotentity.net/legal/commercial
  */
 using System;
+using System.Diagnostics;
+using System.Linq;
 
-namespace DotEntity
+namespace DotEntity.Extensions
 {
-    public class Relation
+    public static class ExceptionExtensions
     {
-        public Type SourceType { get; set; }
-
-        public Type DestinationType { get; set; }
-
-        public string SourceColumnName { get; set; }
-
-        public string DestinationColumnName { get; set; }
-
-        public static Relation Create<TSource, TDestination>(string sourceColumnName, string destinationColumnName)
+        public static string GetStackTraceWithoutSkippedMethods(this Exception e)
         {
-            return new Relation()
-            {
-                SourceColumnName = sourceColumnName,
-                DestinationColumnName = destinationColumnName,
-                SourceType = typeof(TSource),
-                DestinationType = typeof(TDestination)
-            };
-          
+#if NETSTANDARD15
+            return e.StackTrace;
+#else
+            return string.Concat(
+                new StackTrace(e, true)
+                    .GetFrames()
+                    .Where(frame => !frame.GetMethod().IsDefined(typeof(SkipFromStackTrace), true))
+                    .Select(frame => new StackTrace(frame).ToString())
+                    .ToArray());
+#endif
         }
     }
-
 }
