@@ -1,12 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.5;net451;net45;</TargetFrameworks>
+    <TargetFrameworks>net451;net45;netstandard1.5;</TargetFrameworks>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <Authors>Team Roasted Bytes</Authors>
     <Company>Apexol Technologies</Company>
-    <Description>Micro-ORM for .NET</Description>
+    <Description>Yet another simple and powerful micro ORM for .NET</Description>
     <Copyright>Apexol Technologies</Copyright>
+    <PackageLicenseUrl>http://dotentity.net/legal/commercial</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/RoastedBytes/dotEntity</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/RoastedBytes/dotEntity.git</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
+    <PackageTags>Micro-ORM, Database, .NET Framework, POCO</PackageTags>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net45|AnyCPU'">

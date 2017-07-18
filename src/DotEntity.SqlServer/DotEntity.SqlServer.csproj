@@ -2,6 +2,16 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard1.5;net451;net45;</TargetFrameworks>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <Authors>Team Roasted Bytes</Authors>
+    <Company>Apexol Technologies</Company>
+    <Description>SqlServer Database Provider for dotEntity</Description>
+    <Copyright>Apexol Technologies</Copyright>
+    <PackageLicenseUrl>http://dotentity.net/legal/commercial</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/RoastedBytes/dotEntity</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/RoastedBytes/dotEntity.git</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
+    <PackageTags>Micro-ORM, Database, .NET Framework, POCO, SqlServer</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
