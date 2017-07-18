@@ -167,6 +167,18 @@ namespace DotEntity
             return $"DELETE FROM {tableName} WHERE {whereString};";
         }
 
+        public string GenerateDelete<T>(T entity, out IList<QueryInfo> parameters) where T : class
+        {
+            var tableName = DotEntityDb.GetTableNameForType<T>();
+            var deserializer = DataDeserializer<T>.Instance;
+            var keyColumn = deserializer.GetKeyColumn();
+            var keyColumnValue = deserializer.GetPropertyAs<int>(entity, keyColumn);
+            dynamic data = new ExpandoObject();
+            var dataDictionary = (IDictionary<string, object>)data;
+            dataDictionary.Add(keyColumn, keyColumnValue);
+            return GenerateDelete(tableName, dataDictionary, out parameters);
+        }
+
         public string GenerateCount<T>(IList<Expression<Func<T, bool>>> @where, out IList<QueryInfo> parameters) where T : class
         {
             parameters = new List<QueryInfo>();

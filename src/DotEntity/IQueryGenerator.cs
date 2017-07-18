@@ -48,6 +48,8 @@ namespace DotEntity
 
         string GenerateDelete<T>(Expression<Func<T, bool>> where, out IList<QueryInfo> parameters) where T : class;
 
+        string GenerateDelete<T>(T entity, out IList<QueryInfo> parameters) where T : class;
+
         string GenerateCount<T>(IList<Expression<Func<T, bool>>> where, out IList<QueryInfo> parameters) where T : class;
 
         string GenerateCount<T>(dynamic where, out IList<QueryInfo> parameters);

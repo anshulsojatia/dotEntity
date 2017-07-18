@@ -240,7 +240,7 @@ namespace DotEntity
 
         public virtual int DoDelete<T>(T entity, Func<T, bool> resultAction = null) where T : class
         {
-            var query = _queryGenerator.GenerateDelete<T>(x => x == entity, out IList<QueryInfo> queryParameters);
+            var query = _queryGenerator.GenerateDelete(entity, out IList<QueryInfo> queryParameters);
             var cmd = new DotEntityDbCommand(DbOperationType.Delete, query, queryParameters);
             if (_withTransaction)
             {
