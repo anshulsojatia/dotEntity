@@ -329,9 +329,9 @@ namespace DotEntity.Tests.SqlGeneratorTests
             {
                 product => product.ProductName.Contains(GetName())
             });
-            var expected = "SELECT * FROM Product WHERE ProductName LIKE '%' + @ProductName + '%';";
+            var expected = "SELECT * FROM Product WHERE ProductName LIKE @ProductName;";
             Assert.AreEqual(expected, sql);
-            Assert.AreEqual(GetName(), queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue);
+            Assert.AreEqual('%' + GetName() + '%', queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue);
         }
 
         [Test]
@@ -341,9 +341,9 @@ namespace DotEntity.Tests.SqlGeneratorTests
             {
                 product => product.ProductName.StartsWith(GetName())
             });
-            var expected = "SELECT * FROM Product WHERE ProductName LIKE @ProductName + '%';";
+            var expected = "SELECT * FROM Product WHERE ProductName LIKE @ProductName;";
             Assert.AreEqual(expected, sql);
-            Assert.AreEqual(GetName(), queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue);
+            Assert.AreEqual(GetName() + '%', queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue);
         }
 
         [Test]
@@ -354,9 +354,9 @@ namespace DotEntity.Tests.SqlGeneratorTests
             {
                 product => product.ProductName.StartsWith(str)
             });
-            var expected = "SELECT * FROM Product WHERE ProductName LIKE @ProductName + '%';";
+            var expected = "SELECT * FROM Product WHERE ProductName LIKE @ProductName;";
             Assert.AreEqual(expected, sql);
-            Assert.AreEqual(str, queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue);
+            Assert.AreEqual(str + '%', queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue);
         }
 
         [Test]
@@ -366,9 +366,9 @@ namespace DotEntity.Tests.SqlGeneratorTests
             {
                 product => product.ProductName.StartsWith("a")
             });
-            var expected = "SELECT * FROM Product WHERE ProductName LIKE @ProductName + '%';";
+            var expected = "SELECT * FROM Product WHERE ProductName LIKE @ProductName;";
             Assert.AreEqual(expected, sql);
-            Assert.AreEqual("a", queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue);
+            Assert.AreEqual("a%", queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue);
         }
 
 
@@ -380,9 +380,9 @@ namespace DotEntity.Tests.SqlGeneratorTests
             {
                 product => !product.ProductName.StartsWith(GetName())
             });
-            var expected = "SELECT * FROM Product WHERE ProductName NOT LIKE @ProductName + '%';";
+            var expected = "SELECT * FROM Product WHERE ProductName NOT LIKE @ProductName;";
             Assert.AreEqual(expected, sql);
-            Assert.AreEqual(GetName(), queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue);
+            Assert.AreEqual(GetName() + "%", queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue);
         }
 
         [Test]

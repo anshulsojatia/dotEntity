@@ -427,15 +427,18 @@ namespace DotEntity
                             {
                                 case Markers.Contains:
                                 case Markers.NotContains:
-                                    builder.Append($"'%' + @{item.ParameterName} + '%'");
+                                    builder.Append($"@{item.ParameterName}");
+                                    item.PropertyValue = $"%{item.PropertyValue}%";
                                     break;
                                 case Markers.StartsWith:
                                 case Markers.NotStartsWith:
-                                    builder.Append($"@{item.ParameterName} + '%'");
+                                    builder.Append($"@{item.ParameterName}");
+                                    item.PropertyValue = $"{item.PropertyValue}%";
                                     break;
                                 case Markers.EndsWith:
                                 case Markers.NotEndsWith:
-                                    builder.Append($"'%' + @{item.ParameterName}");
+                                    builder.Append($"@{item.ParameterName}");
+                                    item.PropertyValue = $"%{item.PropertyValue}";
                                     break;
                                 default:
                                     builder.Append($"@{item.ParameterName}");
