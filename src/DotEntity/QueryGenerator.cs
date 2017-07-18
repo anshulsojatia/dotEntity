@@ -36,9 +36,9 @@ using DotEntity.Enumerations;
 
 namespace DotEntity
 {
-    internal abstract class QueryGenerator : IQueryGenerator
+    public abstract class QueryGenerator : IQueryGenerator
     {
-        private static Dictionary<JoinType, string> _joinMap = new Dictionary<JoinType, string>
+        protected static Dictionary<JoinType, string> JoinMap = new Dictionary<JoinType, string>
         {
             { JoinType.Inner, "INNER JOIN" },
             { JoinType.LeftOuter, "LEFT OUTER JOIN" },
@@ -63,7 +63,7 @@ namespace DotEntity
             return GenerateInsert(tableName, entity, out parameters);
         }
 
-        public string GenerateBatchInsert<T>(T[] entities, out IList<QueryInfo> parameters) where T : class
+        public virtual string GenerateBatchInsert<T>(T[] entities, out IList<QueryInfo> parameters) where T : class
         {
             Throw.IfEmptyBatch(entities.Length == 0);
 
@@ -167,7 +167,7 @@ namespace DotEntity
             return $"DELETE FROM {tableName} WHERE {whereString};";
         }
 
-        public string GenerateDelete<T>(T entity, out IList<QueryInfo> parameters) where T : class
+        public virtual string GenerateDelete<T>(T entity, out IList<QueryInfo> parameters) where T : class
         {
             var tableName = DotEntityDb.GetTableNameForType<T>();
             var deserializer = DataDeserializer<T>.Instance;
@@ -179,7 +179,7 @@ namespace DotEntity
             return GenerateDelete(tableName, dataDictionary, out parameters);
         }
 
-        public string GenerateCount<T>(IList<Expression<Func<T, bool>>> @where, out IList<QueryInfo> parameters) where T : class
+        public virtual string GenerateCount<T>(IList<Expression<Func<T, bool>>> @where, out IList<QueryInfo> parameters) where T : class
         {
             parameters = new List<QueryInfo>();
             var tableName = DotEntityDb.GetTableNameForType<T>();
@@ -203,13 +203,13 @@ namespace DotEntity
 
 
 
-        public string GenerateCount<T>(dynamic @where, out IList<QueryInfo> parameters)
+        public virtual string GenerateCount<T>(dynamic @where, out IList<QueryInfo> parameters)
         {
             var tableName = DotEntityDb.GetTableNameForType<T>();
             return GenerateCount(tableName, where, out parameters);
         }
 
-        public string GenerateCount(string tableName, dynamic @where, out IList<QueryInfo> parameters)
+        public virtual string GenerateCount(string tableName, dynamic @where, out IList<QueryInfo> parameters)
         {
             Dictionary<string, object> whereMap = QueryParserUtilities.ParseObjectKeyValues(where);
             var whereString = string.Join(" AND ", whereMap.Select(x => $"{x.Key} = @{x.Key}"));
@@ -281,7 +281,7 @@ namespace DotEntity
             return query;
         }
 
-        public string GenerateSelectWithTotalMatchingCount<T>(out IList<QueryInfo> parameters, List<Expression<Func<T, bool>>> @where = null, Dictionary<Expression<Func<T, object>>, RowOrder> orderBy = null,
+        public virtual string GenerateSelectWithTotalMatchingCount<T>(out IList<QueryInfo> parameters, List<Expression<Func<T, bool>>> @where = null, Dictionary<Expression<Func<T, object>>, RowOrder> orderBy = null,
             int page = 1, int count = Int32.MaxValue) where T : class
         {
             parameters = new List<QueryInfo>();
@@ -375,7 +375,7 @@ namespace DotEntity
                     sourceAlias = parentAliasUsed;
                 }
                 joinBuilder.Append(
-                    $"{_joinMap[joinMeta.JoinType]} {joinedTableName} {newAlias} ON {sourceAlias}.[{joinMeta.SourceColumnName}] = {newAlias}.[{joinMeta.DestinationColumnName}] ");
+                    $"{JoinMap[joinMeta.JoinType]} {joinedTableName} {newAlias} ON {sourceAlias}.{joinMeta.SourceColumnName} = {newAlias}.{joinMeta.DestinationColumnName} ");
 
                 lastAliasUsed = newAlias;
 
@@ -448,7 +448,7 @@ namespace DotEntity
             return query;
         }
 
-        private static IList<QueryInfo> ToQueryInfos(params Dictionary<string, object>[] dict)
+        protected static IList<QueryInfo> ToQueryInfos(params Dictionary<string, object>[] dict)
         {
             if (dict == null)
                 return null;
@@ -471,7 +471,7 @@ namespace DotEntity
             return queryParameters;
         }
 
-        private static IList<QueryInfo> MergeParameters(IEnumerable<QueryInfo> baseList, params IList<QueryInfo>[] queryParameterList)
+        protected static IList<QueryInfo> MergeParameters(IEnumerable<QueryInfo> baseList, params IList<QueryInfo>[] queryParameterList)
         {
             //update all the parameter names first
             var queryParameters = baseList as IList<QueryInfo> ?? baseList.ToList();

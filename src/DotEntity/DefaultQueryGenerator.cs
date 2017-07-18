@@ -25,7 +25,7 @@
  */
 namespace DotEntity
 {
-    internal class DefaultQueryGenerator : QueryGenerator
+    public class DefaultQueryGenerator : QueryGenerator
     {
         
     }

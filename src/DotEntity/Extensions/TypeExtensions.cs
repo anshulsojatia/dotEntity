@@ -30,7 +30,7 @@ using System.Reflection;
 
 namespace DotEntity.Extensions
 {
-    internal static class TypeExtensions
+    public static class TypeExtensions
     {
         internal static DotEntityQueryManager AsDotEntityQueryManager(this IDotEntityQueryManager manager)
         {
@@ -39,7 +39,7 @@ namespace DotEntity.Extensions
             return asObj;
         }
 
-        internal static bool IsNullable(this Type type)
+        public static bool IsNullable(this Type type)
         {
             return Nullable.GetUnderlyingType(type) != null;
         }

@@ -36,8 +36,7 @@ using DotEntity.Extensions;
 namespace DotEntity
 {
     public class QueryParserUtilities
-    {
-        
+    {        
        
         internal static string[] ParseTypeKeyValues(Type type, params string[] exclude)
         {
@@ -47,7 +46,7 @@ namespace DotEntity
             return parameters;
         }
 
-        internal static Dictionary<string, object> ParseObjectKeyValues(dynamic obj, params string[] exclude)
+        public static Dictionary<string, object> ParseObjectKeyValues(dynamic obj, params string[] exclude)
         {
             if (obj == null)
                 return null;

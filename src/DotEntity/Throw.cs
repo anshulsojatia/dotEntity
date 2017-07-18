@@ -30,7 +30,7 @@ using DotEntity.Extensions;
 
 namespace DotEntity
 {
-    internal static class Throw
+    public static class Throw
     {
         public static void IfArgumentNull(object arg, string parameterName)
         {
