@@ -20,3 +20,5 @@ src/DotEntity/StyleCop.Cache
 src/DotEntity/Settings.StyleCop
 src/DotEntity/DotEntity.csproj.user
 src/DotEntity/DotEntity.licenseheader
+src/DotEntity.MySql/obj/
+src/DotEntity.MySql/bin/
