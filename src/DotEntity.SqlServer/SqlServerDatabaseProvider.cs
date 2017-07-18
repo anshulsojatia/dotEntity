@@ -13,6 +13,8 @@ namespace DotEntity.SqlServer
 
         public string ProviderName => "System.Data.SqlClient";
 
+        public string DatabaseName { get; } //not required here
+
         public bool IsDatabaseVersioned(string tableName)
         {
             var t = EntitySet<InformationSchema.Tables>.Where(x => x.TABLE_NAME == tableName)

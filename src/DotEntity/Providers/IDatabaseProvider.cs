@@ -33,6 +33,8 @@ namespace DotEntity.Providers
 
         string ProviderName { get; }
 
+        string DatabaseName { get; }
+
         bool IsDatabaseVersioned(string versionTableName);
 
         IDatabaseTableGenerator DatabaseTableGenerator { get; set; }
