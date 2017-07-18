@@ -31,6 +31,10 @@ using DotEntity.Extensions;
 
 namespace DotEntity
 {
+    /// <summary>
+    /// Provides a standard way to perform various database operations for the entity of type <typeparamref name="T"/>
+    /// </summary>
+    /// <typeparam name="T">The entity class that maps to a specific database table</typeparam>
     public sealed partial class EntitySet<T> : IEntitySet<T> where T : class
     {
         private readonly List<Expression<Func<T, bool>>> _whereList;
@@ -47,6 +51,10 @@ namespace DotEntity
         }
 
         #region static wrappers
+        /// <summary>
+        /// Inserts a new entity of specified type into database table
+        /// </summary>
+        /// <param name="entity">The entity to be inserted</param>
         public static void Insert(T entity)
         {
             using (var manager = new DotEntityQueryManager())
@@ -54,7 +62,10 @@ namespace DotEntity
                 manager.DoInsert(entity);
             }
         }
-
+        /// <summary>
+        /// Inserts multiple entities of specified type into database table
+        /// </summary>
+        /// <param name="entities">An array of entities to be inserted</param>
         public static void Insert(T[] entities)
         {
             using (var manager = new DotEntityQueryManager())
@@ -62,7 +73,12 @@ namespace DotEntity
                 manager.DoInsert(entities);
             }
         }
-
+        /// <summary>
+        /// Inserts a new entity of type <typeparam name="T"></typeparam> into database within a transaction
+        /// </summary>
+        /// <param name="entity">The entity to be inserted. The primary key of the entity will be set if Insert succeeds</param>
+        /// <param name="transaction">The <see cref="IDotEntityTransaction"/> transaction under which the operation executes</param>
+        /// <param name="action">(optional) The function to capture the inserted entity. The return value of this function determines if the next operation in the transaction executes or not. Default return value is True</param>
         public static void Insert(T entity, IDotEntityTransaction transaction, Func<T, bool> action = null)
         {
             if (!transaction.IsNullOrDisposed())
@@ -71,7 +87,11 @@ namespace DotEntity
             }
         }
 
-       /* public static void Delete(T entity)
+        /// <summary>
+        /// Deletes the entity of type <typeparamref name="T"/> from database
+        /// </summary>
+        /// <param name="entity">The entity to be deleted</param>
+        public static void Delete(T entity)
         {
             using (var manager = new DotEntityQueryManager())
             {
@@ -79,14 +99,24 @@ namespace DotEntity
             }
         }
 
+        /// <summary>
+        /// Deletes the entity of type <typeparamref name="T"/> from database within a transaction
+        /// </summary>
+        /// <param name="entity">The entity to be deleted</param>
+        /// <param name="transaction">The <see cref="IDotEntityTransaction"/> transaction under which the operation executes</param>
+        /// <param name="action">(optional) The function to capture the inserted entity. The return value of this function determines if the next operation in the transaction executes or not. Default return value is True</param>
         public static void Delete(T entity, IDotEntityTransaction transaction, Func<T, bool> action = null)
         {
             if (!transaction.IsNullOrDisposed())
             {
                 transaction.Manager.AsDotEntityQueryManager().DoDelete(entity, action);
             }
-        }*/
+        }
 
+        /// <summary>
+        /// Deletes the matching entities from the database table
+        /// </summary>
+        /// <param name="where">The expression to filter entities. This translates to WHERE clause in SQL</param>
         public static void Delete(Expression<Func<T, bool>> where)
         {
             using (var manager = new DotEntityQueryManager())
@@ -94,6 +124,11 @@ namespace DotEntity
                 manager.DoDelete(where);
             }
         }
+        /// <summary>
+        /// Deletes the matching entities from the database within a transaction
+        /// </summary>
+        /// <param name="where">The expression to filter entities</param>
+        /// <param name="transaction">The <see cref="IDotEntityTransaction"/> transaction under which the operation executes</param>
         public static void Delete(Expression<Func<T, bool>> where, IDotEntityTransaction transaction)
         {
             if (!transaction.IsNullOrDisposed())
@@ -101,7 +136,11 @@ namespace DotEntity
                 transaction.Manager.AsDotEntityQueryManager().DoDelete<T>(where);
             }
         }
-        
+
+        /// <summary>
+        /// Updates the database table row that matches the primary key of the provided entity with the entity property values
+        /// </summary>
+        /// <param name="entity">The entity object for performing the update</param>
         public static void Update(T entity)
         {
             using (var manager = new DotEntityQueryManager())
@@ -110,6 +149,11 @@ namespace DotEntity
             }
         }
 
+        /// <summary>
+        /// Updates the database table row that matches the provided <paramref name="where"/> expression
+        /// </summary>
+        /// <param name="entity">A dynamic object containing the fields to be updated with their new values</param>
+        /// <param name="where">The filter expression to select appropriate database rows to update. This translates to WHERE clause in SQL</param>
         public static void Update(dynamic entity, Expression<Func<T, bool>> where)
         {
             using (var manager = new DotEntityQueryManager())
@@ -118,6 +162,12 @@ namespace DotEntity
             }
         }
 
+        /// <summary>
+        /// Updates the database table row that matches the primary key of the provided entity with the entity property values within a transaction
+        /// </summary>
+        /// <param name="entity">The entity object for performing the update</param>
+        /// <param name="transaction">The <see cref="IDotEntityTransaction"/> transaction under which the operation executes</param>
+        /// <param name="action">(optional) The function to capture the updated entity. The return value of this function determines if the next operation in the transaction executes or not. Default return value is True</param>
         public static void Update(T entity, IDotEntityTransaction transaction, Func<T, bool> action = null)
         {
             if (!transaction.IsNullOrDisposed())
@@ -126,6 +176,13 @@ namespace DotEntity
             }
         }
 
+        /// <summary>
+        /// Updates the database table row that matches the provided <paramref name="where"/> expression
+        /// </summary>
+        /// <param name="entity">A dynamic object containing the fields to be updated with their new values</param>
+        /// <param name="where">The filter expression to select appropriate database rows to update. This translates to WHERE clause in SQL</param>
+        /// <param name="transaction">The <see cref="IDotEntityTransaction"/> transaction under which the operation executes</param>
+        /// <param name="action">(optional) The function to capture the updated entity. The return value of this function determines if the next operation in the transaction executes or not. Default return value is True</param>
         public static void Update(dynamic entity, Expression<Func<T, bool>> where, IDotEntityTransaction transaction, Func<T, bool> action = null)
         {
             if (!transaction.IsNullOrDisposed())
@@ -134,6 +191,10 @@ namespace DotEntity
             }
         }
 
+        /// <summary>
+        /// Queries the database for the requested entities
+        /// </summary>
+        /// <returns>An enumeration of <typeparamref name="T"/></returns>
         public static IEnumerable<T> Select()
         {
             using (var manager = new DotEntityQueryManager())
@@ -141,6 +202,13 @@ namespace DotEntity
                 return manager.DoSelect<T>();
             }
         }
+
+        /// <summary>
+        /// Executes the provided <paramref name="query"/> against the data provider
+        /// </summary>
+        /// <param name="query">The query to be executed against the provider. The query parameters references should be named with '@' prefix</param>
+        /// <param name="parameters">(optional) A dynamic object containing the parameters used in the query</param>
+        /// <returns>An enumeration of <typeparamref name="T"/></returns>
         public static IEnumerable<T> Query(string query, dynamic parameters = null)
         {
             using (var manager = new DotEntityQueryManager())
@@ -149,6 +217,13 @@ namespace DotEntity
             }
         }
 
+        /// <summary>
+        /// Executes the provided <paramref name="query"/> against the data provider within a transaction
+        /// </summary>
+        /// <param name="query">The query to be executed against the provider. The query parameters references should be named with '@' prefix</param>
+        /// <param name="parameters">A dynamic object containing the parameters used in the query</param>
+        /// <param name="transaction">The <see cref="IDotEntityTransaction"/> transaction under which the operation executes</param>
+        /// <param name="action">(optional) The function to capture the updated entities. The entities are provided as parameter to the function. The return value of this function determines if the next operation in the transaction executes or not. Default return value is True</param>
         public static void Query(string query, dynamic parameters, IDotEntityTransaction transaction, Func<IEnumerable<T>, bool> action = null)
         {
             if (!transaction.IsNullOrDisposed())
@@ -157,6 +232,13 @@ namespace DotEntity
             }
         }
 
+        /// <summary>
+        /// Executes the provided <paramref name="query"/> against the data provider and returns value of first row and first column of the result.
+        /// </summary>
+        /// <typeparam name="TType">The type of the return value</typeparam> 
+        /// <param name="query">The query to be executed against the provider. The query parameters references should be named with '@' prefix</param>
+        /// <param name="parameters">(optional) A dynamic object containing the parameters used in the query</param>
+        /// <returns>A value of type <typeparamref name="TType"/></returns>
         public static TType QueryScaler<TType>(string query, dynamic parameters = null)
         {
             using (var manager = new DotEntityQueryManager())
@@ -165,6 +247,14 @@ namespace DotEntity
             }
         }
 
+        /// <summary>
+        /// Executes the provided <paramref name="query"/> against the data provider within a transaction and returns value of first row and first column of the result.
+        /// </summary>
+        /// <typeparam name="TType">The type of the return value</typeparam> 
+        /// <param name="query">The query to be executed against the provider. The query parameters references should be named with '@' prefix</param>
+        /// <param name="parameters">A dynamic object containing the parameters used in the query</param>
+        /// <param name="transaction">The <see cref="IDotEntityTransaction"/> transaction under which the operation executes</param>
+        /// <param name="action">(optional) The function to capture the updated entities. The entities are provided as parameter to the function. The return value of this function determines if the next operation in the transaction executes or not. Default return value is True</param>
         public static void QueryScaler<TType>(string query, dynamic parameters, IDotEntityTransaction transaction, Func<TType, bool> action = null)
         {
             if (!transaction.IsNullOrDisposed())
@@ -173,20 +263,35 @@ namespace DotEntity
             }
         }
 
+        /// <summary>
+        /// Specifies the where expression to filter the repository for subsequent operation
+        /// </summary>
+        /// <param name="where">The filter expression to select appropriate database rows to update. This translates to WHERE clause in SQL</param>
+        /// <returns></returns>
         public static IEntitySet<T> Where(Expression<Func<T, bool>> where)
         {
             return Instance.Where(where);
         }
 
+        /// <summary>
+        /// Counts the total number of matching entities
+        /// </summary>
+        /// <returns>Total number of matching entities</returns>
         public static int Count()
         {
             return Instance.Count();
         }
 
-        public static IEnumerable<T> SelectWithTotalMatches(out int totalMatches, int page = 1,
-            int count = Int32.MaxValue, IDotEntityTransaction transaction = null)
+        /// <summary>
+        /// Queries the database for the requested entities, additionally finding total number of matching records
+        /// </summary>
+        /// <param name="totalMatches">The total number of matching entities</param>
+        /// <param name="page">(optional) The page number of the result set. Default is 1</param>
+        /// <param name="count">(optional) The number of entities to return. Defaults to all entities</param>
+        /// <returns>An enumeration of <typeparamref name="T"/></returns>
+        public static IEnumerable<T> SelectWithTotalMatches(out int totalMatches, int page = 1, int count = Int32.MaxValue)
         {
-            return Instance.SelectWithTotalMatches(out totalMatches, page, count, transaction);
+            return Instance.SelectWithTotalMatches(out totalMatches, page, count);
         }
 
         #endregion
@@ -201,7 +306,7 @@ namespace DotEntity
 
         IEntitySet<T> IEntitySet<T>.Where(LambdaExpression where)
         {
-            if(_joinWhereList == null)
+            if (_joinWhereList == null)
                 _joinWhereList = new List<LambdaExpression>();
 
             _joinWhereList.Add(where);
@@ -216,13 +321,13 @@ namespace DotEntity
 
         IEntitySet<T> IEntitySet<T>.OrderBy(LambdaExpression orderBy, RowOrder rowOrder)
         {
-            if(_joinOrderBy == null)
+            if (_joinOrderBy == null)
                 _joinOrderBy = new Dictionary<LambdaExpression, RowOrder>();
             _joinOrderBy.Add(orderBy, rowOrder);
             return this;
         }
 
-        IEnumerable<T> IEntitySet<T>.Select(int page, int count, IDotEntityTransaction transaction)
+        IEnumerable<T> IEntitySet<T>.Select(int page, int count)
         {
             using (var manager = new DotEntityQueryManager())
             {
@@ -230,7 +335,7 @@ namespace DotEntity
             }
         }
 
-        IEnumerable<T> IEntitySet<T>.SelectWithTotalMatches(out int totalMatches, int page, int count, IDotEntityTransaction transaction)
+        IEnumerable<T> IEntitySet<T>.SelectWithTotalMatches(out int totalMatches, int page, int count)
         {
             using (var manager = new DotEntityQueryManager())
             {
@@ -240,21 +345,21 @@ namespace DotEntity
             }
         }
 
-        IEnumerable<T> IEntitySet<T>.SelectNested(int page, int count, IDotEntityTransaction transaction)
+        IEnumerable<T> IEntitySet<T>.SelectNested(int page, int count)
         {
             using (var manager = new DotEntityQueryManager())
             {
-                if(_joinWhereList == null)
+                if (_joinWhereList == null)
                     _joinWhereList = new List<LambdaExpression>();
 
-                if(_joinOrderBy == null)
+                if (_joinOrderBy == null)
                     _joinOrderBy = new Dictionary<LambdaExpression, RowOrder>();
 
                 //move all order by and where to these list
-                foreach(var w in _whereList)
+                foreach (var w in _whereList)
                     _joinWhereList.Add(w);
 
-                foreach(var o in _orderBy)
+                foreach (var o in _orderBy)
                     _joinOrderBy.Add(o.Key, o.Value);
 
                 return manager.DoSelect<T>(_joinList, _relationActions, _joinWhereList, _joinOrderBy, page, count);
@@ -275,12 +380,12 @@ namespace DotEntity
                     return manager.DoCount<T>(_whereList);
                 }
             }
-           
+
         }
 
         IEntitySet<T> IEntitySet<T>.Join<T1>(string sourceColumnName, string destinationColumnName, SourceColumn sourceColumn, JoinType joinType)
         {
-            if(_joinList == null)
+            if (_joinList == null)
                 _joinList = new List<IJoinMeta>();
 
             _joinList.Add(new JoinMeta<T1>(sourceColumnName, destinationColumnName, sourceColumn, joinType));
@@ -308,7 +413,7 @@ namespace DotEntity
             }
         }
 
-       
+
         #endregion
 
         internal static IEntitySet<T> Instance => new EntitySet<T>();

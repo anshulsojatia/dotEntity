@@ -30,28 +30,98 @@ using DotEntity.Enumerations;
 
 namespace DotEntity
 {
+    /// <summary>
+    /// Represents a database table of type <typeparamref name="T"/>
+    /// </summary>
+    /// <typeparam name="T">The entity class that maps to a specific database table</typeparam>
     public interface IEntitySet<T> where T : class
     {
+        /// <summary>
+        /// Orders the result set according to the <paramref name="orderBy"/> expression field
+        /// </summary>
+        /// <param name="orderBy">The expression specifying the field to use in ORDER BY clause</param>
+        /// <param name="rowOrder">(optional) Specifies the <see cref="RowOrder"/>. Default is <see cref="RowOrder.Ascending"/></param>
+        /// <returns>An implementation object of type <see cref="IEntitySet{T}"/></returns>
         IEntitySet<T> OrderBy(Expression<Func<T, object>> orderBy, RowOrder rowOrder = RowOrder.Ascending);
 
+        /// <summary>
+        /// Orders the result set according to the <paramref name="orderBy"/> lambda expression
+        /// </summary>
+        /// <param name="orderBy">The expression specifying the field to use in ORDER BY clause</param>
+        /// <param name="rowOrder">(optional) Specifies the <see cref="RowOrder"/>. Default is <see cref="RowOrder.Ascending"/></param>
+        /// <returns>An implementation object of type <see cref="IEntitySet{T}"/></returns>
         IEntitySet<T> OrderBy(LambdaExpression orderBy, RowOrder rowOrder = RowOrder.Ascending);
 
+        /// <summary>
+        /// Specifies the where expression to filter the repository for subsequent operations
+        /// </summary>
+        /// <param name="where">The filter expression to select appropriate database rows to update. This translates to WHERE clause in SQL</param>
+        /// <returns>An implementation object of type <see cref="IEntitySet{T}"/></returns>
         IEntitySet<T> Where(Expression<Func<T, bool>> where);
 
+        /// <summary>
+        /// Specifies the where expression to filter the repository for subsequent operations
+        /// </summary>
+        /// <param name="where">The filter expression to select appropriate database rows to update. This translates to WHERE clause in SQL</param>
+        /// <returns>An implementation object of type <see cref="IEntitySet{T}"/></returns>
         IEntitySet<T> Where(LambdaExpression where);
-        
-        IEntitySet<T> Join<T1>(string sourceColumnName, string destinationColumnName, SourceColumn sourceColumn = SourceColumn.Chained, JoinType joinType = JoinType.Inner) where T1 : class;
 
+        /// <summary>
+        /// Joins the current <see cref="IEntitySet{T}" /> with another entity of <typeparamref name="T1"/> to produce a nested result
+        /// </summary>
+        /// <typeparam name="T1">The entity class that maps to a specific database table</typeparam>
+        /// <param name="sourceColumnName">The column name of the source table</param>
+        /// <param name="destinationColumnName">The column name of the destination table</param>
+        /// <param name="sourceColumnType">(optional) The <see cref="SourceColumn"/> type in this join. Default is <see cref="SourceColumn.Chained"/></param>
+        /// <param name="joinType">(optional) The <see cref="JoinType"/> of this join. Default is <see cref="JoinType.Inner"/></param>
+        /// <returns>An implementation object of type <see cref="IEntitySet{T}"/></returns>
+        IEntitySet<T> Join<T1>(string sourceColumnName, string destinationColumnName, SourceColumn sourceColumnType = SourceColumn.Chained, JoinType joinType = JoinType.Inner) where T1 : class;
+
+        /// <summary>
+        /// Relates entity of type <typeparamref name="T"/> with entity of type <typeparamref name="T1"/>
+        /// </summary>
+        /// <typeparam name="T1">The entity class that maps to a specific database table</typeparam>
+        /// <param name="relateAction">A function accepts parameters of <typeparamref name="T"/> and <typeparamref name="T1"/> and defines their relationship</param>
+        /// <returns>An implementation object of type <see cref="IEntitySet{T}"/></returns>
         IEntitySet<T> Relate<T1>(Action<T, T1> relateAction) where T1 : class;
 
-        IEnumerable<T> Select(int page = 1, int count = int.MaxValue, IDotEntityTransaction transaction = null);
+        /// <summary>
+        /// Queries the database for the requested entities
+        /// </summary>
+        /// <param name="page">(optional) The page number of the result set. Default is 1</param>
+        /// <param name="count">(optional) The number of entities to return. Defaults to all entities</param>
+        /// <returns>An enumeration of <typeparamref name="T"/></returns>
+        IEnumerable<T> Select(int page = 1, int count = int.MaxValue);
 
-        IEnumerable<T> SelectWithTotalMatches(out int totalMatches, int page = 1, int count = int.MaxValue, IDotEntityTransaction transaction = null);
+        /// <summary>
+        /// Queries the database for the requested entities, additionally finding total number of matching records
+        /// </summary>
+        /// <param name="totalMatches">The total number of matching entities</param>
+        /// <param name="page">(optional) The page number of the result set. Default is 1</param>
+        /// <param name="count">(optional) The number of entities to return. Defaults to all entities</param>
+        /// <returns>An enumeration of <typeparamref name="T"/></returns>
+        IEnumerable<T> SelectWithTotalMatches(out int totalMatches, int page = 1, int count = int.MaxValue);
 
-        IEnumerable<T> SelectNested(int page = 1, int count = int.MaxValue, IDotEntityTransaction transaction = null);
+        /// <summary>
+        /// Queries the database for the requested entities with join operation
+        /// </summary>
+        /// <param name="page">(optional) The page number of the result set. Default is 1</param>
+        /// <param name="count">(optional) The number of entities to return. Defaults to all entities</param>
+        /// <returns>An enumeration of <typeparamref name="T"/></returns>
+        IEnumerable<T> SelectNested(int page = 1, int count = int.MaxValue);
 
+        /// <summary>
+        /// Counts the total number of matching entities within or without a transaction
+        /// </summary>
+        /// <param name="transaction">(optional) The <see cref="IDotEntityTransaction"/> transaction under which the operation executes. If this is null, no transaction is used for the operation</param>
+        /// <returns>Total number of matching entities</returns>
         int Count(IDotEntityTransaction transaction = null);
 
+        /// <summary>
+        /// Queries the database for the requested entities within or without a transaction and returns the first entity of the result set
+        /// </summary>
+        /// <param name="transaction">(optional) The <see cref="IDotEntityTransaction"/> transaction under which the operation executes. If this is null, no transaction is used for the operation</param>
+        /// <returns>The entity of type <typeparamref name="T"/> or null in case of empty result set</returns>
         T SelectSingle(IDotEntityTransaction transaction = null);
     }
 }

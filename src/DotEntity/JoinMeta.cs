@@ -28,11 +28,24 @@ using DotEntity.Enumerations;
 
 namespace DotEntity
 {
+    /// <summary>
+    /// Specifies the source column type in a join operation
+    /// </summary>
     public enum SourceColumn
     {
+        /// <summary>
+        /// The source column in context belongs to the parent repository
+        /// </summary>
         Parent,
+        /// <summary>
+        /// The source column in context belongs to the previous repository in chained operation
+        /// </summary>
         Chained
     }
+
+    /// <summary>
+    /// Specifies a join definition for querying the database
+    /// </summary>
     public interface IJoinMeta
     {
         string SourceColumnName { get; set; }
@@ -46,13 +59,24 @@ namespace DotEntity
         JoinType JoinType { get; set; }
     }
 
+    /// <summary>
+    /// Specifies a join definition to the target type <typeparamref name="T"/>
+    /// </summary>
+    /// <typeparam name="T">The entity class that maps to a specific database table</typeparam>
     public class JoinMeta<T> : IJoinMeta
     {
-        public JoinMeta(string sourceColumnName, string destinationColumnName, SourceColumn sourceColumn = SourceColumn.Chained, JoinType joinType = JoinType.Inner)
+        /// <summary>
+        /// Creates a new instance of <see cref="JoinMeta{T}"/>
+        /// </summary>
+        /// <param name="sourceColumnName">The column name of the source table</param>
+        /// <param name="destinationColumnName">The column name of the destination table</param>
+        /// <param name="sourceColumnType">(optional) The <see cref="SourceColumn"/> type in this join. Default is <see cref="SourceColumn.Chained"/></param>
+        /// <param name="joinType">(optional) The <see cref="JoinType"/> of this join. Default is <see cref="JoinType.Inner"/></param>
+        public JoinMeta(string sourceColumnName, string destinationColumnName, SourceColumn sourceColumnType = SourceColumn.Chained, JoinType joinType = JoinType.Inner)
         {
             SourceColumnName = sourceColumnName;
             DestinationColumnName = destinationColumnName;
-            SourceColumn = sourceColumn;
+            SourceColumn = sourceColumnType;
             JoinType = joinType;
         }
         public string SourceColumnName { get; set; }
