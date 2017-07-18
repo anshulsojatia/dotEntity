@@ -90,14 +90,31 @@ namespace DotEntity.Extensions
             while (hasResultSet)
             {
                 var newList = new List<DataReaderRow>();
-                var columnNames = GetColumnNames(dataReader);
+                string[] columnNames = null;
+                try
+                {
+                    columnNames = GetColumnNames(dataReader);
+                }
+                catch
+                {
+                    //we'll have to manually do something
+                }
                 while (dataReader.Read())
                 {
+                    var fieldCount = dataReader.FieldCount;
                     var row = new DataReaderRow();
+                    if (columnNames == null)
+                    {
+                        columnNames = new string[fieldCount];
+                        for (var i = 0; i < fieldCount; i++)
+                            columnNames[i] = dataReader.GetName(i);
+                    }
+
                     foreach (var c in columnNames)
                     {
                         row[c] = dataReader[c];
                     }
+
 
                     newList.Add(row);
                 }
@@ -119,10 +136,7 @@ namespace DotEntity.Extensions
             }
             return resultColumns;
 #else
-            var arr = new string[dataReader.FieldCount];
-            for (var i = 0; i < arr.Length; i++)
-                arr[i] = $"::{i + 1}";
-            return arr;
+            throw new NotSupportedException();
 #endif
 
         }
