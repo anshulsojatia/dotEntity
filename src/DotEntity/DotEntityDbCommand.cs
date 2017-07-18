@@ -48,6 +48,7 @@ namespace DotEntity
             Query = query;
             QueryInfos = queryParameters;
             ContinueNextCommand = true;
+            KeyColumn = keyColumn;
         }
 
         private Func<IDataReader, object> _readerAction;
@@ -77,7 +78,14 @@ namespace DotEntity
 
         public T GetResultAs<T>()
         {
-            return (T) RawResult;
+            try
+            {
+                return (T)RawResult;
+            }
+            catch
+            {
+                return (T)Convert.ChangeType(RawResult, typeof(T));
+            }
         }
     }
 }

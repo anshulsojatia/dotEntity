@@ -126,7 +126,7 @@ namespace DotEntity
             var cmd = new DotEntityDbCommand(DbOperationType.Insert, query, queryParameters, keyColumn);
             cmd.ProcessResult(result =>
             {
-                var id = (int)result;
+                var id = result as int? ?? Convert.ToInt32(result);
                 DataDeserializer<T>.Instance.SetPropertyAs<int>(entity, keyColumn, id);
                 if (_withTransaction)
                     //has somebody called for a rollback?
@@ -151,7 +151,7 @@ namespace DotEntity
                 var cmd = new DotEntityDbCommand(DbOperationType.Insert, query, queryParameters, keyColumn);
                 cmd.ProcessResult(result =>
                 {
-                    var id = (int)result;
+                    var id = result as int? ?? Convert.ToInt32(result);
                     DataDeserializer<T>.Instance.SetPropertyAs<int>(t, keyColumn, id);
                     if (_withTransaction)
                         //has somebody called for a rollback?
@@ -293,7 +293,8 @@ namespace DotEntity
                 var ts = DataDeserializer<T>.Instance.DeserializeMany(reader);
                 reader.NextResult();
                 reader.Read();
-                var total = (int)reader[0];
+                var fv = reader[0];
+                var total = fv as int? ?? Convert.ToInt32(fv);
                 return Tuple.Create(total, ts);
             });
             DotEntityDbConnector.ExecuteCommand(cmd);

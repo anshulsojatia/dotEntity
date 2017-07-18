@@ -23,6 +23,8 @@
  * To know more about our commercial license email us at support@roastedbytes.com or
  * visit http://dotentity.net/legal/commercial
  */
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using DotEntity.Extensions;
@@ -72,9 +74,14 @@ namespace DotEntity
 
         public TType SelectScalerAs<TType>()
         {
+            var value = _resultSet[_resultIndex].First()[0];
             try
             {
-                return (TType) _resultSet[_resultIndex].First()[0];
+                return (TType) value;
+            }
+            catch
+            {
+                return (TType) Convert.ChangeType(value, typeof(TType));
             }
             finally
             {
