@@ -499,7 +499,7 @@ namespace DotEntity
             var prefix = tableName;
             aliases?.TryGetValue(tableName, out prefix);
 
-            return $"[{prefix}].[{propertyName}]";
+            return $"{prefix}.{propertyName}";
         }
 
         #endregion;

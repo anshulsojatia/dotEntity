@@ -571,7 +571,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
                 new JoinMeta<Category>("CategoryId", "Id")
             });
 
-            var expected = "SELECT * FROM Product t1 INNER JOIN ProductCategory t2 ON t1.[Id] = t2.[ProductId] INNER JOIN Category t3 ON t2.[CategoryId] = t3.[Id];";
+            var expected = "SELECT * FROM Product t1 INNER JOIN ProductCategory t2 ON t1.Id = t2.ProductId INNER JOIN Category t3 ON t2.CategoryId = t3.Id;";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(0, queryParameters.Count);
         }
@@ -585,7 +585,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
                 new JoinMeta<Category>("CategoryId", "Id", SourceColumn.Parent)
             });
 
-            var expected = "SELECT * FROM Product t1 INNER JOIN ProductCategory t2 ON t1.[Id] = t2.[ProductId] INNER JOIN Category t3 ON t1.[CategoryId] = t3.[Id];";
+            var expected = "SELECT * FROM Product t1 INNER JOIN ProductCategory t2 ON t1.Id = t2.ProductId INNER JOIN Category t3 ON t1.CategoryId = t3.Id;";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(0, queryParameters.Count);
         }
@@ -600,7 +600,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
                 new JoinMeta<Category>("CategoryId", "Id")
             }, new List<LambdaExpression>(){ expression });
 
-            var expected = "SELECT * FROM Product t1 INNER JOIN ProductCategory t2 ON t1.[Id] = t2.[ProductId] INNER JOIN Category t3 ON t2.[CategoryId] = t3.[Id]  WHERE [t1].[Id] = [t3].[Id];";
+            var expected = "SELECT * FROM Product t1 INNER JOIN ProductCategory t2 ON t1.Id = t2.ProductId INNER JOIN Category t3 ON t2.CategoryId = t3.Id  WHERE t1.Id = t3.Id;";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(1, queryParameters.Count);
         }
@@ -616,7 +616,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
                 new JoinMeta<Category>("CategoryId", "Id")
             }, new List<LambdaExpression>() { expression1, expression2 });
 
-            var expected = "SELECT * FROM Product t1 LEFT OUTER JOIN ProductCategory t2 ON t1.[Id] = t2.[ProductId] INNER JOIN Category t3 ON t2.[CategoryId] = t3.[Id]  WHERE [t1].[Id] = [t3].[Id] AND [t2].[CategoryId] > [t3].[Id];";
+            var expected = "SELECT * FROM Product t1 LEFT OUTER JOIN ProductCategory t2 ON t1.Id = t2.ProductId INNER JOIN Category t3 ON t2.CategoryId = t3.Id  WHERE t1.Id = t3.Id AND t2.CategoryId > t3.Id;";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(2, queryParameters.Count);
         }
