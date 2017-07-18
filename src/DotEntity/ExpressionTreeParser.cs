@@ -225,7 +225,7 @@ namespace DotEntity
         private object VisitMemberExpression(MemberExpression expression, out bool isProperty)
         {
             isProperty = false;
-            if (expression.Expression == null)
+            if (expression.Expression == null || expression.Expression.NodeType == ExpressionType.Constant)
             {
                 return Compile(expression);
             }
@@ -236,6 +236,7 @@ namespace DotEntity
             }
             if (expression.Expression.NodeType == ExpressionType.Parameter)
                 return VisitParameterExpression((ParameterExpression)expression.Expression);
+
 #if !NETSTANDARD15
             if (expression.Member.MemberType == MemberTypes.Field || expression.Expression.NodeType == ExpressionType.MemberAccess)
             {
@@ -243,7 +244,7 @@ namespace DotEntity
             }
 #endif
 
-            return null;
+                return null;
         }
 
         private object Compile(Expression expression)
