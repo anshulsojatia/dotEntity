@@ -31,7 +31,9 @@ using System.Runtime.CompilerServices;
 using DotEntity.Providers;
 using DotEntity.Versioning;
 
+#if DEBUG
 [assembly: InternalsVisibleTo("DotEntity.Tests")]
+#endif
 namespace DotEntity
 {
     public partial class DotEntityDb
