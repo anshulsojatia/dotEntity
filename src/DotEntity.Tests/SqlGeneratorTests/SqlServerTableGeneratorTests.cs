@@ -1,31 +1,40 @@
 ﻿// #region Author Information
-// // TableGeneratorTests.cs
+// // SqlServerTableGeneratorTests.cs
 // // 
 // // (c) Apexol Technologies. All Rights Reserved.
 // // 
 // #endregion
 
+using DotEntity.SqlServer;
 using NUnit.Framework;
 using DotEntity.Tests.Data;
 
 namespace DotEntity.Tests.SqlGeneratorTests
 {
     [TestFixture]
-    public class TableGeneratorTests
+    public class SqlServerTableGeneratorTests
     {
+        [OneTimeSetUp]
+        public void Init()
+        {
+            DotEntityDb.Initialize(
+                @"Data Source=.\sqlexpress;Initial Catalog=ms;Integrated Security=False;Persist Security Info=False;User ID=iis_user;Password=iis_user",
+                new SqlServerDatabaseProvider());
+        }
+
         [Test]
         public void CreateTable_Succeeds()
         {
             var generator = new DefaultDatabaseTableGenerator();
             var sql = generator.GetCreateTableScript<Product>();
-            var expected = @"CREATE TABLE [Product]
-(	 [Id] INT NOT NULL IDENTITY(1,1),
-	 [ProductName] NVARCHAR(MAX) NOT NULL,
-	 [ProductDescription] NVARCHAR(MAX) NOT NULL,
-	 [DateCreated] DATETIME NOT NULL,
-	 [Price] NUMERIC(18,0) NOT NULL,
-	 [IsActive] BIT NOT NULL,
-PRIMARY KEY CLUSTERED ([Id] ASC));";
+            var expected = @"CREATE TABLE Product
+(	 Id INT NOT NULL IDENTITY(1,1),
+	 ProductName NVARCHAR(MAX) NOT NULL,
+	 ProductDescription NVARCHAR(MAX) NOT NULL,
+	 DateCreated DATETIME NOT NULL,
+	 Price NUMERIC(18,0) NOT NULL,
+	 IsActive BIT NOT NULL,
+PRIMARY KEY CLUSTERED (Id ASC));";
             Assert.AreEqual(expected, sql);
         }
 
@@ -34,7 +43,7 @@ PRIMARY KEY CLUSTERED ([Id] ASC));";
         {
             var generator = new DefaultDatabaseTableGenerator();
             var sql = generator.GetDropTableScript<Product>();
-            var expected = @"DROP TABLE [Product]";
+            var expected = @"DROP TABLE Product;";
             Assert.AreEqual(expected, sql);
         }
 
@@ -50,9 +59,9 @@ PRIMARY KEY CLUSTERED ([Id] ASC));";
             };
             var generator = new DefaultDatabaseTableGenerator();
             var sql = generator.GetCreateConstraintScript(relation);
-            var expected = @"ALTER TABLE [ProductCategory]
+            var expected = @"ALTER TABLE ProductCategory
 ADD CONSTRAINT FK_Product_Id_ProductCategory_ProductId
-FOREIGN KEY ([ProductId]) REFERENCES [Product](Id);";
+FOREIGN KEY (ProductId) REFERENCES Product(Id);";
 
             Assert.AreEqual(expected, sql);
         }
@@ -69,7 +78,7 @@ FOREIGN KEY ([ProductId]) REFERENCES [Product](Id);";
             };
             var generator = new DefaultDatabaseTableGenerator();
             var sql = generator.GetDropConstraintScript(relation);
-            var expected = @"ALTER TABLE [ProductCategory]
+            var expected = @"ALTER TABLE ProductCategory
 DROP CONSTRAINT FK_Product_Id_ProductCategory_ProductId;";
             Assert.AreEqual(expected, sql);
         }
