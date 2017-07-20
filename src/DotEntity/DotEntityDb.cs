@@ -82,15 +82,24 @@ namespace DotEntity
             return EntityTableNames.ContainsKey(type) ? EntityTableNames[type] : type.Name;
         }
 
-        public static void UpdateDatabaseToLatestVersion()
+        private static ConcurrentQueue<IDatabaseVersion> _databaseVersions;
+
+        public static void EnqueueVersions(params IDatabaseVersion[] versions)
         {
-            var versionRunner = new VersionUpdater();
+            _databaseVersions = _databaseVersions ?? new ConcurrentQueue<IDatabaseVersion>();
+            foreach(var version in versions)
+                _databaseVersions.Enqueue(version);
+        }
+
+        public static void UpdateDatabaseToLatestVersion(string callingContextName)
+        {
+            var versionRunner = new VersionUpdater(callingContextName);
             versionRunner.RunUpgrade();
         }
 
-        public static void UpdateDatabaseToVersion(string versionKey)
+        public static void UpdateDatabaseToVersion(string callingContextName, string versionKey)
         {
-            var versionRunner = new VersionUpdater();
+            var versionRunner = new VersionUpdater(callingContextName);
             versionRunner.RunDowngrade(versionKey);
         }
     }

@@ -25,13 +25,13 @@ namespace DotEntity.Tests.PersistanceTests
             DotEntityDb.Initialize(@"Server=127.0.0.1;Uid=root;Pwd=admin;Database=mytest;",
                 new MySqlDatabaseProvider("mytest"));
 
-            DotEntityDb.UpdateDatabaseToLatestVersion();
+            DotEntityDb.UpdateDatabaseToLatestVersion("DotEntity.Tests.PersistanceTests");
         }
 
         [OneTimeTearDown]
         public void End()
         {
-            DotEntityDb.UpdateDatabaseToVersion(null);
+            DotEntityDb.UpdateDatabaseToVersion("DotEntity.Tests.PersistanceTests", null);
         }
 
         [Test]

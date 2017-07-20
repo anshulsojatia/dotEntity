@@ -35,5 +35,7 @@ namespace DotEntity.Versioning
         public int Id { get; set; }
 
         public string VersionKey { get; set; }
+
+        public string ContextName { get; set; }
     }
 }

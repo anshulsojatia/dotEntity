@@ -35,6 +35,13 @@ namespace DotEntity.Versioning
 {
     public class VersionUpdater
     {
+        private readonly string _callingContextName;
+
+        public VersionUpdater(string callingContextName)
+        {
+            _callingContextName = callingContextName;
+        }
+
         public void RunUpgrade()
         {
             DotEntityDb.MapTableNameForType<DotEntityVersion>(Configuration.VersionTableName);
@@ -56,7 +63,7 @@ namespace DotEntity.Versioning
             }
 
             //first get all the versions from database
-            var appliedDatabaseVersions = EntitySet<DotEntityVersion>.Select().ToList();
+            var appliedDatabaseVersions = EntitySet<DotEntityVersion>.Where(x => x.ContextName == _callingContextName).Select().ToList();
             var availableVersions = TypeFinder.ClassesOfType<IDatabaseVersion>()
                 .Select(x => (IDatabaseVersion)Instantiator.GetInstance(x));
 
@@ -71,7 +78,8 @@ namespace DotEntity.Versioning
                     availableVersion.Upgrade(transaction);
                     var newVersion = new DotEntityVersion()
                     {
-                        VersionKey = availableVersion.VersionKey
+                        VersionKey = availableVersion.VersionKey,
+                        ContextName = _callingContextName
                     };
                     //insert the version
                     EntitySet<DotEntityVersion>.Insert(newVersion, transaction);
@@ -87,7 +95,7 @@ namespace DotEntity.Versioning
             Throw.IfDbNotVersioned(!DotEntityDb.Provider.IsDatabaseVersioned(Configuration.VersionTableName));
            
             //first get all the versions from database
-            var appliedDatabaseVersions = EntitySet<DotEntityVersion>.Select().ToList();
+            var appliedDatabaseVersions = EntitySet<DotEntityVersion>.Where(x => x.ContextName == _callingContextName).Select().ToList();
 
             if (versionKey != null)
             {

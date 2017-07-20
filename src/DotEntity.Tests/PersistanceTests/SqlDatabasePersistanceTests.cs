@@ -26,13 +26,13 @@ namespace DotEntity.Tests.PersistanceTests
                 @"Data Source=.\sqlexpress;Initial Catalog=ms;Integrated Security=False;Persist Security Info=False;User ID=iis_user;Password=iis_user",
                 new SqlServerDatabaseProvider());
 
-            DotEntityDb.UpdateDatabaseToLatestVersion();
+            DotEntityDb.UpdateDatabaseToLatestVersion("DotEntity.Tests.PersistanceTests");
         }
 
         [OneTimeTearDown]
         public void End()
         {
-            DotEntityDb.UpdateDatabaseToVersion(null);
+            DotEntityDb.UpdateDatabaseToVersion("DotEntity.Tests.PersistanceTests", null);
         }
 
         [Test]
