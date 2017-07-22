@@ -94,7 +94,7 @@ namespace DotEntity
             else if (expression is InvocationExpression)
                 return VisitInvocationExpression((InvocationExpression)expression);
             else if (expression is UnaryExpression)
-                return VisitUnaryExpression((UnaryExpression)expression);
+                return VisitUnaryExpression((UnaryExpression)expression, out isProperty);
             else if (expression is ParameterExpression)
                 VisitParameterExpression((ParameterExpression)expression);
             else if (expression is MemberExpression)
@@ -123,12 +123,24 @@ namespace DotEntity
             {
                 
                 _queryInfo.Add(new QueryInfo(true, Markers.Open));
-                Visit(expression.Left, out bool _);
+                var p = Visit(expression.Left, out bool isProperty);
+                if (isProperty)
+                {
+                    var value = _notCount <= 0;
+                    AddQueryParameter("", p.ToString(), value, "=", p.ToString());
+                    _notCount--;
+                }
                 _queryInfo.Add(new QueryInfo(true, Markers.Close));
                 _queryInfo.Add(new QueryInfo(true, GetOperator(expression.NodeType, this)));
                 
                 _queryInfo.Add(new QueryInfo(true, Markers.Open));
-                Visit(expression.Right, out bool _);
+                p = Visit(expression.Right, out isProperty);
+                if (isProperty)
+                {
+                    var value = _notCount <= 0;
+                    AddQueryParameter("", p.ToString(), value, "=", p.ToString());
+                    _notCount--;
+                }
                 _queryInfo.Add(new QueryInfo(true, Markers.Close));
                 _notCount--;
             }
@@ -209,13 +221,13 @@ namespace DotEntity
             return null;
         }
 
-        private object VisitUnaryExpression(UnaryExpression expression)
+        private object VisitUnaryExpression(UnaryExpression expression, out bool isProperty)
         {
             if (expression.NodeType == ExpressionType.Not)
             {
                 _notCount++;
             }
-            return Visit(expression.Operand, out bool isProperty);
+            return Visit(expression.Operand, out isProperty);
         }
 
         private string VisitParameterExpression(ParameterExpression expression)
