@@ -17,13 +17,13 @@
  * along with dotEntity.If not, see<http://www.gnu.org/licenses/>.
 
  * You can release yourself from the requirements of the AGPL license by purchasing
- * a commercial license. Buying such a license is mandatory as soon as you
+ * a commercial license (dotEntity Pro). Buying such a license is mandatory as soon as you
  * develop commercial activities involving the dotEntity software without
  * disclosing the source code of your own applications. The activites include:
  * shipping dotEntity with a closed source product, offering paid services to customers
  * as an Application Service Provider.
  * To know more about our commercial license email us at support@roastedbytes.com or
- * visit http://dotentity.net/legal/commercial
+ * visit http://dotentity.net/licensing
  */
 using System;
 using System.Collections.Concurrent;
