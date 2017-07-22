@@ -29,7 +29,6 @@ using System;
 using System.Linq;
 using DotEntity.Constants;
 using DotEntity.Reflection;
-using DotEntity.Utils;
 
 namespace DotEntity.Versioning
 {

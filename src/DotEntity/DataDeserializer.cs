@@ -217,29 +217,6 @@ namespace DotEntity
             return _getter.Get<TType>(instance, fieldName);
         }
 
-        private static TType Parse<TType>(object value)
-        {
-            if (value == null || value is DBNull) return default(TType);
-            if (value is TType) return (TType)value;
-            var type = typeof(TType);
-            type = Nullable.GetUnderlyingType(type) ?? type;
-#if NETSTANDARD15
-            if (type.GetTypeInfo().IsEnum)
-#else
-            if (type.IsEnum)
-#endif
-            {
-                if (value is float || value is double || value is decimal)
-                {
-                    value = Convert.ChangeType(value, Enum.GetUnderlyingType(type), CultureInfo.InvariantCulture);
-                }
-                return (TType)Enum.ToObject(type, value);
-            }
-
-            return (TType)Convert.ChangeType(value, type, CultureInfo.InvariantCulture);
-        }
-
-
         public static DataDeserializer<T> Instance => Singleton<DataDeserializer<T>>.Instance;
 
         private string[] _columnsAsArray;
