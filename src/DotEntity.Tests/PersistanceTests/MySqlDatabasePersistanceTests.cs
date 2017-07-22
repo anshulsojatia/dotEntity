@@ -53,7 +53,7 @@ namespace DotEntity.Tests.PersistanceTests
         [Test]
         public void MySql_Select_Simple_Succeeds()
         {
-            var productCount = 500;
+            var productCount = 5;
             var products = new List<Product>();
             for (var i = 0; i < productCount; i++)
             {
@@ -133,7 +133,7 @@ namespace DotEntity.Tests.PersistanceTests
         [Test]
         public void MySql_SingleQuery_Succeeds()
         {
-            var productCount = 500;
+            var productCount = 5;
             var ps = new List<Product>();
             for (var i = 0; i < productCount; i++)
             {
