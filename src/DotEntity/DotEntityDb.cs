@@ -93,13 +93,15 @@ namespace DotEntity
 
         public static void UpdateDatabaseToLatestVersion(string callingContextName)
         {
-            var versionRunner = new VersionUpdater(callingContextName);
+            Throw.IfNoDatabaseVersions(_databaseVersions);
+            var versionRunner = new VersionUpdater(callingContextName, _databaseVersions.ToArray());
             versionRunner.RunUpgrade();
         }
 
         public static void UpdateDatabaseToVersion(string callingContextName, string versionKey)
         {
-            var versionRunner = new VersionUpdater(callingContextName);
+            Throw.IfNoDatabaseVersions(_databaseVersions);
+            var versionRunner = new VersionUpdater(callingContextName, _databaseVersions.ToArray());
             versionRunner.RunDowngrade(versionKey);
         }
     }

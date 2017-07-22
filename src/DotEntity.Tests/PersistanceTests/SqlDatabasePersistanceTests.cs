@@ -25,7 +25,8 @@ namespace DotEntity.Tests.PersistanceTests
             DotEntityDb.Initialize(
                 @"Data Source=.\sqlexpress;Initial Catalog=ms;Integrated Security=False;Persist Security Info=False;User ID=iis_user;Password=iis_user",
                 new SqlServerDatabaseProvider());
-
+            //add some versions
+            DotEntityDb.EnqueueVersions(new DbVersion());
             DotEntityDb.UpdateDatabaseToLatestVersion("DotEntity.Tests.PersistanceTests");
         }
 

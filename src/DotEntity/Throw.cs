@@ -27,8 +27,10 @@
  */
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Linq.Expressions;
 using DotEntity.Extensions;
+using DotEntity.Versioning;
 
 namespace DotEntity
 {
@@ -99,6 +101,13 @@ namespace DotEntity
         public static void IfInvalidDataTypeMapping(bool isNotValid, Type type)
         {
             It<InvalidOperationException>(isNotValid, $"Can't find an equivalent database type for type {type.FullName}. Either mark the field as virtual or change the datatype to a more concrete type");
+        }
+
+        public static void IfNoDatabaseVersions(ConcurrentQueue<IDatabaseVersion> databaseVersions)
+        {
+            It<InvalidOperationException>(databaseVersions == null || databaseVersions.IsEmpty,
+                $"Version upgrades or downgrades can't be done with no versions. Use {nameof(DotEntityDb)}.{nameof(DotEntityDb.EnqueueVersions)} to add some database versions");
+
         }
 
         public static void It<TException>(bool condition, params object[] parameters) where TException : Exception

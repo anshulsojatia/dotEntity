@@ -36,10 +36,12 @@ namespace DotEntity.Versioning
     public class VersionUpdater
     {
         private readonly string _callingContextName;
+        private readonly IDatabaseVersion[] _databaseVersions;
 
-        public VersionUpdater(string callingContextName)
+        public VersionUpdater(string callingContextName, IDatabaseVersion[] databaseVersions)
         {
             _callingContextName = callingContextName;
+            _databaseVersions = databaseVersions;
         }
 
         public void RunUpgrade()
@@ -64,12 +66,10 @@ namespace DotEntity.Versioning
 
             //first get all the versions from database
             var appliedDatabaseVersions = EntitySet<DotEntityVersion>.Where(x => x.ContextName == _callingContextName).Select().ToList();
-            var availableVersions = TypeFinder.ClassesOfType<IDatabaseVersion>()
-                .Select(x => (IDatabaseVersion)Instantiator.GetInstance(x));
 
             using (var transaction = EntitySet.BeginInternalTransaction())
             {
-                foreach (var availableVersion in availableVersions)
+                foreach (var availableVersion in _databaseVersions)
                 {
                     if (appliedDatabaseVersions.Any(x => x.VersionKey == availableVersion.VersionKey)) //already applied this one
                         continue;
@@ -105,13 +105,9 @@ namespace DotEntity.Versioning
                 }
             }
 
-            var availableVersions = TypeFinder.ClassesOfType<IDatabaseVersion>()
-                .Select(x => (IDatabaseVersion) Instantiator.GetInstance(x)).Reverse(); //in reverse order
-
-
             using (var transaction = EntitySet.BeginInternalTransaction())
             {
-                foreach (var availableVersion in availableVersions)
+                foreach (var availableVersion in _databaseVersions)
                 {
                     if (versionKey == availableVersion.VersionKey)
                         break; //stop here. everything done
