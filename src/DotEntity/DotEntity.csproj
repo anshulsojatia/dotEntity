@@ -5,13 +5,17 @@
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <Authors>Team Roasted Bytes</Authors>
     <Company>Apexol Technologies</Company>
+    <Title>dotEntity ORM</Title>
     <Description>Yet another simple and powerful micro ORM for .NET</Description>
-    <Copyright>Apexol Technologies</Copyright>
-    <PackageLicenseUrl>http://dotentity.net/legal/commercial</PackageLicenseUrl>
+    <Copyright>(C) 2017 Apexol Technologies</Copyright>
+    <PackageLicenseUrl>http://dotentity.net/licensing</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/RoastedBytes/dotEntity</PackageProjectUrl>
     <RepositoryUrl>https://github.com/RoastedBytes/dotEntity.git</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
     <PackageTags>Micro-ORM, Database, .NET Framework, POCO</PackageTags>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Version>0.0.1-rc</Version>
+    <PackageId>DotEntity</PackageId>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net45|AnyCPU'">

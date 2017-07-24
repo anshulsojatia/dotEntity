@@ -2,16 +2,20 @@
 
   <PropertyGroup>
     <TargetFrameworks>net451;net45;netstandard1.5;</TargetFrameworks>
-    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
     <Authors>Team Roasted Bytes</Authors>
     <Company>Apexol Technologies</Company>
-    <Description>MySql Database Provider for dotEntity</Description>
-    <Copyright>Apexol Technologies</Copyright>
-    <PackageLicenseUrl>http://dotentity.net/legal/commercial</PackageLicenseUrl>
+    <Title>dotEntity MySql Provider</Title>
+    <Description>MySql provider for dotEntity</Description>
+    <Copyright>(C) 2017 Apexol Technologies</Copyright>
+    <PackageLicenseUrl>http://dotentity.net/licensing</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/RoastedBytes/dotEntity</PackageProjectUrl>
     <RepositoryUrl>https://github.com/RoastedBytes/dotEntity.git</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
     <PackageTags>Micro-ORM, Database, .NET Framework, POCO, MySql</PackageTags>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Version>1.0.0-rc</Version>
+    <PackageId>DotEntity.MySql</PackageId>
   </PropertyGroup>
 
   <ItemGroup>
