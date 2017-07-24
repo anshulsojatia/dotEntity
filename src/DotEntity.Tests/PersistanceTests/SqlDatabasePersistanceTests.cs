@@ -15,13 +15,12 @@ using DotEntity.Tests.Data;
 namespace DotEntity.Tests.PersistanceTests
 {
     [TestFixture]
-    public class SqlDatabasePersistanceTests
+    public class SqlDatabasePersistanceTests : DotEntityTest
     {
         [OneTimeSetUp]
         public void Init()
         {
-            DotEntityDb.Initialize(
-                @"Data Source=.\sqlexpress;Initial Catalog=ms;Integrated Security=False;Persist Security Info=False;User ID=iis_user;Password=iis_user",
+            DotEntityDb.Initialize(MsSqlConnectionString,
                 new SqlServerDatabaseProvider());
             var createProduct = @"CREATE TABLE Product
 (     Id INT NOT NULL IDENTITY(1,1),

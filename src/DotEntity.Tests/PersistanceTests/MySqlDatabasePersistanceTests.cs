@@ -9,7 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
-using DotEntity.Enumerations;
 using DotEntity.MySql;
 using DotEntity.Tests.Data;
 
@@ -21,8 +20,7 @@ namespace DotEntity.Tests.PersistanceTests
         [OneTimeSetUp]
         public void Init()
         {
-            DotEntityDb.Initialize(IsAppVeyor ? @"Server=127.0.0.1;Uid=root;Pwd=Password12!;Database=mytest;" : @"Server=127.0.0.1;Uid=root;Pwd=admin;Database=mytest;",
-                new MySqlDatabaseProvider("mytest"));
+            DotEntityDb.Initialize(MySqlConnectionString, new MySqlDatabaseProvider("mytest"));
 
             var createProduct = @"CREATE TABLE Product
 (     Id INT NOT NULL AUTO_INCREMENT,
