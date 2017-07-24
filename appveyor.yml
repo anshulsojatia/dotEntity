@@ -1,8 +1,26 @@
 version: 1.0.{build}
+image: Visual Studio 2017
 environment:
   appveyor: true
 services:
 - mssql2016
 - mysql
-build:
-  verbosity: minimal
+build_script:
+- cmd: >-
+    dotnet restore .\src\DotEntity\DotEntity.csproj
+
+    dotnet msbuild .\src\DotEntity\DotEntity.csproj
+
+    dotnet restore .\src\DotEntity.Tests.Runner\DotEntity.Tests.Runner.csproj
+
+    dotnet msbuild .\src\DotEntity.Tests.Runner\DotEntity.Tests.Runner.csproj
+test_script:
+- ps: >-
+    $env:MYSQL_PWD="Password12!"
+
+    $cmd = '"C:\Program Files\MySQL\MySQL Server 5.7\bin\mysql" -e "create database mytest;" --user=root'
+
+    iex "& $cmd"
+
+
+    dotnet run -p .\src\DotEntity.Tests.Runner\DotEntity.Tests.Runner.csproj
