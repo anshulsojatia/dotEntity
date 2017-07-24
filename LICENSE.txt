@@ -2,5 +2,5 @@ dotEntity is a software that is dual-licensed under GNU Affero General Public Li
 
 1. If you wish to use the software under AGPL, read more about the licensing terms by opening the file AGPL.txt or at https://www.gnu.org/licenses/agpl.txt
 
-2. In case you wish to use the software for commercial distribution without having to share the application source code, you should consider buying a commercial license. To know more about our commercial license email us at support@roastedbytes.com or visit http://dotentity.net/legal/commercial.
+2. In case you wish to use the software for commercial distribution without having to share the application source code, you should consider buying a commercial license. To know more about our commercial license email us at support@roastedbytes.com or visit http://dotentity.net/licensing.
 
