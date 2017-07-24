@@ -22,3 +22,5 @@ src/DotEntity/DotEntity.csproj.user
 src/DotEntity/DotEntity.licenseheader
 src/DotEntity.MySql/obj/
 src/DotEntity.MySql/bin/
+src/DotEntity.Tests.Runner/bin/
+src/DotEntity.Tests.Runner/obj/
