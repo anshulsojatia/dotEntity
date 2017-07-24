@@ -251,14 +251,12 @@ namespace DotEntity
             if (expression.Expression.NodeType == ExpressionType.Parameter)
                 return VisitParameterExpression((ParameterExpression)expression.Expression);
 
-#if !NETSTANDARD15
+
             if (expression.Member.MemberType == MemberTypes.Field || expression.Expression.NodeType == ExpressionType.MemberAccess)
             {
                 return Compile(expression);
             }
-#endif
-
-                return null;
+            return null;
         }
 
         private object Compile(Expression expression)
