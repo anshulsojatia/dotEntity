@@ -20,3 +20,8 @@ To install **MySql Provider** (uses [MySqlConnector](https://github.com/mysql-ne
 ```
 Install-Package DotEntity.MySql -Pre
 ```
+## Documentation
+The documentation of the library is available at http://dotentity.net/docs.
+
+## Report Issues
+Please check if the problem you are facing is already listed in [issues](https://github.com/RoastedBytes/dotEntity/issues). If not, create a new issue and provide steps to reproduce the issue. Sharing images would be good if that helps to reproduce the issue quickly.
