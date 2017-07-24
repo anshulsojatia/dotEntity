@@ -21,6 +21,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotEntity.Tests.Data", "Dot
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotEntity.MySql", "DotEntity.MySql\DotEntity.MySql.csproj", "{DFA17877-E020-4E81-A270-DA265435E619}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotEntity.Tests.Runner", "DotEntity.Tests.Runner\DotEntity.Tests.Runner.csproj", "{CABBFDF5-ECF8-4A55-B315-7B4AE751746B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,10 @@ Global
 		{DFA17877-E020-4E81-A270-DA265435E619}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DFA17877-E020-4E81-A270-DA265435E619}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DFA17877-E020-4E81-A270-DA265435E619}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CABBFDF5-ECF8-4A55-B315-7B4AE751746B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CABBFDF5-ECF8-4A55-B315-7B4AE751746B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CABBFDF5-ECF8-4A55-B315-7B4AE751746B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CABBFDF5-ECF8-4A55-B315-7B4AE751746B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -64,6 +70,7 @@ Global
 		{CA597152-C809-4E46-A2AC-E9B484922538} = {F33CFA87-3667-418E-A487-16CD24F31ADF}
 		{408E5BE1-7E64-4696-9682-2FCECAC54435} = {78ACE309-A5DD-44B6-A245-19BE94067041}
 		{FCC61C35-C9D7-4CA0-8ADB-771EBA3F4723} = {78ACE309-A5DD-44B6-A245-19BE94067041}
+		{CABBFDF5-ECF8-4A55-B315-7B4AE751746B} = {78ACE309-A5DD-44B6-A245-19BE94067041}
 	EndGlobalSection
 	GlobalSection(Performance) = preSolution
 		HasPerformanceSessions = true
