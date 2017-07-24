@@ -5,18 +5,8 @@ Yet another simple and powerful micro ORM for .NET. To know more goto [http://do
 ## How to install
 You can download **dotEntity** library in the following ways.
 
-### GitHub
-
-**dotEntity** is hosted on GitHub. The following are links to various available versions.
-
-|Download Type| |
-|-------|---------|-------------|
-|**Latest Stable Source Code**|[Download](https://github.com/RoastedBytes/dotEntity)|
-|**Latest Development**|[Download](https://github.com/RoastedBytes/dotEntity/tree/develop)|
-|**Releases**| [Download](https://github.com/RoastedBytes/dotEntity/releases)|
-
 ### NuGet
-**dotEntity** can also be installed via NuGet.
+**dotEntity** can be installed via NuGet.
 
 To install **dotEntity**
 ```
