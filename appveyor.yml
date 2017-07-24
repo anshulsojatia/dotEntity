@@ -1,0 +1,8 @@
+version: 1.0.{build}
+environment:
+  appveyor: true
+services:
+- mssql2016
+- mysql
+build:
+  verbosity: minimal

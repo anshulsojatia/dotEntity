@@ -16,12 +16,12 @@ using DotEntity.Tests.Data;
 namespace DotEntity.Tests.PersistanceTests
 {
     [TestFixture]
-    public class MySqlDatabasePersistanceTests
+    public class MySqlDatabasePersistanceTests : DotEntityTest
     {
         [OneTimeSetUp]
         public void Init()
         {
-            DotEntityDb.Initialize(@"Server=127.0.0.1;Uid=root;Pwd=admin;Database=mytest;",
+            DotEntityDb.Initialize(IsAppVeyor ? @"Server=127.0.0.1;Uid=root;Pwd=Password12!;Database=mytest;" : @"Server=127.0.0.1;Uid=root;Pwd=admin;Database=mytest;",
                 new MySqlDatabaseProvider("mytest"));
 
             var createProduct = @"CREATE TABLE Product
