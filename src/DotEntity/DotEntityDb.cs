@@ -55,6 +55,7 @@ namespace DotEntity
             Provider.QueryGenerator = Provider.QueryGenerator ?? new DefaultQueryGenerator();
             Provider.TypeMapProvider = Provider.TypeMapProvider ?? new DefaultTypeMapProvider();
             Provider.DatabaseTableGenerator = Provider.DatabaseTableGenerator ?? new DefaultDatabaseTableGenerator();
+            ResetVersions();
         }
 
         public static IDatabaseProvider Provider { get; internal set; }
@@ -84,6 +85,11 @@ namespace DotEntity
 
         private static ConcurrentQueue<IDatabaseVersion> _databaseVersions;
 
+        private static void ResetVersions()
+        {
+            if(_databaseVersions != null)
+                while (_databaseVersions.TryDequeue(out IDatabaseVersion version)) { }
+        }
         public static void EnqueueVersions(params IDatabaseVersion[] versions)
         {
             _databaseVersions = _databaseVersions ?? new ConcurrentQueue<IDatabaseVersion>();
