@@ -85,17 +85,26 @@ namespace DotEntity.Caching
                     Delegate setter = null;
                     if (propertyType == typeof(int))
                         setter = property.CreateSetter<int>(_type);
+                    if (propertyType == typeof(int?))
+                        setter = property.CreateSetter<int?>(_type);
                     else if (propertyType == typeof(string))
                         setter = property.CreateSetter<string>(_type);
                     else if (propertyType == typeof(DateTime))
                         setter = property.CreateSetter<DateTime>(_type);
+                    else if (propertyType == typeof(DateTime?))
+                        setter = property.CreateSetter<DateTime?>(_type);
                     else if (propertyType == typeof(decimal))
                         setter = property.CreateSetter<decimal>(_type);
+                    else if (propertyType == typeof(decimal?))
+                        setter = property.CreateSetter<decimal?>(_type);
                     else if (propertyType == typeof(double))
                         setter = property.CreateSetter<double>(_type);
+                    else if (propertyType == typeof(double?))
+                        setter = property.CreateSetter<double?>(_type);
                     else if (propertyType == typeof(bool))
                         setter = property.CreateSetter<bool>(_type);
-
+                    else if (propertyType == typeof(bool?))
+                        setter = property.CreateSetter<bool?>(_type);
                     _setter.TryAdd(property.Name, setter);
                 }
             }
@@ -112,19 +121,29 @@ namespace DotEntity.Caching
                     Delegate getter = null;
                     if (propertyType == typeof(int))
                         getter = property.CreateGetter<int>(_type);
+                    if (propertyType == typeof(int?))
+                        getter = property.CreateGetter<int?>(_type);
                     else if (propertyType == typeof(string))
                         getter = property.CreateGetter<string>(_type);
                     else if (propertyType == typeof(DateTime))
                         getter = property.CreateGetter<DateTime>(_type);
+                    else if (propertyType == typeof(DateTime?))
+                        getter = property.CreateGetter<DateTime?>(_type);
                     else if (propertyType == typeof(decimal))
                         getter = property.CreateGetter<decimal>(_type);
+                    else if (propertyType == typeof(decimal?))
+                        getter = property.CreateGetter<decimal?>(_type);
                     else if (propertyType == typeof(double))
                         getter = property.CreateGetter<double>(_type);
+                    else if (propertyType == typeof(double?))
+                        getter = property.CreateGetter<double?>(_type);
                     else if (propertyType == typeof(bool))
                         getter = property.CreateGetter<bool>(_type);
-
+                    else if (propertyType == typeof(bool?))
+                        getter = property.CreateGetter<bool?>(_type);
                     _getter.TryAdd(property.Name, getter);
                 }
+
             }
         }
 
