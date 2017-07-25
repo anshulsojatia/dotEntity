@@ -68,20 +68,7 @@ namespace DotEntity
                             }
                             break;
                         case DbOperationType.Select:
-                            using (var cmd =
-                                queryProcessor.GetQueryCommand(con, DotEntityDbCommand.Query, DotEntityDbCommand.QueryInfos))
-                            {
-                                using (var reader = cmd.ExecuteReader())
-                                {
-                                    DotEntityDbCommand.SetDataReader(reader);
-                                }
-                            }
-                            break;
                         case DbOperationType.MultiQuery:
-                            //the difference between a multiquery and select is that in multiquery,
-                            //we don't dispose the reader immediately. It's the responsibility of the
-                            //reader processor to dispose it manually
-                            //todo: Can we have a better solution than this?
                             using (var cmd =
                                 queryProcessor.GetQueryCommand(con, DotEntityDbCommand.Query, DotEntityDbCommand.QueryInfos))
                             {
