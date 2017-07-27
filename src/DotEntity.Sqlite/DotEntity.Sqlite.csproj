@@ -1,0 +1,47 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net451;net45;netstandard1.5;</TargetFrameworks>
+    <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
+    <Authors>Team Roasted Bytes</Authors>
+    <Company>Apexol Technologies</Company>
+    <Description>Sqlite Database Provider for dotEntity</Description>
+    <Copyright>Apexol Technologies</Copyright>
+    <PackageLicenseUrl>http://dotentity.net/licensing</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/RoastedBytes/dotEntity</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/RoastedBytes/dotEntity.git</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
+    <PackageTags>Micro-ORM, Database, .NET Framework, POCO, MySql</PackageTags>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net45|AnyCPU'">
+    <DefineConstants>TRACE;DEBUG;NET45;NET40</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
+    <DefineConstants>NETSTANDARD15</DefineConstants>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\DotEntity\DotEntity.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net45'">
+    <PackageReference Include="System.Data.SQLite.Core">
+      <Version>1.0.105.2</Version>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net451'">
+    <PackageReference Include="System.Data.SQLite.Core">
+      <Version>1.0.105.2</Version>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.5'">
+    <PackageReference Include="Microsoft.Data.SQLite">
+      <Version>1.1.1</Version>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>

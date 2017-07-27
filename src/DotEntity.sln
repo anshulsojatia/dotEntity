@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotEntity.MySql", "DotEntit
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotEntity.Tests.Runner", "DotEntity.Tests.Runner\DotEntity.Tests.Runner.csproj", "{CABBFDF5-ECF8-4A55-B315-7B4AE751746B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotEntity.Sqlite", "DotEntity.Sqlite\DotEntity.Sqlite.csproj", "{0F88921E-B5BF-44A1-8218-80599B9BB757}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +49,10 @@ Global
 		{CABBFDF5-ECF8-4A55-B315-7B4AE751746B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CABBFDF5-ECF8-4A55-B315-7B4AE751746B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CABBFDF5-ECF8-4A55-B315-7B4AE751746B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F88921E-B5BF-44A1-8218-80599B9BB757}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F88921E-B5BF-44A1-8218-80599B9BB757}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F88921E-B5BF-44A1-8218-80599B9BB757}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F88921E-B5BF-44A1-8218-80599B9BB757}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -24,3 +24,7 @@ src/DotEntity.MySql/obj/
 src/DotEntity.MySql/bin/
 src/DotEntity.Tests.Runner/bin/
 src/DotEntity.Tests.Runner/obj/
+src/DotEntity.Sqlite/obj/
+src/DotEntity.Sqlite/bin/
+src/DotEntity.Sqlite/DotEntity.Sqlite.csproj.user
+src/DotEntity.Tests/DotEntity.Tests.csproj.user
