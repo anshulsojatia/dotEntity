@@ -44,6 +44,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DotEntity.MySql\DotEntity.MySql.csproj" />
+    <ProjectReference Include="..\DotEntity.Sqlite\DotEntity.Sqlite.csproj" />
     <ProjectReference Include="..\DotEntity.SqlServer\DotEntity.SqlServer.csproj" />
     <ProjectReference Include="..\DotEntity.Tests.Data\DotEntity.Tests.Data.csproj" />
     <ProjectReference Include="..\DotEntity\DotEntity.csproj" />
