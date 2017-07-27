@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using DotEntity.Extensions;
 using DotEntity.Reflection;
@@ -193,7 +194,17 @@ namespace DotEntity.Caching
             {
                 return;
             }
-            callback.GetMethodInfo().Invoke(instance, new[] { propertyValue } );
+            var minfo = callback.GetMethodInfo();
+            try
+            {
+                minfo.Invoke(instance, new[] {propertyValue});
+            }
+            catch
+            {
+                var paramterType = minfo.GetParameters().First().ParameterType;
+                var convertedValue = Convert.ChangeType(propertyValue, paramterType);
+                minfo.Invoke(instance, new[] { convertedValue });
+            }
         }
     }
 
