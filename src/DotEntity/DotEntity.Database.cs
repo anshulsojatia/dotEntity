@@ -35,7 +35,7 @@ namespace DotEntity
     {
         public static class Database
         {
-            private static readonly IDatabaseTableGenerator DatabaseTableGenerator = DotEntityDb.Provider.DatabaseTableGenerator;
+            private static IDatabaseTableGenerator DatabaseTableGenerator => DotEntityDb.Provider.DatabaseTableGenerator;
 
             public static void CreateTable<T>(IDotEntityTransaction transaction) where T : class
             {
