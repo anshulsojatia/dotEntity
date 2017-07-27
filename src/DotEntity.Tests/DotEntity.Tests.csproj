@@ -3,7 +3,37 @@
   <PropertyGroup>
     <TargetFrameworks>net451;net45;netstandard1.5;</TargetFrameworks>
   </PropertyGroup>
-
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net45|AnyCPU'">
+    <DefineConstants>TRACE;DEBUG;NET45;</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net451|AnyCPU'">
+    <DefineConstants>TRACE;DEBUG;NET451;</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.5' ">
+    <DefineConstants>NETSTANDARD15</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="bin\Debug\net451\x64\**" />
+    <Compile Remove="bin\Debug\net451\x86\**" />
+    <Compile Remove="bin\Debug\net45\x64\**" />
+    <Compile Remove="bin\Debug\net45\x86\**" />
+    <EmbeddedResource Remove="bin\Debug\net451\x64\**" />
+    <EmbeddedResource Remove="bin\Debug\net451\x86\**" />
+    <EmbeddedResource Remove="bin\Debug\net45\x64\**" />
+    <EmbeddedResource Remove="bin\Debug\net45\x86\**" />
+    <None Remove="bin\Debug\net451\x64\**" />
+    <None Remove="bin\Debug\net451\x86\**" />
+    <None Remove="bin\Debug\net45\x64\**" />
+    <None Remove="bin\Debug\net45\x86\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="TestDb\sqlite.db" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="TestDb\sqlite.db">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
     <PackageReference Include="MySqlConnector" Version="0.23.0" />
