@@ -20,6 +20,10 @@ To install **MySql Provider** (uses [MySqlConnector](https://github.com/mysql-ne
 ```
 Install-Package DotEntity.MySql -Pre
 ```
+To install **Sqlite Provider**
+```
+Install-Package DotEntity.Sqlite -Pre
+```
 ## Documentation
 The documentation of the library is available at http://dotentity.net/docs.
 
