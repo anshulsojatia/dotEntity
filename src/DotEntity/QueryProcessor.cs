@@ -62,7 +62,7 @@ namespace DotEntity
                     idParameter.DbType = DbType.Int32;
                     command.Parameters.Add(idParameter);
                 }
-                catch (NotSupportedException)
+                catch (Exception)
                 {
                     //some providers may not support output parameters
                 }
