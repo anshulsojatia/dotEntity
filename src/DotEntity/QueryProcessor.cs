@@ -25,6 +25,8 @@
  * To know more about our commercial license email us at support@roastedbytes.com or
  * visit http://dotentity.net/licensing
  */
+
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -51,12 +53,20 @@ namespace DotEntity
             
             if (loadIdOfAffectedRow)
             {
-                //add an output parameter
-                var idParameter = command.CreateParameter();
-                idParameter.ParameterName = idParameterName;
-                idParameter.Direction = ParameterDirection.Output;
-                idParameter.DbType = DbType.Int32;
-                command.Parameters.Add(idParameter);
+                try
+                {
+                    //add an output parameter
+                    var idParameter = command.CreateParameter();
+                    idParameter.ParameterName = idParameterName;
+                    idParameter.Direction = ParameterDirection.Output;
+                    idParameter.DbType = DbType.Int32;
+                    command.Parameters.Add(idParameter);
+                }
+                catch (NotSupportedException)
+                {
+                    //some providers may not support output parameters
+                }
+               
             }
             return command;
         }
