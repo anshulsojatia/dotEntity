@@ -18,9 +18,9 @@ namespace DotEntity.Tests
         public DotEntityTest()
         {
 #if NETSTANDARD15
-            _sqliteFile = ApplicationEnvironment.ApplicationBasePath + @"TestDb\sqlite.db";
+            _sqliteFile = ApplicationEnvironment.ApplicationBasePath + @"\TestDb\sqlite.db";
 #else
-            _sqliteFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"TestDb\sqlite.db");
+            _sqliteFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"\TestDb\sqlite.db");
 
 #endif            
             IsAppVeyor = Environment.GetEnvironmentVariable("appveyor") == "true";
