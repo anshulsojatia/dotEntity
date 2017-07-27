@@ -5,6 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using NUnit.Framework;
 using DotEntity.Enumerations;
+using DotEntity.MySql;
 using DotEntity.Tests.Data;
 
 namespace DotEntity.Tests.SqlGeneratorTests
@@ -16,7 +17,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
 
         public MySqlQueryGenerationTests()
         {
-            generator = new DefaultQueryGenerator();
+            generator = new MySqlQueryGenerator();
         }
 
         [Test]
@@ -37,7 +38,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
                     {product => product.Id, RowOrder.Ascending}
                 }, page: 1, count: 30);
 
-            var expected = "SELECT * FROM (SELECT *,ROW_NUMBER() OVER (ORDER BY Id) AS __ROW_NUM__ FROM Product) AS __PAGINATEDRESULT__ WHERE __ROW_NUM__ > 0 AND __ROW_NUM__ < 31;";
+            var expected = "SELECT * FROM Product ORDER BY Id LIMIT 0,30;";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(0, queryParameters.Count);
         }
@@ -53,7 +54,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
                 {product => product.Id, RowOrder.Ascending}
             }, 1, 30);
 
-            var expected = "SELECT * FROM (SELECT *,ROW_NUMBER() OVER (ORDER BY Id) AS __ROW_NUM__ FROM Product WHERE ProductName = @ProductName) AS __PAGINATEDRESULT__ WHERE __ROW_NUM__ > 0 AND __ROW_NUM__ < 31;";
+            var expected = "SELECT * FROM Product WHERE ProductName = @ProductName ORDER BY Id LIMIT 0,30;";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual("Ice Candy", queryInfos.First(x => x.PropertyName == "ProductName").PropertyValue);
         }   
@@ -78,7 +79,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
             {
                 product => product.ProductName == "Ice Candy"
             });
-            var expected = $"SELECT * FROM Product WHERE ProductName = @ProductName{Environment.NewLine}SELECT COUNT(*) FROM Product WHERE ProductName = @ProductName;";
+            var expected = $"SELECT * FROM Product WHERE ProductName = @ProductName;{Environment.NewLine}SELECT COUNT(*) FROM Product WHERE ProductName = @ProductName;";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual("Ice Candy", queryParameters.First(x => x.PropertyName == "ProductName").PropertyValue);
         }
@@ -437,7 +438,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
         {
             var p = new Product();
             var sql = generator.GenerateInsert(p, out IList<QueryInfo> queryParameters);
-            var expected = "INSERT INTO Product (ProductName,ProductDescription,DateCreated,Price,IsActive) OUTPUT inserted.Id VALUES (@ProductName,@ProductDescription,@DateCreated,@Price,@IsActive);";
+            var expected = "INSERT INTO Product (ProductName,ProductDescription,DateCreated,Price,IsActive) VALUES (@ProductName,@ProductDescription,@DateCreated,@Price,@IsActive);SELECT last_insert_id() AS Id;";
 
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(5, queryParameters.Count);
@@ -447,7 +448,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
         public void InsertGenerator_DynamicType_Valid()
         {
             var sql = generator.GenerateInsert("User", new { UserName = "JohnSmith", FirstName = "John", DateOfBirth = DateTime.Now}, out IList<QueryInfo> queryParameters);
-            var expected = "INSERT INTO User (UserName,FirstName,DateOfBirth) OUTPUT inserted.Id VALUES (@UserName,@FirstName,@DateOfBirth);";
+            var expected = "INSERT INTO User (UserName,FirstName,DateOfBirth) VALUES (@UserName,@FirstName,@DateOfBirth);SELECT last_insert_id() AS Id;";
 
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(3, queryParameters.Count);

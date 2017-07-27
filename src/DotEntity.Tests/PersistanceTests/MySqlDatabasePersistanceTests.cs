@@ -17,13 +17,12 @@ using DotEntity.Versioning;
 namespace DotEntity.Tests.PersistanceTests
 {
     [TestFixture]
-    public class MySqlDatabasePersistanceTests
+    public class MySqlDatabasePersistanceTests : DotEntityTest
     {
         [OneTimeSetUp]
         public void Init()
         {
-            DotEntityDb.Initialize(@"Server=127.0.0.1;Uid=root;Pwd=admin;Database=mytest;",
-                new MySqlDatabaseProvider("mytest"));
+            DotEntityDb.Initialize(MySqlConnectionString, new MySqlDatabaseProvider("mytest"));
             DotEntityDb.EnqueueVersions(new DbVersion());
             DotEntityDb.UpdateDatabaseToLatestVersion("DotEntity.Tests.PersistanceTests");
         }

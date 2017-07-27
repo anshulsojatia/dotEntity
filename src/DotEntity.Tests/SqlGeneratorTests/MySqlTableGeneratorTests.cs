@@ -12,19 +12,19 @@ using DotEntity.Tests.Data;
 namespace DotEntity.Tests.SqlGeneratorTests
 {
     [TestFixture]
-    public class MySqlTableGeneratorTests
+    public class MySqlTableGeneratorTests : DotEntityTest
     {
+        private IDatabaseTableGenerator generator;
         [OneTimeSetUp]
         public void Init()
         {
-            DotEntityDb.Initialize(@"Server=127.0.0.1;Uid=root;Pwd=admin;Database=mytest;",
-                new MySqlDatabaseProvider("mytest"));
+            DotEntityDb.Initialize(MySqlConnectionString, new MySqlDatabaseProvider("mytest"));
+            generator = DotEntityDb.Provider.DatabaseTableGenerator;
         }
 
         [Test]
         public void CreateTable_Succeeds()
         {
-            var generator = new MySqlTableGenerator();
             var sql = generator.GetCreateTableScript<Product>();
             var expected = @"CREATE TABLE Product
 (	 Id INT NOT NULL AUTO_INCREMENT,
@@ -40,7 +40,6 @@ PRIMARY KEY (Id));";
         [Test]
         public void DropTable_Succeeds()
         {
-            var generator = new DefaultDatabaseTableGenerator();
             var sql = generator.GetDropTableScript<Product>();
             var expected = @"DROP TABLE Product;";
             Assert.AreEqual(expected, sql);
@@ -56,7 +55,6 @@ PRIMARY KEY (Id));";
                 SourceColumnName = "Id",
                 DestinationColumnName = "ProductId"
             };
-            var generator = new DefaultDatabaseTableGenerator();
             var sql = generator.GetCreateConstraintScript(relation);
             var expected = @"ALTER TABLE ProductCategory
 ADD CONSTRAINT FK_Product_Id_ProductCategory_ProductId
@@ -75,10 +73,9 @@ FOREIGN KEY (ProductId) REFERENCES Product(Id);";
                 SourceColumnName = "Id",
                 DestinationColumnName = "ProductId"
             };
-            var generator = new DefaultDatabaseTableGenerator();
             var sql = generator.GetDropConstraintScript(relation);
             var expected = @"ALTER TABLE ProductCategory
-DROP CONSTRAINT FK_Product_Id_ProductCategory_ProductId;";
+DROP FOREIGN KEY FK_Product_Id_ProductCategory_ProductId;";
             Assert.AreEqual(expected, sql);
         }
     }

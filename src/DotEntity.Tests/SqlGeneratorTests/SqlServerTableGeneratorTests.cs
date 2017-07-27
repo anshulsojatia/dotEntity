@@ -12,14 +12,12 @@ using DotEntity.Tests.Data;
 namespace DotEntity.Tests.SqlGeneratorTests
 {
     [TestFixture]
-    public class SqlServerTableGeneratorTests
+    public class SqlServerTableGeneratorTests : DotEntityTest
     {
         [OneTimeSetUp]
         public void Init()
         {
-            DotEntityDb.Initialize(
-                @"Data Source=.\sqlexpress;Initial Catalog=ms;Integrated Security=False;Persist Security Info=False;User ID=iis_user;Password=iis_user",
-                new SqlServerDatabaseProvider());
+            DotEntityDb.Initialize(MsSqlConnectionString, new SqlServerDatabaseProvider());
         }
 
         [Test]

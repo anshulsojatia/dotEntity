@@ -12,19 +12,16 @@ using NUnit.Framework;
 using DotEntity.Enumerations;
 using DotEntity.SqlServer;
 using DotEntity.Tests.Data;
-using DotEntity.Versioning;
 
 namespace DotEntity.Tests.PersistanceTests
 {
     [TestFixture]
-    public class SqlDatabasePersistanceTests
+    public class SqlDatabasePersistanceTests : DotEntityTest
     {
         [OneTimeSetUp]
         public void Init()
         {
-            DotEntityDb.Initialize(
-                @"Data Source=.\sqlexpress;Initial Catalog=ms;Integrated Security=False;Persist Security Info=False;User ID=iis_user;Password=iis_user",
-                new SqlServerDatabaseProvider());
+            DotEntityDb.Initialize(MsSqlConnectionString, new SqlServerDatabaseProvider());
             //add some versions
             DotEntityDb.EnqueueVersions(new DbVersion());
             DotEntityDb.UpdateDatabaseToLatestVersion("DotEntity.Tests.PersistanceTests");
