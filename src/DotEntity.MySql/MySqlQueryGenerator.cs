@@ -67,10 +67,12 @@ namespace DotEntity.MySql
             {
                 builder.Append(" ORDER BY " + orderByString);
             }
-            var offset = (page - 1) * count;
-            builder.Append($" LIMIT {offset},{count}");
+            if (page > 1 || count != int.MaxValue)
+            {
+                var offset = (page - 1) * count;
+                builder.Append($" LIMIT {offset},{count}");
+            }
             var query = builder.ToString().Trim() + ";";
-          
             return query;
         }
 
@@ -122,8 +124,11 @@ namespace DotEntity.MySql
             {
                 builder.Append(" ORDER BY " + orderByString);
             }
-            var offset = (page - 1) * count;
-            builder.Append($" LIMIT {offset},{count}");
+            if (page > 1 || count != int.MaxValue)
+            {
+                var offset = (page - 1) * count;
+                builder.Append($" LIMIT {offset},{count}");
+            }
             var query = builder.ToString().Trim() + ";";
 
             //and the count query
@@ -210,8 +215,11 @@ namespace DotEntity.MySql
             {
                 builder.Append(" ORDER BY " + orderByString);
             }
-            var offset = (page - 1) * count;
-            builder.Append($" LIMIT {offset},{count}");
+            if (page > 1 || count != int.MaxValue)
+            {
+                var offset = (page - 1) * count;
+                builder.Append($" LIMIT {offset},{count}");
+            }
             var query = builder.ToString().Trim() + ";";
             return query;
         }
