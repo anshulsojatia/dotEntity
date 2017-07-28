@@ -1,5 +1,10 @@
 version: 1.0.{build}
 image: Visual Studio 2017
+skip_tags: true
+skip_commits:
+  files:
+    - '**/*.md'
+    - '**/*.txt'
 environment:
   appveyor: true
 services:
