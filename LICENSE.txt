@@ -1,3 +1,4 @@
+Copyright (c) 2017 Apexol Technologies
 dotEntity is a software that is dual-licensed under GNU Affero General Public License as published by the Free Software Foundation(either version 3 of the License, or (at your option) any later version) and dotEntity Commercial License.
 
 1. If you wish to use the software under AGPL, read more about the licensing terms by opening the file AGPL.txt or at https://www.gnu.org/licenses/agpl.txt
