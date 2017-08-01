@@ -214,6 +214,8 @@ namespace DotEntity.Caching
                 return;
             }
             var minfo = callback.GetMethodInfo();
+            if (propertyValue is DBNull)
+                propertyValue = null;
             try
             {
                 minfo.Invoke(instance, new[] {propertyValue});
