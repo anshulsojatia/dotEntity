@@ -210,10 +210,14 @@ namespace DotEntity
         /// </summary>
         /// <param name="query">The query to be executed against the provider. The query parameters references should be named with '@' prefix</param>
         /// <param name="parameters">(optional) A dynamic object containing the parameters used in the query</param>
+        /// <param name="queryCache">(optional) The query cache to be used for the query</param>
+        /// <param name="cacheParameters">(optional) The cache parameters that'll be replaced in the query</param>
         /// <returns>An enumeration of <typeparamref name="T"/></returns>
-        public static IEnumerable<T> Query(string query, object parameters = null)
+        public static IEnumerable<T> Query(string query, object parameters = null, QueryCache queryCache = null, object[] cacheParameters = null)
         {
-            using (var manager = new DotEntityQueryManager())
+            if (queryCache != null)
+                queryCache.ParameterValues = cacheParameters;
+            using (var manager = new DotEntityQueryManager(queryCache))
             {
                 return manager.Do<T>(query, parameters);
             }
