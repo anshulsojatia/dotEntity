@@ -40,7 +40,7 @@ namespace DotEntity
 {
     public abstract class QueryGenerator : IQueryGenerator
     {
-        public virtual string GenerateInsert(string tableName, dynamic entity, out IList<QueryInfo> parameters)
+        public virtual string GenerateInsert(string tableName, object entity, out IList<QueryInfo> parameters)
         {
             Dictionary<string, object> columnValueMap = QueryParserUtilities.ParseObjectKeyValues(entity, exclude: "Id");
             var insertColumns = columnValueMap.Keys.ToArray();
@@ -92,7 +92,7 @@ namespace DotEntity
             return GenerateUpdate(tableName, entity, dataDictionary, out queryParameters, keyColumn);
         }
 
-        public virtual string GenerateUpdate(string tableName, dynamic entity, dynamic where, out IList<QueryInfo> queryParameters, params string[] exclude)
+        public virtual string GenerateUpdate(string tableName, object entity, object where, out IList<QueryInfo> queryParameters, params string[] exclude)
         {
             Dictionary<string, object> updateValueMap = QueryParserUtilities.ParseObjectKeyValues(entity, exclude);
             Dictionary<string, object> whereMap = QueryParserUtilities.ParseObjectKeyValues(where);
@@ -110,7 +110,7 @@ namespace DotEntity
             return $"UPDATE {tableName} SET {updateString} WHERE {whereString};";
         }
 
-        public virtual string GenerateUpdate<T>(dynamic item, Expression<Func<T, bool>> where, out IList<QueryInfo> queryParameters) where T : class
+        public virtual string GenerateUpdate<T>(object item, Expression<Func<T, bool>> where, out IList<QueryInfo> queryParameters) where T : class
         {
             var tableName = DotEntityDb.GetTableNameForType<T>();
             var builder = new StringBuilder();
@@ -144,7 +144,7 @@ namespace DotEntity
             return builder.ToString().Trim() + ";";
         }
 
-        public virtual string GenerateDelete(string tableName, dynamic where, out IList<QueryInfo> parameters)
+        public virtual string GenerateDelete(string tableName, object where, out IList<QueryInfo> parameters)
         {
             Dictionary<string, object> whereMap = QueryParserUtilities.ParseObjectKeyValues(where);
             var whereString = string.Join(" AND ", whereMap.Select(x => $"{x.Key} = @{x.Key}"));
@@ -195,13 +195,13 @@ namespace DotEntity
             return $"SELECT COUNT(*) FROM {tableName} WHERE {whereString};";
         }
 
-        public virtual string GenerateCount<T>(dynamic @where, out IList<QueryInfo> parameters)
+        public virtual string GenerateCount<T>(object @where, out IList<QueryInfo> parameters)
         {
             var tableName = DotEntityDb.GetTableNameForType<T>();
             return GenerateCount(tableName, where, out parameters);
         }
 
-        public virtual string GenerateCount(string tableName, dynamic @where, out IList<QueryInfo> parameters)
+        public virtual string GenerateCount(string tableName, object @where, out IList<QueryInfo> parameters)
         {
             Dictionary<string, object> whereMap = QueryParserUtilities.ParseObjectKeyValues(where);
             var whereString = string.Join(" AND ", whereMap.Select(x => $"{x.Key} = @{x.Key}"));
@@ -341,7 +341,7 @@ namespace DotEntity
             return query;
         }
 
-        public virtual string Query(string query, dynamic inParameters, out IList<QueryInfo> parameters)
+        public virtual string Query(string query, object inParameters, out IList<QueryInfo> parameters)
         {
             var columnValueMap = QueryParserUtilities.ParseObjectKeyValues(inParameters);
             parameters = ToQueryInfos(columnValueMap);

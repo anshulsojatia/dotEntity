@@ -102,7 +102,7 @@ namespace DotEntity
         /// </summary>
         /// <param name="entity">A dynamic object containing the fields to be updated with their new values</param>
         /// <param name="where">The filter expression to select appropriate database rows to update. This translates to WHERE clause in SQL</param>
-        public static void Update(dynamic entity, Expression<Func<T, bool>> where)
+        public static void Update(object entity, Expression<Func<T, bool>> where)
         {
             using (var manager = new DotEntityQueryManager())
             {
@@ -128,7 +128,7 @@ namespace DotEntity
         /// <param name="query">The query to be executed against the provider. The query parameters references should be named with '@' prefix</param>
         /// <param name="parameters">(optional) A dynamic object containing the parameters used in the query</param>
         /// <returns>An enumeration of <typeparamref name="T"/></returns>
-        public static IEnumerable<T> Query(string query, dynamic parameters = null)
+        public static IEnumerable<T> Query(string query, object parameters = null)
         {
             using (var manager = new DotEntityQueryManager())
             {
@@ -143,7 +143,7 @@ namespace DotEntity
         /// <param name="query">The query to be executed against the provider. The query parameters references should be named with '@' prefix</param>
         /// <param name="parameters">(optional) A dynamic object containing the parameters used in the query</param>
         /// <returns>A value of type <typeparamref name="TType"/></returns>
-        public static TType QueryScaler<TType>(string query, dynamic parameters = null)
+        public static TType QueryScaler<TType>(string query, object parameters = null)
         {
             using (var manager = new DotEntityQueryManager())
             {

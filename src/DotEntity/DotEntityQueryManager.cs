@@ -49,8 +49,8 @@ namespace DotEntity
         {
             _queryCache = cache;
         }
-
-        public virtual TType DoScaler<TType>(string query, dynamic parameters, Func<TType, bool> resultAction = null)
+      
+        public virtual TType DoScaler<TType>(string query, object parameters, Func<TType, bool> resultAction = null)
         {
             query = _queryGenerator.Query(query, parameters, out IList<QueryInfo> queryParameters);
             var cmd = new DotEntityDbCommand(DbOperationType.SelectScaler, query, queryParameters);
@@ -58,7 +58,7 @@ namespace DotEntity
             return cmd.GetResultAs<TType>();
         }
 
-        public virtual IEnumerable<T> Do<T>(string query, dynamic parameters, Func<IEnumerable<T>, bool> resultAction = null) where T : class
+        public virtual IEnumerable<T> Do<T>(string query, object parameters, Func<IEnumerable<T>, bool> resultAction = null) where T : class
         {
             query = _queryGenerator.Query(query, parameters, out IList<QueryInfo> queryParameters);
             var cmd = new DotEntityDbCommand(DbOperationType.Select, query, queryParameters);
@@ -67,7 +67,7 @@ namespace DotEntity
             return cmd.GetResultAs<IEnumerable<T>>();
         }
 
-        public virtual void Do(string query, dynamic parameters)
+        public virtual void Do(string query, object parameters)
         {
             query = _queryGenerator.Query(query, parameters, out IList<QueryInfo> queryParameters);
             var cmd = new DotEntityDbCommand(DbOperationType.Select, query, queryParameters);
@@ -96,7 +96,7 @@ namespace DotEntity
             return cmd.GetResultAs<int>();
         }
 
-        public virtual int DoUpdate<T>(dynamic entity, Expression<Func<T, bool>> where, Func<T, bool> resultAction = null) where T : class
+        public virtual int DoUpdate<T>(object entity, Expression<Func<T, bool>> where, Func<T, bool> resultAction = null) where T : class
         {
             TryGetFromCache(out string query, out IList<QueryInfo> queryParameters);
             query = query ?? _queryGenerator.GenerateUpdate(entity, where, out queryParameters);

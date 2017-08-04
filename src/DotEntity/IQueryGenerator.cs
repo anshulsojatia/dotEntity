@@ -34,17 +34,17 @@ namespace DotEntity
 {
     public interface IQueryGenerator
     {
-        string GenerateInsert(string tableName, dynamic entity, out IList<QueryInfo> parameters);
+        string GenerateInsert(string tableName, object entity, out IList<QueryInfo> parameters);
 
         string GenerateInsert<T>(T entity, out IList<QueryInfo> parameters) where T : class;
 
-        string GenerateUpdate<T>(dynamic item, Expression<Func<T, bool>> where, out IList<QueryInfo> parameters) where T : class;
+        string GenerateUpdate<T>(object item, Expression<Func<T, bool>> where, out IList<QueryInfo> parameters) where T : class;
 
         string GenerateUpdate<T>(T entity, out IList<QueryInfo> queryParameters) where T : class;
 
-        string GenerateUpdate(string tableName, dynamic item, dynamic where, out IList<QueryInfo> parameters, params string[] exclude);
+        string GenerateUpdate(string tableName, object item, object where, out IList<QueryInfo> parameters, params string[] exclude);
 
-        string GenerateDelete(string tableName, dynamic where, out IList<QueryInfo> parameters);
+        string GenerateDelete(string tableName, object where, out IList<QueryInfo> parameters);
 
         string GenerateDelete<T>(Expression<Func<T, bool>> where, out IList<QueryInfo> parameters) where T : class;
 
@@ -52,9 +52,9 @@ namespace DotEntity
 
         string GenerateCount<T>(IList<Expression<Func<T, bool>>> where, out IList<QueryInfo> parameters) where T : class;
 
-        string GenerateCount<T>(dynamic where, out IList<QueryInfo> parameters);
+        string GenerateCount<T>(object where, out IList<QueryInfo> parameters);
 
-        string GenerateCount(string tableName, dynamic where, out IList<QueryInfo> parameters);
+        string GenerateCount(string tableName, object where, out IList<QueryInfo> parameters);
 
         string GenerateSelect<T>(out IList<QueryInfo> parameters, List<Expression<Func<T, bool>>> where = null,
             Dictionary<Expression<Func<T, object>>, RowOrder> orderBy = null, int page = 1, int count = int.MaxValue) where T : class;
@@ -62,6 +62,6 @@ namespace DotEntity
         string GenerateSelectWithTotalMatchingCount<T>(out IList<QueryInfo> parameters, List<Expression<Func<T, bool>>> where = null,
             Dictionary<Expression<Func<T, object>>, RowOrder> orderBy = null, int page = 1, int count = int.MaxValue) where T : class;
         
-        string Query(string query, dynamic inParameters, out IList<QueryInfo> parameters);
+        string Query(string query, object inParameters, out IList<QueryInfo> parameters);
     }
 }
