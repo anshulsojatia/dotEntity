@@ -125,5 +125,13 @@ namespace DotEntity
         /// <param name="transaction">(optional) The <see cref="IDotEntityTransaction"/> transaction under which the operation executes. If this is null, no transaction is used for the operation</param>
         /// <returns>The entity of type <typeparamref name="T"/> or null in case of empty result set</returns>
         T SelectSingle(IDotEntityTransaction transaction = null);
+
+        /// <summary>
+        /// Specifies that the query should be picked up from the cache provided.  This is useful to execute multiple queries with same signature. All the expressions in such queries are evaluated only once
+        /// </summary>
+        /// <param name="cache">The query cache to use</param>
+        /// <param name="parameterValues">The parameter values to be replaced in the cached query</param>
+        /// <returns>An implementation object of type <see cref="IEntitySet{T}"/></returns>
+        IEntitySet<T> WithQueryCache(QueryCache cache, params object[] parameterValues);
     }
 }

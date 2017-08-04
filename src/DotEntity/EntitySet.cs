@@ -46,5 +46,10 @@ namespace DotEntity
                 return manager.DoMultiResult(query, parameters);
             }
         }
+
+        public static QueryCache GetQueryCache()
+        {
+            return new QueryCache();
+        }
     }
 }
