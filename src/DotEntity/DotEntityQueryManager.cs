@@ -44,6 +44,12 @@ namespace DotEntity
             _queryGenerator = DotEntityDb.Provider.QueryGenerator;
         }
 
+        private readonly QueryCache _queryCache;
+        internal DotEntityQueryManager(QueryCache cache) : this()
+        {
+            _queryCache = cache;
+        }
+
         public virtual TType DoScaler<TType>(string query, dynamic parameters, Func<TType, bool> resultAction = null)
         {
             query = _queryGenerator.Query(query, parameters, out IList<QueryInfo> queryParameters);
@@ -92,7 +98,9 @@ namespace DotEntity
 
         public virtual int DoUpdate<T>(dynamic entity, Expression<Func<T, bool>> where, Func<T, bool> resultAction = null) where T : class
         {
-            var query = _queryGenerator.GenerateUpdate(entity, where, out IList<QueryInfo> queryParameters);
+            TryGetFromCache(out string query, out IList<QueryInfo> queryParameters);
+            query = query ?? _queryGenerator.GenerateUpdate(entity, where, out queryParameters);
+            TrySetCache(query, queryParameters);
             var cmd = new DotEntityDbCommand(DbOperationType.Update, query, queryParameters);
             DotEntityDbConnector.ExecuteCommand(cmd);
             return cmd.GetResultAs<int>();
@@ -100,7 +108,9 @@ namespace DotEntity
 
         public virtual int DoDelete<T>(T entity, Func<T, bool> resultAction = null) where T : class
         {
-            var query = _queryGenerator.GenerateDelete(entity, out IList<QueryInfo> queryParameters);
+            TryGetFromCache(out string query, out IList<QueryInfo> queryParameters);
+            query = query ?? _queryGenerator.GenerateDelete(entity, out queryParameters);
+            TrySetCache(query, queryParameters);
             var cmd = new DotEntityDbCommand(DbOperationType.Delete, query, queryParameters);
             DotEntityDbConnector.ExecuteCommand(cmd);
             return cmd.GetResultAs<int>();
@@ -108,7 +118,9 @@ namespace DotEntity
 
         public virtual int DoDelete<T>(Expression<Func<T, bool>> where, Func<T, bool> resultAction = null) where T : class
         {
-            var query = _queryGenerator.GenerateDelete<T>(where, out IList<QueryInfo> queryParameters);
+            TryGetFromCache(out string query, out IList<QueryInfo> queryParameters);
+            query = query ?? _queryGenerator.GenerateDelete<T>(where, out queryParameters);
+            TrySetCache(query, queryParameters);
             var cmd = new DotEntityDbCommand(DbOperationType.Delete, query, queryParameters);
             DotEntityDbConnector.ExecuteCommand(cmd);
             return cmd.GetResultAs<int>();
@@ -117,8 +129,10 @@ namespace DotEntity
         public virtual IEnumerable<T> DoSelect<T>(List<Expression<Func<T, bool>>> where = null, Dictionary<Expression<Func<T, object>>, RowOrder> orderBy = null, int page = 1, int count = int.MaxValue) where T : class
         {
             ThrowIfInvalidPage(orderBy, page, count);
+            TryGetFromCache(out string query, out IList<QueryInfo> queryParameters);
+            query = query ?? _queryGenerator.GenerateSelect(out queryParameters, where, orderBy, page, count);
+            TrySetCache(query, queryParameters);
 
-            var query = _queryGenerator.GenerateSelect(out IList<QueryInfo> queryParameters, where, orderBy, page, count);
             var cmd = new DotEntityDbCommand(DbOperationType.Select, query, queryParameters);
             cmd.ProcessReader(reader =>
             {
@@ -132,9 +146,9 @@ namespace DotEntity
         public virtual Tuple<int, IEnumerable<T>> DoSelectWithTotalMatches<T>(List<Expression<Func<T, bool>>> where = null, Dictionary<Expression<Func<T, object>>, RowOrder> orderBy = null, int page = 1, int count = int.MaxValue) where T : class
         {
             ThrowIfInvalidPage(orderBy, page, count);
-
-            var query = _queryGenerator.GenerateSelectWithTotalMatchingCount(out IList<QueryInfo> queryParameters, where, orderBy, page, count);
-
+            TryGetFromCache(out string query, out IList<QueryInfo> queryParameters);
+            query = query ?? _queryGenerator.GenerateSelectWithTotalMatchingCount(out queryParameters, where, orderBy, page, count);
+            TrySetCache(query, queryParameters);
             var cmd = new DotEntityDbCommand(DbOperationType.Select, query, queryParameters);
             cmd.ProcessReader(reader =>
             {
@@ -170,6 +184,22 @@ namespace DotEntity
         private static void ThrowIfInvalidPage(ICollection orderBy, int page, int count)
         {
             Throw.IfInvalidPagination(orderBy, page, count);
+        }
+
+        private void TryGetFromCache(out string query, out IList<QueryInfo> queryParameters)
+        {
+            query = _queryCache?.CachedQuery;
+            queryParameters = _queryCache?.QueryInfo;
+        }
+
+        private void TrySetCache(string query, IList<QueryInfo> queryParameters)
+        {
+            //set 
+            if (_queryCache != null)
+            {
+                _queryCache.CachedQuery = query;
+                _queryCache.QueryInfo = queryParameters;
+            }
         }
 
         private bool _disposed;

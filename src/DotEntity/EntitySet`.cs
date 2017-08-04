@@ -182,6 +182,17 @@ namespace DotEntity
             return Instance.SelectWithTotalMatches(out totalMatches, page, count);
         }
 
+        /// <summary>
+        /// Specifies that the query should be picked up from the cache provided.  This is useful to execute multiple queries with same signature. All the expressions in such queries are evaluated only once
+        /// </summary>
+        /// <param name="cache">The query cache to use</param>
+        /// <param name="parameterValues">The parameter values to be replaced in the cached query</param>
+        /// <returns>An implementation object of type <see cref="IEntitySet{T}"/></returns>
+        public static IEntitySet<T> WithQueryCache(QueryCache cache, params object[] parameterValues)
+        {
+            return Instance.WithQueryCache(cache, parameterValues);
+        }
+
         #endregion
 
         #region implementations
@@ -200,7 +211,7 @@ namespace DotEntity
 
         IEnumerable<T> IEntitySet<T>.Select(int page, int count)
         {
-            using (var manager = new DotEntityQueryManager())
+            using (var manager = new DotEntityQueryManager(_cache))
             {
                 return manager.DoSelect(_whereList, _orderBy, page, count);
             }
@@ -230,6 +241,14 @@ namespace DotEntity
             {
                 return manager.DoSelectSingle(_whereList, _orderBy);
             }
+        }
+
+        private QueryCache _cache;
+        IEntitySet<T> IEntitySet<T>.WithQueryCache(QueryCache cache, params object[] parameterValues)
+        {
+            _cache = cache;
+            _cache.ParameterValues = parameterValues;
+            return this;
         }
 
         #endregion

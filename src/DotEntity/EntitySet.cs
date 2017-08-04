@@ -36,6 +36,10 @@ namespace DotEntity
                 manager.Do(query, parameters);
             }
         }
-       
+
+        public static QueryCache GetQueryCache()
+        {
+            return new QueryCache();
+        }
     }
 }
