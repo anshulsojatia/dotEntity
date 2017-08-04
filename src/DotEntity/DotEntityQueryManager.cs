@@ -60,7 +60,11 @@ namespace DotEntity
 
         public virtual IEnumerable<T> Do<T>(string query, object parameters, Func<IEnumerable<T>, bool> resultAction = null) where T : class
         {
-            query = _queryGenerator.Query(query, parameters, out IList<QueryInfo> queryParameters);
+            var actualQuery = query;
+            TryGetFromCache(out query, out IList<QueryInfo> queryParameters);
+            query = query ?? _queryGenerator.Query(actualQuery, parameters, out queryParameters);
+            TrySetCache(query, queryParameters);
+
             var cmd = new DotEntityDbCommand(DbOperationType.Select, query, queryParameters);
             cmd.ProcessReader(reader => DataDeserializer<T>.Instance.DeserializeMany(reader));
             DotEntityDbConnector.ExecuteCommand(cmd);
