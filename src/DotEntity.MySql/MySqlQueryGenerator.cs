@@ -9,7 +9,7 @@ namespace DotEntity.MySql
 {
     public class MySqlQueryGenerator : DefaultQueryGenerator
     {
-        public override string GenerateInsert(string tableName, dynamic entity, out IList<QueryInfo> parameters)
+        public override string GenerateInsert(string tableName, object entity, out IList<QueryInfo> parameters)
         {
             Dictionary<string, object> columnValueMap = QueryParserUtilities.ParseObjectKeyValues(entity, exclude: "Id");
             var insertColumns = columnValueMap.Keys.ToArray();

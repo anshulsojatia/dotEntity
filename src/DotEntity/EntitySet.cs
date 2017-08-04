@@ -39,7 +39,7 @@ namespace DotEntity
             return new DotEntityTransaction(true);
         }
 
-        public static IMultiResult Query(string query, dynamic parameters)
+        public static IMultiResult Query(string query, object parameters)
         {
             using (var manager = new DotEntityQueryManager())
             {

@@ -48,7 +48,7 @@ namespace DotEntity
             return parameters;
         }
 
-        public static Dictionary<string, object> ParseObjectKeyValues(dynamic obj, params string[] exclude)
+        public static Dictionary<string, object> ParseObjectKeyValues(object obj, params string[] exclude)
         {
             if (obj == null)
                 return null;

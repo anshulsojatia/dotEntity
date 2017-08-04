@@ -156,7 +156,7 @@ namespace DotEntity
         /// </summary>
         /// <param name="entity">A dynamic object containing the fields to be updated with their new values</param>
         /// <param name="where">The filter expression to select appropriate database rows to update. This translates to WHERE clause in SQL</param>
-        public static void Update(dynamic entity, Expression<Func<T, bool>> where)
+        public static void Update(object entity, Expression<Func<T, bool>> where)
         {
             using (var manager = new DotEntityQueryManager())
             {
@@ -185,7 +185,7 @@ namespace DotEntity
         /// <param name="where">The filter expression to select appropriate database rows to update. This translates to WHERE clause in SQL</param>
         /// <param name="transaction">The <see cref="IDotEntityTransaction"/> transaction under which the operation executes</param>
         /// <param name="action">(optional) The function to capture the updated entity. The return value of this function determines if the next operation in the transaction executes or not. Default return value is True</param>
-        public static void Update(dynamic entity, Expression<Func<T, bool>> where, IDotEntityTransaction transaction, Func<T, bool> action = null)
+        public static void Update(object entity, Expression<Func<T, bool>> where, IDotEntityTransaction transaction, Func<T, bool> action = null)
         {
             if (!transaction.IsNullOrDisposed())
             {
@@ -211,7 +211,7 @@ namespace DotEntity
         /// <param name="query">The query to be executed against the provider. The query parameters references should be named with '@' prefix</param>
         /// <param name="parameters">(optional) A dynamic object containing the parameters used in the query</param>
         /// <returns>An enumeration of <typeparamref name="T"/></returns>
-        public static IEnumerable<T> Query(string query, dynamic parameters = null)
+        public static IEnumerable<T> Query(string query, object parameters = null)
         {
             using (var manager = new DotEntityQueryManager())
             {
@@ -226,7 +226,7 @@ namespace DotEntity
         /// <param name="parameters">A dynamic object containing the parameters used in the query</param>
         /// <param name="transaction">The <see cref="IDotEntityTransaction"/> transaction under which the operation executes</param>
         /// <param name="action">(optional) The function to capture the updated entities. The entities are provided as parameter to the function. The return value of this function determines if the next operation in the transaction executes or not. Default return value is True</param>
-        public static void Query(string query, dynamic parameters, IDotEntityTransaction transaction, Func<IEnumerable<T>, bool> action = null)
+        public static void Query(string query, object parameters, IDotEntityTransaction transaction, Func<IEnumerable<T>, bool> action = null)
         {
             if (!transaction.IsNullOrDisposed())
             {
@@ -241,7 +241,7 @@ namespace DotEntity
         /// <param name="query">The query to be executed against the provider. The query parameters references should be named with '@' prefix</param>
         /// <param name="parameters">(optional) A dynamic object containing the parameters used in the query</param>
         /// <returns>A value of type <typeparamref name="TType"/></returns>
-        public static TType QueryScaler<TType>(string query, dynamic parameters = null)
+        public static TType QueryScaler<TType>(string query, object parameters = null)
         {
             using (var manager = new DotEntityQueryManager())
             {
@@ -257,7 +257,7 @@ namespace DotEntity
         /// <param name="parameters">A dynamic object containing the parameters used in the query</param>
         /// <param name="transaction">The <see cref="IDotEntityTransaction"/> transaction under which the operation executes</param>
         /// <param name="action">(optional) The function to capture the updated entities. The entities are provided as parameter to the function. The return value of this function determines if the next operation in the transaction executes or not. Default return value is True</param>
-        public static void QueryScaler<TType>(string query, dynamic parameters, IDotEntityTransaction transaction, Func<TType, bool> action = null)
+        public static void QueryScaler<TType>(string query, object parameters, IDotEntityTransaction transaction, Func<TType, bool> action = null)
         {
             if (!transaction.IsNullOrDisposed())
             {
