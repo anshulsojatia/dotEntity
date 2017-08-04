@@ -457,6 +457,8 @@ namespace DotEntity
             var queryParameters = new List<QueryInfo>();
             foreach (var dictionary in dict)
             {
+                if (dictionary == null)
+                    continue;
                 foreach (var strObj in dictionary)
                 {
                     var propertyName = strObj.Key;
