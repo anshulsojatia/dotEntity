@@ -38,14 +38,25 @@ namespace DotEntity.Extensions
         {
             Throw.IfArgumentNullOrEmpty(typeName, nameof(typeName));
             var dataReaderRows = new List<DataReaderRow>();
+            var columnOrdinals = new Dictionary<string, int>(columnNames.Length);
+            var ordinalsCaptured = false;
             while (dataReader.Read())
             {
-                var row = new DataReaderRow();
-                foreach (var c in columnNames)
+                if (!ordinalsCaptured)
                 {
-                    row[typeName + "." + c] = dataReader[c];
+                    ordinalsCaptured = true;
+                    //the microsoft sqlite reader's get ordinal performs case sensitive comparision, we'll have to lower case the columns in the case
+                    var doLower = typeName == "SqliteMaster" && dataReader.GetType().FullName == "Microsoft.Data.Sqlite.SqliteDataReader";
+                    foreach (var c in columnNames)
+                    {
+                        columnOrdinals.Add(typeName + "." + c, dataReader.GetOrdinal(doLower ? c.ToLowerInvariant() : c));
+                    }
                 }
-
+                var row = new DataReaderRow();
+                foreach (var c in columnOrdinals)
+                {
+                    row[c.Key] = dataReader[c.Value];
+                }
                 dataReaderRows.Add(row);
             }
 
@@ -99,13 +110,13 @@ namespace DotEntity.Extensions
                 }
                 catch
                 {
-                    //we'll have to manually do something
-                }
-                while (dataReader.Read())
-                {
-                    var fieldCount = dataReader.FieldCount;
-                    var row = new DataReaderRow();
-                    if (columnNames == null)
+                    //we'll have to manually do something-----------------------------------------
+                }                                                                               //|
+                while (dataReader.Read())                                                       //|
+                {                                                                               //|
+                    var fieldCount = dataReader.FieldCount;                                     //|
+                    var row = new DataReaderRow();                                              //|
+                    if (columnNames == null)  //<--------------------------------------------------
                     {
                         columnNames = new string[fieldCount];
                         for (var i = 0; i < fieldCount; i++)
