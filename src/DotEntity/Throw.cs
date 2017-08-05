@@ -35,78 +35,107 @@ namespace DotEntity
 {
     public static class Throw
     {
+        public class ThrowInfo
+        {         
+            public object[] Parameters { get; set; }
+
+            public ThrowInfo(string message, params object[] parameters)
+            {
+                Parameters = new object[parameters.Length + 1];
+                Parameters[0] = message;
+                for (var i = 1; i < parameters.Length; i++)
+                    Parameters[i] = parameters[i];
+            }
+        }
+
         public static void IfArgumentNull(object arg, string parameterName)
         {
-            It<ArgumentNullException>(arg == null, $"Argument {parameterName} is null", parameterName);
+            It<ArgumentNullException>(arg == null,
+                () => new ThrowInfo($"Argument {parameterName} is null", parameterName));
         }
 
         public static void IfArgumentNullOrEmpty(string arg, string parameterName)
         {
-            It<ArgumentNullException>(string.IsNullOrEmpty(arg), $"Argument {parameterName} is null or empty. A non-empty value must be provided", parameterName);
+            It<ArgumentNullException>(string.IsNullOrEmpty(arg),
+                () => new ThrowInfo($"Argument {parameterName} is null or empty. A non-empty value must be provided",
+                    parameterName));
         }
 
         public static void IfObjectNull(object arg, string parameterName)
         {
-            It<NullReferenceException>(arg == null, $"Field/Property/Variable {parameterName} is null and can not be referenced");
+            It<NullReferenceException>(arg == null,
+                () => new ThrowInfo($"Field/Property/Variable {parameterName} is null and can not be referenced"));
         }
 
         public static void IfKeyNull(string keyColumnName, Type arg)
         {
-            It<InvalidOperationException>(string.IsNullOrEmpty(keyColumnName), $"The entity type {arg.FullName} doesn't have a Key specified");
+            It<InvalidOperationException>(string.IsNullOrEmpty(keyColumnName),
+                () => new ThrowInfo($"The entity type {arg.FullName} doesn't have a Key specified"));
         }
 
         public static void IfDbNotVersioned(bool versioned)
         {
-            It<InvalidOperationException>(versioned, $"The database hasn't been versioned");
+            It<InvalidOperationException>(versioned, () => new ThrowInfo("The database hasn't been versioned"));
         }
 
         public static void IfKeyTypeNullable(Type arg, string keyColumnName)
         {
-            It<InvalidOperationException>(arg.IsNullable(), $"The entity type {arg.FullName} has a Key defined on a Nullable type. A non-Nullable type should be used");
+            It<InvalidOperationException>(arg.IsNullable(),
+                () => new ThrowInfo(
+                    $"The entity type {arg.FullName} has a Key defined on a Nullable type. A non-Nullable type should be used"));
         }
 
         public static void IfInvalidPagination(ICollection orderBy, int page, int count)
         {
-            It<InvalidOperationException>(page < 1 || count < 0 || 
-                ((page > 1 || count < int.MaxValue) && (orderBy == null || orderBy.Count == 0)),
-                $"The pagination is invalid with Page: {page}, Count: {count} and OrderBy: {orderBy}");
+            It<InvalidOperationException>(page < 1 || count < 0 ||
+                                          ((page > 1 || count < int.MaxValue) &&
+                                           (orderBy == null || orderBy.Count == 0)),
+                () => new ThrowInfo(
+                    $"The pagination is invalid with Page: {page}, Count: {count} and OrderBy: {orderBy}"));
         }
 
         public static void IfCommitCalledOnNonTransactionalExecution(bool withTransaction)
         {
-            It<InvalidOperationException>(!withTransaction, $"Can not call CommitTransaction on a non-transactional execution");
+            It<InvalidOperationException>(!withTransaction,
+                () => new ThrowInfo($"Can not call CommitTransaction on a non-transactional execution"));
         }
 
         public static void IfNullOrDisposed(IWrappedDisposable disposable, string parameterName)
         {
-            It<NullReferenceException>(disposable.IsNullOrDisposed(), $"Field/Property/Variable {parameterName} is null or disposed and can not be referenced");
+            It<NullReferenceException>(disposable.IsNullOrDisposed(),
+                () => new ThrowInfo(
+                    $"Field/Property/Variable {parameterName} is null or disposed and can not be referenced"));
         }
 
         public static void IfMethodNameNotSupported(string methodName)
         {
-            It<NotSupportedException>(true, $"The method {methodName} is not supported");
+            It<NotSupportedException>(true, () => new ThrowInfo($"The method {methodName} is not supported"));
         }
 
         public static void IfExpressionTypeNotSupported(Expression expression)
         {
-            It<NotSupportedException>(true, $"The expression {expression} is not supported");
+            It<NotSupportedException>(true, () => new ThrowInfo($"The expression {expression} is not supported"));
         }
 
         public static void IfEmptyBatch(bool isEmpty)
         {
-            It<InvalidOperationException>(isEmpty, $"At least one operation must be executed within a batch");
+            It<InvalidOperationException>(isEmpty,
+                () => new ThrowInfo($"At least one operation must be executed within a batch"));
         }
 
         public static void IfInvalidDataTypeMapping(bool isNotValid, Type type)
         {
-            It<InvalidOperationException>(isNotValid, $"Can't find an equivalent database type for type {type.FullName}. Either mark the field as virtual or change the datatype to a more concrete type");
+            It<InvalidOperationException>(isNotValid,
+                () => new ThrowInfo(
+                    $"Can't find an equivalent database type for type {type.FullName}. Either mark the field as virtual or change the datatype to a more concrete type"));
         }
 
-        public static void It<TException>(bool condition, params object[] parameters) where TException : Exception
+        public static void It<TException>(bool condition, Func<ThrowInfo> getParameters) where TException : Exception
         {
             if (!condition) return;
 
-            var ex = (TException)Activator.CreateInstance(typeof(TException), parameters);
+            var messageInfo = getParameters();
+            var ex = (TException)Activator.CreateInstance(typeof(TException), messageInfo.Parameters);
             throw ex;
         }
     } 
