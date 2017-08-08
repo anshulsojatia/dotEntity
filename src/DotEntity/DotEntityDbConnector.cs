@@ -46,39 +46,39 @@ namespace DotEntity
                 con.Open();
                 using (var trans = useTransaction ? con.BeginTransaction(isolationLevel) : null)
                 {
-                    foreach (var DotEntityDbCommand in commands)
+                    foreach (var dotEntityDbCommand in commands)
                     {
-                        switch (DotEntityDbCommand.OperationType)
+                        switch (dotEntityDbCommand.OperationType)
                         {
                             case DbOperationType.Insert:
                             case DbOperationType.SelectScaler:
                                 using (var cmd =
-                                    queryProcessor.GetQueryCommand(con, DotEntityDbCommand.Query, DotEntityDbCommand.QueryInfos, true, DotEntityDbCommand.KeyColumn))
+                                    queryProcessor.GetQueryCommand(con, dotEntityDbCommand.Query, dotEntityDbCommand.QueryInfos, true, dotEntityDbCommand.KeyColumn))
                                 {
                                     cmd.Transaction = trans;
                                     var value = cmd.ExecuteScalar();
 
-                                    DotEntityDbCommand.SetRawResult(value);
+                                    dotEntityDbCommand.SetRawResult(value);
                                 }
                                 break;
                             case DbOperationType.Update:
                             case DbOperationType.Delete:
                             case DbOperationType.Other:    
                                 using (var cmd =
-                                    queryProcessor.GetQueryCommand(con, DotEntityDbCommand.Query, DotEntityDbCommand.QueryInfos))
+                                    queryProcessor.GetQueryCommand(con, dotEntityDbCommand.Query, dotEntityDbCommand.QueryInfos))
                                 {
                                     cmd.Transaction = trans;
-                                    DotEntityDbCommand.SetRawResult(cmd.ExecuteNonQuery());
+                                    dotEntityDbCommand.SetRawResult(cmd.ExecuteNonQuery());
                                 }
                                 break;
                             case DbOperationType.Select:
                                 using (var cmd =
-                                    queryProcessor.GetQueryCommand(con, DotEntityDbCommand.Query, DotEntityDbCommand.QueryInfos))
+                                    queryProcessor.GetQueryCommand(con, dotEntityDbCommand.Query, dotEntityDbCommand.QueryInfos))
                                 {
                                     cmd.Transaction = trans;
-                                    using (var reader = cmd.ExecuteReader())
+                                    using (var reader = cmd.ExecuteReader(dotEntityDbCommand.CommandBehavior))
                                     {
-                                        DotEntityDbCommand.SetDataReader(reader);
+                                        dotEntityDbCommand.SetDataReader(reader);
                                     }
                                 }
                                 break;
@@ -88,23 +88,23 @@ namespace DotEntity
                                 //reader processor to dispose it manually
                                 //todo: Can we have a better solution than this?
                                 using (var cmd =
-                                    queryProcessor.GetQueryCommand(con, DotEntityDbCommand.Query, DotEntityDbCommand.QueryInfos))
+                                    queryProcessor.GetQueryCommand(con, dotEntityDbCommand.Query, dotEntityDbCommand.QueryInfos))
                                 {
                                     cmd.Transaction = trans;
-                                    using (var reader = cmd.ExecuteReader())
+                                    using (var reader = cmd.ExecuteReader(dotEntityDbCommand.CommandBehavior))
                                     {
-                                        DotEntityDbCommand.SetDataReader(reader);
+                                        dotEntityDbCommand.SetDataReader(reader);
                                     }
                                 }
                                 break;
                             case DbOperationType.Procedure:
                                 using (var cmd =
-                                    queryProcessor.GetQueryCommand(con, DotEntityDbCommand.Query, DotEntityDbCommand.QueryInfos, commandType: CommandType.StoredProcedure))
+                                    queryProcessor.GetQueryCommand(con, dotEntityDbCommand.Query, dotEntityDbCommand.QueryInfos, commandType: CommandType.StoredProcedure))
                                 {
                                     cmd.Transaction = trans;
-                                    using (var reader = cmd.ExecuteReader())
+                                    using (var reader = cmd.ExecuteReader(dotEntityDbCommand.CommandBehavior))
                                     {
-                                        DotEntityDbCommand.SetDataReader(reader);
+                                        dotEntityDbCommand.SetDataReader(reader);
                                     }
                                 }
                                 break;
@@ -112,7 +112,7 @@ namespace DotEntity
                                 throw new ArgumentOutOfRangeException();
                         }
 
-                        if(!DotEntityDbCommand.ContinueNextCommand)
+                        if(!dotEntityDbCommand.ContinueNextCommand)
                             trans?.Rollback();
                         
                     }
