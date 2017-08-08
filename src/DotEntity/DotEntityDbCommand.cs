@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using DotEntity.Caching;
 using DotEntity.Enumerations;
 
 namespace DotEntity
@@ -44,13 +45,16 @@ namespace DotEntity
 
         public bool ContinueNextCommand { get; set; }
 
-        public DotEntityDbCommand(DbOperationType operationType, string query, IList<QueryInfo> queryParameters, string keyColumn = "Id")
+        public CommandBehavior CommandBehavior { get; set; }
+
+        public DotEntityDbCommand(DbOperationType operationType, string query, IList<QueryInfo> queryParameters, string keyColumn = "Id", CommandBehavior commandBehavior = CommandBehavior.Default)
         {
             OperationType = operationType;
             Query = query;
             QueryInfos = queryParameters;
             ContinueNextCommand = true;
             KeyColumn = keyColumn;
+            CommandBehavior = commandBehavior;
         }
 
         private Func<IDataReader, object> _readerAction;

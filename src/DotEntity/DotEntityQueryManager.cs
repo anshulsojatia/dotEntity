@@ -28,6 +28,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -67,7 +68,7 @@ namespace DotEntity
         public virtual TType DoScaler<TType>(string query, object parameters, Func<TType, bool> resultAction = null)
         {
             query = _queryGenerator.Query(query, parameters, out IList<QueryInfo> queryParameters);
-            var cmd = new DotEntityDbCommand(DbOperationType.SelectScaler, query, queryParameters);
+            var cmd = new DotEntityDbCommand(DbOperationType.SelectScaler, query, queryParameters, commandBehavior: CommandBehavior.SingleRow);
             cmd.ProcessResult(o =>
             {
                 if (_withTransaction)
@@ -95,10 +96,10 @@ namespace DotEntity
             cmd.ProcessReader(reader =>
             {
                 if (!_withTransaction)
-                    return DataDeserializer<T>.Instance.DeserializeMany(reader);
+                    return DataDeserializer<T>.Instance.DeserializeMany(reader, cmd);
                 if (resultAction != null)
                 {
-                    var ts = DataDeserializer<T>.Instance.DeserializeMany(reader);
+                    var ts = DataDeserializer<T>.Instance.DeserializeMany(reader, cmd);
                     cmd.ContinueNextCommand = resultAction.Invoke(ts);
                 }
                 return null;
@@ -300,7 +301,7 @@ namespace DotEntity
             var cmd = new DotEntityDbCommand(DbOperationType.Select, query, queryParameters);
             cmd.ProcessReader(reader =>
             {
-                return DataDeserializer<T>.Instance.DeserializeMany(reader);
+                return DataDeserializer<T>.Instance.DeserializeMany(reader, cmd);
             });
             DotEntityDbConnector.ExecuteCommand(cmd);
 
@@ -316,7 +317,7 @@ namespace DotEntity
             var cmd = new DotEntityDbCommand(DbOperationType.Select, query, queryParameters);
             cmd.ProcessReader(reader =>
             {
-                var ts = DataDeserializer<T>.Instance.DeserializeMany(reader);
+                var ts = DataDeserializer<T>.Instance.DeserializeMany(reader, cmd);
                 reader.NextResult();
                 reader.Read();
                 var fv = reader[0];
@@ -344,8 +345,8 @@ namespace DotEntity
         public virtual T DoSelectSingle<T>(List<Expression<Func<T, bool>>> where = null, Dictionary<Expression<Func<T, object>>, RowOrder> orderBy = null) where T : class
         {
             var query = _queryGenerator.GenerateSelect(out IList<QueryInfo> queryParameters, where, orderBy);
-            var cmd = new DotEntityDbCommand(DbOperationType.Select, query, queryParameters);
-            cmd.ProcessReader(reader => DataDeserializer<T>.Instance.DeserializeSingle(reader));
+            var cmd = new DotEntityDbCommand(DbOperationType.Select, query, queryParameters, commandBehavior: CommandBehavior.SingleRow);
+            cmd.ProcessReader(reader => DataDeserializer<T>.Instance.DeserializeSingle(reader, cmd));
             DotEntityDbConnector.ExecuteCommand(cmd);
             return cmd.GetResultAs<T>();
         }
@@ -353,7 +354,7 @@ namespace DotEntity
         public virtual int DoCount<T>(List<Expression<Func<T, bool>>> where, Func<int, bool> resultAction = null) where T : class
         {
             var query = _queryGenerator.GenerateCount(where, out IList<QueryInfo> queryParameters);
-            var cmd = new DotEntityDbCommand(DbOperationType.SelectScaler, query, queryParameters);
+            var cmd = new DotEntityDbCommand(DbOperationType.SelectScaler, query, queryParameters, commandBehavior: CommandBehavior.SingleRow);
             if (_withTransaction)
             {
                 cmd.ProcessResult(o => cmd.ContinueNextCommand = resultAction?.Invoke((int)o) ?? true);
