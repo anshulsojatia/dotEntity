@@ -28,6 +28,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -53,7 +54,7 @@ namespace DotEntity
         public virtual TType DoScaler<TType>(string query, object parameters, Func<TType, bool> resultAction = null)
         {
             query = _queryGenerator.Query(query, parameters, out IList<QueryInfo> queryParameters);
-            var cmd = new DotEntityDbCommand(DbOperationType.SelectScaler, query, queryParameters);
+            var cmd = new DotEntityDbCommand(DbOperationType.SelectScaler, query, queryParameters, commandBehavior: CommandBehavior.SingleRow);
             DotEntityDbConnector.ExecuteCommand(cmd);
             return cmd.GetResultAs<TType>();
         }
@@ -171,7 +172,7 @@ namespace DotEntity
         public virtual T DoSelectSingle<T>(List<Expression<Func<T, bool>>> where = null, Dictionary<Expression<Func<T, object>>, RowOrder> orderBy = null) where T : class
         {
             var query = _queryGenerator.GenerateSelect(out IList<QueryInfo> queryParameters, where, orderBy);
-            var cmd = new DotEntityDbCommand(DbOperationType.Select, query, queryParameters);
+            var cmd = new DotEntityDbCommand(DbOperationType.Select, query, queryParameters, commandBehavior: CommandBehavior.SingleRow);
             cmd.ProcessReader(reader => DataDeserializer<T>.Instance.DeserializeSingle(reader));
             DotEntityDbConnector.ExecuteCommand(cmd);
             return cmd.GetResultAs<T>();
@@ -180,7 +181,7 @@ namespace DotEntity
         public virtual int DoCount<T>(List<Expression<Func<T, bool>>> where, Func<int, bool> resultAction = null) where T : class
         {
             var query = _queryGenerator.GenerateCount(where, out IList<QueryInfo> queryParameters);
-            var cmd = new DotEntityDbCommand(DbOperationType.SelectScaler, query, queryParameters);
+            var cmd = new DotEntityDbCommand(DbOperationType.SelectScaler, query, queryParameters, commandBehavior: CommandBehavior.SingleRow);
             DotEntityDbConnector.ExecuteCommand(cmd);
             return cmd.GetResultAs<int>();
         }
