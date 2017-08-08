@@ -44,47 +44,47 @@ namespace DotEntity
             using (var con = DotEntityDb.Provider.Connection)
             {
                 con.Open();
-                foreach (var DotEntityDbCommand in commands)
+                foreach (var dotEntityDbCommand in commands)
                 {
-                    switch (DotEntityDbCommand.OperationType)
+                    switch (dotEntityDbCommand.OperationType)
                     {
                         case DbOperationType.Insert:
                         case DbOperationType.SelectScaler:
                             using (var cmd =
-                                queryProcessor.GetQueryCommand(con, DotEntityDbCommand.Query, DotEntityDbCommand.QueryInfos, true, DotEntityDbCommand.KeyColumn))
+                                queryProcessor.GetQueryCommand(con, dotEntityDbCommand.Query, dotEntityDbCommand.QueryInfos, true, dotEntityDbCommand.KeyColumn))
                             {
                                 var value = cmd.ExecuteScalar();
 
-                                DotEntityDbCommand.SetRawResult(value);
+                                dotEntityDbCommand.SetRawResult(value);
                             }
                             break;
                         case DbOperationType.Update:
                         case DbOperationType.Delete:
                         case DbOperationType.Other:
                             using (var cmd =
-                                queryProcessor.GetQueryCommand(con, DotEntityDbCommand.Query, DotEntityDbCommand.QueryInfos))
+                                queryProcessor.GetQueryCommand(con, dotEntityDbCommand.Query, dotEntityDbCommand.QueryInfos))
                             {
-                                DotEntityDbCommand.SetRawResult(cmd.ExecuteNonQuery());
+                                dotEntityDbCommand.SetRawResult(cmd.ExecuteNonQuery());
                             }
                             break;
                         case DbOperationType.Select:
                         case DbOperationType.MultiQuery:
                             using (var cmd =
-                                queryProcessor.GetQueryCommand(con, DotEntityDbCommand.Query, DotEntityDbCommand.QueryInfos))
+                                queryProcessor.GetQueryCommand(con, dotEntityDbCommand.Query, dotEntityDbCommand.QueryInfos))
                             {
                                 using (var reader = cmd.ExecuteReader())
                                 {
-                                    DotEntityDbCommand.SetDataReader(reader);
+                                    dotEntityDbCommand.SetDataReader(reader);
                                 }
                             }
                             break;
                         case DbOperationType.Procedure:
                             using (var cmd =
-                                queryProcessor.GetQueryCommand(con, DotEntityDbCommand.Query, DotEntityDbCommand.QueryInfos, commandType: CommandType.StoredProcedure))
+                                queryProcessor.GetQueryCommand(con, dotEntityDbCommand.Query, dotEntityDbCommand.QueryInfos, commandType: CommandType.StoredProcedure))
                             {
                                 using (var reader = cmd.ExecuteReader())
                                 {
-                                    DotEntityDbCommand.SetDataReader(reader);
+                                    dotEntityDbCommand.SetDataReader(reader);
                                 }
                             }
                             break;
