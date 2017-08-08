@@ -29,28 +29,30 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using DotEntity.Caching;
 
 namespace DotEntity.Extensions
 {
     internal static class DataReaderExtensions
     {
-        internal static List<DataReaderRow> GetDataReaderRows(this IDataReader dataReader, string[] columnNames, string typeName)
+        internal static List<DataReaderRow> GetDataReaderRows(this IDataReader dataReader, string[] columnNames, string typeName, DotEntityDbCommand command)
         {
             Throw.IfArgumentNullOrEmpty(typeName, nameof(typeName));
             var dataReaderRows = new List<DataReaderRow>();
-            var columnOrdinals = new Dictionary<string, int>(columnNames.Length);
-            var ordinalsCaptured = false;
+            var ordinalsCaptured = ProcessedQueryCache.TryGet(command.Query, out Dictionary<string, int> columnOrdinals);
             while (dataReader.Read())
             {
                 if (!ordinalsCaptured)
                 {
                     ordinalsCaptured = true;
+                    columnOrdinals = columnOrdinals ?? new Dictionary<string, int>();
                     //the microsoft sqlite reader's get ordinal performs case sensitive comparision, we'll have to lower case the columns in the case
                     var doLower = typeName == "SqliteMaster" && dataReader.GetType().FullName == "Microsoft.Data.Sqlite.SqliteDataReader";
                     foreach (var c in columnNames)
                     {
                         columnOrdinals.Add(typeName + "." + c, dataReader.GetOrdinal(doLower ? c.ToLowerInvariant() : c));
                     }
+                    ProcessedQueryCache.TrySet(command.Query, columnOrdinals);
                 }
                 var row = new DataReaderRow();
                 foreach (var c in columnOrdinals)

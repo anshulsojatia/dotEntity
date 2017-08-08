@@ -1,7 +1,7 @@
 ﻿/**
  * Copyright(C) 2017  Apexol Technologies
  * 
- * This file (IDataDeserializer.cs) is part of dotEntity(https://github.com/RoastedBytes/dotentity).
+ * This file (ProcessedQueryCache.cs) is part of dotEntity(https://github.com/RoastedBytes/dotentity).
  * 
  * dotEntity is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,7 +17,7 @@
  * along with dotEntity.If not, see<http://www.gnu.org/licenses/>.
 
  * You can release yourself from the requirements of the AGPL license by purchasing
- * a commercial license (dotEntity Pro). Buying such a license is mandatory as soon as you
+ * a commercial license (dotEntity or dotEntity Pro). Buying such a license is mandatory as soon as you
  * develop commercial activities involving the dotEntity software without
  * disclosing the source code of your own applications. The activites include:
  * shipping dotEntity with a closed source product, offering paid services to customers
@@ -25,24 +25,29 @@
  * To know more about our commercial license email us at support@roastedbytes.com or
  * visit http://dotentity.net/licensing
  */
-using System;
+
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Data;
 
-namespace DotEntity
+namespace DotEntity.Caching
 {
-    internal interface IDataDeserializer
+    internal static class ProcessedQueryCache
     {
-        string[] GetColumns();
 
-        string GetKeyColumn();
-    }
-    internal interface IDataDeserializer<out T> : IDataDeserializer where T : class
-    {
-        T DeserializeSingle(IDataReader reader, DotEntityDbCommand command);
+        private static readonly ConcurrentDictionary<string, Dictionary<string, int>> Cache;
+        static ProcessedQueryCache()
+        {
+            Cache = new ConcurrentDictionary<string, Dictionary<string, int>>();
+        }
 
-        IEnumerable<T> DeserializeMany(IDataReader reader, DotEntityDbCommand command);
+        internal static bool TryGet(string commandText, out Dictionary<string, int> columnOrdinals)
+        {
+            return Cache.TryGetValue(commandText, out columnOrdinals);
+        }
 
-        IEnumerable<T> DeserializeManyNested(IDataReader reader, IList<IJoinMeta> joinMetas, Dictionary<Type, Delegate> relationActions);
+        internal static void TrySet(string commandText, Dictionary<string, int> columnOrdinals)
+        {
+            Cache.TryAdd(commandText, columnOrdinals);
+        }
     }
 }
