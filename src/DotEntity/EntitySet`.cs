@@ -27,6 +27,7 @@
  */
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using DotEntity.Enumerations;
 using DotEntity.Extensions;
@@ -220,6 +221,24 @@ namespace DotEntity
             using (var manager = new DotEntityQueryManager(queryCache))
             {
                 return manager.Do<T>(query, parameters);
+            }
+        }
+
+        /// <summary>
+        /// Executes the provided <paramref name="query"/> against the data provider and returns the first result of the set
+        /// </summary>
+        /// <param name="query">The query to be executed against the provider. The query parameters references should be named with '@' prefix</param>
+        /// <param name="parameters">(optional) A dynamic object containing the parameters used in the query</param>
+        /// <param name="queryCache">(optional) The query cache to be used for the query</param>
+        /// <param name="cacheParameters">(optional) The cache parameters that'll be replaced in the query</param>
+        /// <returns>An enumeration of <typeparamref name="T"/></returns>
+        public static T QuerySingle(string query, object parameters = null, QueryCache queryCache = null, object[] cacheParameters = null)
+        {
+            if (queryCache != null)
+                queryCache.ParameterValues = cacheParameters;
+            using (var manager = new DotEntityQueryManager(queryCache))
+            {
+                return manager.DoSingle<T>(query, parameters);
             }
         }
 

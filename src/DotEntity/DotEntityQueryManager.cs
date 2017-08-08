@@ -113,6 +113,34 @@ namespace DotEntity
             return cmd.GetResultAs<IEnumerable<T>>();
         }
 
+        public virtual T DoSingle<T>(string query, object parameters, Func<T, bool> resultAction = null) where T : class
+        {
+            var actualQuery = query;
+            TryGetFromCache(out query, out IList<QueryInfo> queryParameters);
+            query = query ?? _queryGenerator.Query(actualQuery, parameters, out queryParameters);
+            TrySetCache(query, queryParameters);
+
+            var cmd = new DotEntityDbCommand(DbOperationType.Select, query, queryParameters, commandBehavior: CommandBehavior.SingleRow);
+            cmd.ProcessReader(reader =>
+            {
+                if (!_withTransaction)
+                    return DataDeserializer<T>.Instance.DeserializeSingle(reader, cmd);
+                if (resultAction != null)
+                {
+                    var ts = DataDeserializer<T>.Instance.DeserializeSingle(reader, cmd);
+                    cmd.ContinueNextCommand = resultAction.Invoke(ts);
+                }
+                return null;
+            });
+            if (_withTransaction)
+            {
+                _transactionCommands.Add(cmd);
+                return default(T);
+            }
+            DotEntityDbConnector.ExecuteCommand(cmd);
+            return cmd.GetResultAs<T>();
+        }
+
         public virtual void Do(string query, object parameters)
         {
             query = _queryGenerator.Query(query, parameters, out IList<QueryInfo> queryParameters);
