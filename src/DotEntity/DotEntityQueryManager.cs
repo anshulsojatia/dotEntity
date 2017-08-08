@@ -67,7 +67,7 @@ namespace DotEntity
             TrySetCache(query, queryParameters);
 
             var cmd = new DotEntityDbCommand(DbOperationType.Select, query, queryParameters);
-            cmd.ProcessReader(reader => DataDeserializer<T>.Instance.DeserializeMany(reader));
+            cmd.ProcessReader(reader => DataDeserializer<T>.Instance.DeserializeMany(reader, cmd));
             DotEntityDbConnector.ExecuteCommand(cmd);
             return cmd.GetResultAs<IEnumerable<T>>();
         }
@@ -141,7 +141,7 @@ namespace DotEntity
             var cmd = new DotEntityDbCommand(DbOperationType.Select, query, queryParameters);
             cmd.ProcessReader(reader =>
             {
-                return DataDeserializer<T>.Instance.DeserializeMany(reader);
+                return DataDeserializer<T>.Instance.DeserializeMany(reader, cmd);
             });
             DotEntityDbConnector.ExecuteCommand(cmd);
 
@@ -157,7 +157,7 @@ namespace DotEntity
             var cmd = new DotEntityDbCommand(DbOperationType.Select, query, queryParameters);
             cmd.ProcessReader(reader =>
             {
-                var ts = DataDeserializer<T>.Instance.DeserializeMany(reader);
+                var ts = DataDeserializer<T>.Instance.DeserializeMany(reader, cmd);
                 reader.NextResult();
                 reader.Read();
                 var fv = reader[0];
@@ -173,7 +173,7 @@ namespace DotEntity
         {
             var query = _queryGenerator.GenerateSelect(out IList<QueryInfo> queryParameters, where, orderBy);
             var cmd = new DotEntityDbCommand(DbOperationType.Select, query, queryParameters, commandBehavior: CommandBehavior.SingleRow);
-            cmd.ProcessReader(reader => DataDeserializer<T>.Instance.DeserializeSingle(reader));
+            cmd.ProcessReader(reader => DataDeserializer<T>.Instance.DeserializeSingle(reader, cmd));
             DotEntityDbConnector.ExecuteCommand(cmd);
             return cmd.GetResultAs<T>();
         }

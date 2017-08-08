@@ -57,9 +57,9 @@ namespace DotEntity
       
 
         
-        public T DeserializeSingle(IDataReader reader)
+        public T DeserializeSingle(IDataReader reader, DotEntityDbCommand command)
         {
-            return DeserializeMany(reader).FirstOrDefault();
+            return DeserializeMany(reader, command).FirstOrDefault();
         }
 
         public T DeserializeSingle(List<DataReaderRow> rows)
@@ -67,10 +67,10 @@ namespace DotEntity
             return DeserializeMany(rows).FirstOrDefault();
         }
 
-        public IEnumerable<T> DeserializeMany(IDataReader reader)
+        public IEnumerable<T> DeserializeMany(IDataReader reader, DotEntityDbCommand command)
         {
             var columnNames = GetColumns();
-            var rows = reader.GetDataReaderRows(columnNames, _typeofT.Name);
+            var rows = reader.GetDataReaderRows(columnNames, _typeofT.Name, command);
             return DeserializeMany(rows);
         }
 
