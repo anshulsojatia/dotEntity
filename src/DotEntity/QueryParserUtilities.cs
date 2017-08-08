@@ -54,7 +54,8 @@ namespace DotEntity
                 return null;
             Type typeOfObj = obj.GetType();
             var props = typeOfObj.GetDatabaseUsableProperties().ToArray();
-            props = props.Where(x => !exclude.Contains(x.Name)).ToArray();
+            if(exclude.Any())
+                props = props.Where(x => !exclude.Contains(x.Name)).ToArray();
             var getterMap = PropertyCallerCache.GetterOfType(typeOfObj);
             var dict = new Dictionary<string, object>();
             
