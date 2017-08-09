@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.12
+VisualStudioVersion = 15.0.26430.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{78ACE309-A5DD-44B6-A245-19BE94067041}"
 EndProject
@@ -13,11 +13,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotEntity.Tests", "DotEntit
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotEntity.Tests.Data", "DotEntity.Tests.Data\DotEntity.Tests.Data.csproj", "{FCC61C35-C9D7-4CA0-8ADB-771EBA3F4723}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotEntity.MySql", "DotEntity.MySql\DotEntity.MySql.csproj", "{DFA17877-E020-4E81-A270-DA265435E619}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotEntity.MySql", "DotEntity.MySql\DotEntity.MySql.csproj", "{DFA17877-E020-4E81-A270-DA265435E619}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotEntity.Tests.Runner", "DotEntity.Tests.Runner\DotEntity.Tests.Runner.csproj", "{CABBFDF5-ECF8-4A55-B315-7B4AE751746B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotEntity.Tests.Runner", "DotEntity.Tests.Runner\DotEntity.Tests.Runner.csproj", "{CABBFDF5-ECF8-4A55-B315-7B4AE751746B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotEntity.Sqlite", "DotEntity.Sqlite\DotEntity.Sqlite.csproj", "{0F88921E-B5BF-44A1-8218-80599B9BB757}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotEntity.Sqlite", "DotEntity.Sqlite\DotEntity.Sqlite.csproj", "{0F88921E-B5BF-44A1-8218-80599B9BB757}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotEntity.Benchmarks", "DotEntity.Benchmarks\DotEntity.Benchmarks.csproj", "{A54EBE92-B3D7-407A-A461-BBB627CA5F44}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,6 +55,10 @@ Global
 		{0F88921E-B5BF-44A1-8218-80599B9BB757}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0F88921E-B5BF-44A1-8218-80599B9BB757}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0F88921E-B5BF-44A1-8218-80599B9BB757}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A54EBE92-B3D7-407A-A461-BBB627CA5F44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A54EBE92-B3D7-407A-A461-BBB627CA5F44}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A54EBE92-B3D7-407A-A461-BBB627CA5F44}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A54EBE92-B3D7-407A-A461-BBB627CA5F44}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -61,6 +67,7 @@ Global
 		{408E5BE1-7E64-4696-9682-2FCECAC54435} = {78ACE309-A5DD-44B6-A245-19BE94067041}
 		{FCC61C35-C9D7-4CA0-8ADB-771EBA3F4723} = {78ACE309-A5DD-44B6-A245-19BE94067041}
 		{CABBFDF5-ECF8-4A55-B315-7B4AE751746B} = {78ACE309-A5DD-44B6-A245-19BE94067041}
+		{A54EBE92-B3D7-407A-A461-BBB627CA5F44} = {78ACE309-A5DD-44B6-A245-19BE94067041}
 	EndGlobalSection
 	GlobalSection(Performance) = preSolution
 		HasPerformanceSessions = true
