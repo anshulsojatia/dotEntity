@@ -10,19 +10,19 @@ You can download **dotEntity** library in the following ways.
 
 To install **dotEntity**
 ```
-Install-Package DotEntity -Pre
+Install-Package DotEntity
 ```
 To install **SqlServer Provider**
 ```
-Install-Package DotEntity.SqlServer -Pre
+Install-Package DotEntity.SqlServer
 ```
 To install **MySql Provider** (uses [MySqlConnector](https://github.com/mysql-net/MySqlConnector?target=_blank))
 ```
-Install-Package DotEntity.MySql -Pre
+Install-Package DotEntity.MySql
 ```
 To install **Sqlite Provider**
 ```
-Install-Package DotEntity.Sqlite -Pre
+Install-Package DotEntity.Sqlite
 ```
 ## Documentation
 The documentation of the library is available at http://dotentity.net/docs.
