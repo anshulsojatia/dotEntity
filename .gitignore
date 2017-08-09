@@ -28,3 +28,6 @@ src/DotEntity.Sqlite/obj/
 src/DotEntity.Sqlite/bin/
 src/DotEntity.Sqlite/DotEntity.Sqlite.csproj.user
 src/DotEntity.Tests/DotEntity.Tests.csproj.user
+src/DotEntity.Benchmarks/obj/
+src/DotEntity.Benchmarks/bin/
+src/DotEntity.Benchmarks/BenchmarkDotNet.Artifacts/

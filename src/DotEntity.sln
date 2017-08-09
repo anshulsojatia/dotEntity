@@ -25,6 +25,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotEntity.Tests.Runner", "D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotEntity.Sqlite", "DotEntity.Sqlite\DotEntity.Sqlite.csproj", "{0F88921E-B5BF-44A1-8218-80599B9BB757}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotEntity.Benchmarks", "DotEntity.Benchmarks\DotEntity.Benchmarks.csproj", "{A54EBE92-B3D7-407A-A461-BBB627CA5F44}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
