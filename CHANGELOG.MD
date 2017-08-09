@@ -1,4 +1,9 @@
 # dotEntity Change Log
+## 1.0.0 (Stable) - 2017-08-09
+- Query Caching added to improve performance
+- Ordinal Caching added to improve performance
+- Command behavior added to query processing
+- Exception handling refined to improve performance
 
 ## 0.2.0-rc1 - 2017-07-27
 - Bugs Fixed
