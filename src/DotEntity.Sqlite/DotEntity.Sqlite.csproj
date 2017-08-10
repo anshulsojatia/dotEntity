@@ -5,14 +5,17 @@
     <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
     <Authors>Team Roasted Bytes</Authors>
     <Company>Apexol Technologies</Company>
+    <Title>dotEntity Sqlite Provider</Title>
     <Description>Sqlite Database Provider for dotEntity</Description>
-    <Copyright>Apexol Technologies</Copyright>
+    <Copyright>(C) 2017 Apexol Technologies</Copyright>
     <PackageLicenseUrl>http://dotentity.net/licensing</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/RoastedBytes/dotEntity</PackageProjectUrl>
     <RepositoryUrl>https://github.com/RoastedBytes/dotEntity.git</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
-    <PackageTags>Micro-ORM, Database, .NET Framework, POCO, MySql</PackageTags>
+    <PackageTags>Micro-ORM, Database, .NET Framework, POCO, Sqlite</PackageTags>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Version>1.0.0</Version>
+    <PackageId>DotEntityPro.Sqlite</PackageId>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net45|AnyCPU'">

@@ -14,8 +14,8 @@
     <RepositoryType>Git</RepositoryType>
     <PackageTags>Micro-ORM, Database, .NET Framework, POCO</PackageTags>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>0.0.1-rc</Version>
-    <PackageId>DotEntity</PackageId>
+    <Version>1.0.0</Version>
+    <PackageId>DotEntityPro</PackageId>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net45|AnyCPU'">
