@@ -27,6 +27,9 @@
     <None Remove="bin\Debug\net45\x86\**" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Remove="PersistanceTests\SqlDatabasePersistanceProfiler.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <None Remove="TestDb\sqlite.db" />
   </ItemGroup>
   <ItemGroup>
