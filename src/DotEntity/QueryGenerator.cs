@@ -35,6 +35,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Text.RegularExpressions;
 using DotEntity.Enumerations;
+using DotEntity.Extensions;
 
 namespace DotEntity
 {
@@ -52,11 +53,11 @@ namespace DotEntity
         {
             Dictionary<string, object> columnValueMap = QueryParserUtilities.ParseObjectKeyValues(entity, exclude: "Id");
             var insertColumns = columnValueMap.Keys.ToArray();
-            var joinInsertString = string.Join(",", insertColumns);
+            var joinInsertString = string.Join(",", insertColumns.Select(x => x.ToEnclosed()));
             var joinValueString = "@" + string.Join(",@", insertColumns); ;
             parameters = ToQueryInfos(columnValueMap);
 
-            return $"INSERT INTO {tableName} ({joinInsertString}) OUTPUT inserted.Id VALUES ({joinValueString});";
+            return $"INSERT INTO {tableName.ToEnclosed()} ({joinInsertString}) OUTPUT inserted.Id VALUES ({joinValueString});";
         }
 
         public virtual string GenerateInsert<T>(T entity, out IList<QueryInfo> parameters) where T : class
@@ -107,15 +108,15 @@ namespace DotEntity
 
             queryParameters = ToQueryInfos(updateValueMap, whereMap);
 
-            var updateString = string.Join(",", updateValueMap.Select(x => $"{x.Key} = @{x.Key}"));
+            var updateString = string.Join(",", updateValueMap.Select(x => $"{x.Key.ToEnclosed()} = @{x.Key}"));
             //get the common keys
             var commonKeys = updateValueMap.Keys.Intersect(whereMap.Keys);
             var whereString = string.Join(" AND ", whereMap.Select(x =>
             {
                 var prefix = commonKeys.Contains(x.Key) ? "2" : "";
-                return $"{x.Key} = @{x.Key}{prefix}";
+                return $"{x.Key.ToEnclosed()} = @{x.Key}{prefix}";
             }));
-            return $"UPDATE {tableName} SET {updateString} WHERE {whereString};";
+            return $"UPDATE {tableName.ToEnclosed()} SET {updateString} WHERE {whereString};";
         }
 
         public virtual string GenerateUpdate<T>(object item, Expression<Func<T, bool>> where, out IList<QueryInfo> queryParameters) where T : class
@@ -124,11 +125,11 @@ namespace DotEntity
             var builder = new StringBuilder();
             // convert the query parms into a SQL string and dynamic property object
             builder.Append("UPDATE ");
-            builder.Append(tableName);
+            builder.Append(tableName.ToEnclosed());
             builder.Append(" SET ");
 
             Dictionary<string, object> updateValueMap = QueryParserUtilities.ParseObjectKeyValues(item);
-            var updateString = string.Join(",", updateValueMap.Select(x => $"{x.Key} = @{x.Key}"));
+            var updateString = string.Join(",", updateValueMap.Select(x => $"{x.Key.ToEnclosed()} = @{x.Key}"));
 
             builder.Append(updateString);
             var parser = new ExpressionTreeParser(where);
@@ -155,9 +156,9 @@ namespace DotEntity
         public virtual string GenerateDelete(string tableName, object where, out IList<QueryInfo> parameters)
         {
             Dictionary<string, object> whereMap = QueryParserUtilities.ParseObjectKeyValues(where);
-            var whereString = string.Join(" AND ", whereMap.Select(x => $"{x.Key} = @{x.Key}"));
+            var whereString = string.Join(" AND ", whereMap.Select(x => $"{x.Key.ToEnclosed()} = @{x.Key}"));
             parameters = ToQueryInfos(whereMap);
-            return $"DELETE FROM {tableName} WHERE {whereString};";
+            return $"DELETE FROM {tableName.ToEnclosed()} WHERE {whereString};";
         }
 
         public virtual string GenerateDelete<T>(Expression<Func<T, bool>> where, out IList<QueryInfo> parameters) where T : class
@@ -166,7 +167,7 @@ namespace DotEntity
             var parser = new ExpressionTreeParser(where);
             var whereString = parser.GetWhereString().Trim();
             parameters = parser.QueryInfoList;
-            return $"DELETE FROM {tableName} WHERE {whereString};";
+            return $"DELETE FROM {tableName.ToEnclosed()} WHERE {whereString};";
         }
 
         public virtual string GenerateDelete<T>(T entity, out IList<QueryInfo> parameters) where T : class
@@ -200,7 +201,7 @@ namespace DotEntity
                 whereString = string.Join(" AND ", whereStringBuilder).Trim();
             }
 
-            return $"SELECT COUNT(*) FROM {tableName} WHERE {whereString};";
+            return $"SELECT COUNT(*) FROM {tableName.ToEnclosed()} WHERE {whereString};";
         }
 
 
@@ -216,7 +217,7 @@ namespace DotEntity
             Dictionary<string, object> whereMap = QueryParserUtilities.ParseObjectKeyValues(where);
             var whereString = string.Join(" AND ", whereMap.Select(x => $"{x.Key} = @{x.Key}"));
             parameters = ToQueryInfos(whereMap);
-            return $"SELECT COUNT(*) FROM {tableName} WHERE {whereString};";
+            return $"SELECT COUNT(*) FROM {tableName.ToEnclosed()} WHERE {whereString};";
         }
 
         public virtual string GenerateSelect<T>(out IList<QueryInfo> parameters, List<Expression<Func<T, bool>>> where = null, Dictionary<Expression<Func<T, object>>, RowOrder> orderBy = null, int page = 1, int count = int.MaxValue) where T : class
@@ -261,7 +262,7 @@ namespace DotEntity
             }
             // make the query now
             builder.Append($"SELECT *{paginatedSelect} FROM ");
-            builder.Append(tableName);
+            builder.Append(tableName.ToEnclosed());
 
             if (!string.IsNullOrEmpty(whereString))
             {
@@ -326,7 +327,7 @@ namespace DotEntity
             }
             // make the query now
             builder.Append($"SELECT *{paginatedSelect} FROM ");
-            builder.Append(tableName);
+            builder.Append(tableName.ToEnclosed());
 
             if (!string.IsNullOrEmpty(whereString))
             {
@@ -345,7 +346,7 @@ namespace DotEntity
             }
 
             //and the count query
-            query = query + $"{Environment.NewLine}SELECT COUNT(*) FROM {tableName}" + (string.IsNullOrEmpty(whereString)
+            query = query + $"{Environment.NewLine}SELECT COUNT(*) FROM {tableName.ToEnclosed()}" + (string.IsNullOrEmpty(whereString)
                 ? ""
                 : $" WHERE {whereString}") + ";";
             return query;
@@ -377,7 +378,7 @@ namespace DotEntity
                     sourceAlias = parentAliasUsed;
                 }
                 joinBuilder.Append(
-                    $"{JoinMap[joinMeta.JoinType]} {joinedTableName} {newAlias} ON {sourceAlias}.{joinMeta.SourceColumnName} = {newAlias}.{joinMeta.DestinationColumnName} ");
+                    $"{JoinMap[joinMeta.JoinType]} {joinedTableName.ToEnclosed()} {newAlias} ON {sourceAlias}.{joinMeta.SourceColumnName.ToEnclosed()} = {newAlias}.{joinMeta.DestinationColumnName.ToEnclosed()} ");
 
                 lastAliasUsed = newAlias;
 
@@ -420,7 +421,7 @@ namespace DotEntity
             // make the query now
             builder.Append($"SELECT *{paginatedSelect} FROM ");
 
-            builder.Append(tableName + $" {parentAliasUsed} ");
+            builder.Append(tableName.ToEnclosed() + $" {parentAliasUsed} ");
 
             //join
             builder.Append(joinBuilder);

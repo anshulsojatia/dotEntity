@@ -46,5 +46,10 @@ namespace DotEntity.MySql
         public IQueryGenerator QueryGenerator { get; set; }
         public ITypeMapProvider TypeMapProvider { get; set; }
         public int MaximumParametersPerQuery { get; set; }
+
+        public string SafeEnclose(string objectName)
+        {
+            return $"`{objectName}`";
+        }
     }
 }

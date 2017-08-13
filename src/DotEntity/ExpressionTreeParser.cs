@@ -32,6 +32,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using DotEntity.Extensions;
 
 namespace DotEntity
 {
@@ -415,7 +416,7 @@ namespace DotEntity
                 {
                     if (item.PropertyValue is ICollection)
                     {
-                        builder.Append($"{item.PropertyName} {item.QueryOperator} (");
+                        builder.Append($"{item.PropertyName.ToEnclosed()} {item.QueryOperator} (");
                         var itemCollection = (IList)item.PropertyValue;
                         for (var itemIndex = 0; itemIndex < itemCollection.Count; itemIndex++)
                         {
@@ -429,10 +430,10 @@ namespace DotEntity
                     }
                     else
                     {
-                        builder.Append($"{item.PropertyName} {item.QueryOperator} ");
+                        builder.Append($"{item.PropertyName.ToEnclosed()} {item.QueryOperator} ");
                         if (item.IsPropertyValueAlsoProperty)
                         {
-                            builder.Append(item.PropertyValue);
+                            builder.Append(item.PropertyValue.ToString().ToEnclosed());
                         }
                         else
                         {
@@ -484,7 +485,7 @@ namespace DotEntity
         {
             
             var ob = Visit(_expression, out bool _);
-            return ob.ToString();
+            return ob.ToString().ToEnclosed();
         }
 
         private static string GetSafeParameterName(IList<QueryInfo> queryParameters, string propertyName, object propertyValue)

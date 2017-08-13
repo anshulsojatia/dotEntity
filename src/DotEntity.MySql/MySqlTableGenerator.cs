@@ -24,7 +24,7 @@ namespace DotEntity.MySql
             var tableName = DotEntityDb.GetTableNameForType(type);
             var properties = type.GetDatabaseUsableProperties();
 
-            var builder = new StringBuilder($"CREATE TABLE {tableName}{Environment.NewLine}(");
+            var builder = new StringBuilder($"CREATE TABLE {tableName.ToEnclosed()}{Environment.NewLine}(");
             var keyColumn = type.GetKeyColumnName();
 
             //is key column nullable
@@ -42,10 +42,10 @@ namespace DotEntity.MySql
                 {
                     identityString = " AUTO_INCREMENT";
                 }
-                builder.Append($"\t {fieldName} {dbFieldType}{identityString},");
+                builder.Append($"\t {fieldName.ToEnclosed()} {dbFieldType}{identityString},");
                 builder.Append(Environment.NewLine);
             }
-            builder.Append($"PRIMARY KEY ({keyColumn}));");
+            builder.Append($"PRIMARY KEY ({keyColumn.ToEnclosed()}));");
             return builder.ToString();
         }
 
@@ -55,8 +55,8 @@ namespace DotEntity.MySql
             var toTable = DotEntityDb.GetTableNameForType(relation.DestinationType);
             var constraintName = GetForeignKeyConstraintName(fromTable, toTable, relation.SourceColumnName,
                 relation.DestinationColumnName);
-            var builder = new StringBuilder($"ALTER TABLE {toTable}{Environment.NewLine}");
-            builder.Append($"DROP FOREIGN KEY {constraintName};");
+            var builder = new StringBuilder($"ALTER TABLE {toTable.ToEnclosed()}{Environment.NewLine}");
+            builder.Append($"DROP FOREIGN KEY {constraintName.ToEnclosed()};");
             return builder.ToString();
         }
     }

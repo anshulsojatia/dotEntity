@@ -45,6 +45,10 @@ namespace DotEntity.Sqlite
         public ITypeMapProvider TypeMapProvider { get; set; }
 
         public int MaximumParametersPerQuery { get; set; }
+        public string SafeEnclose(string objectName)
+        {
+            return $"[{objectName}]";
+        }
 
         public SqliteDatabaseProvider()
         {

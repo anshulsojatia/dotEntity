@@ -69,7 +69,7 @@ namespace DotEntity
             var tableName = DotEntityDb.GetTableNameForType(type);
             var properties = type.GetDatabaseUsableProperties();
 
-            var builder = new StringBuilder($"CREATE TABLE {tableName}{Environment.NewLine}(");
+            var builder = new StringBuilder($"CREATE TABLE {tableName.ToEnclosed()}{Environment.NewLine}(");
             var keyColumn = type.GetKeyColumnName();
 
             //is key column nullable
@@ -87,10 +87,10 @@ namespace DotEntity
                 {
                     identityString = " IDENTITY(1,1)";
                 }
-                builder.Append($"\t {fieldName} {dbFieldType}{identityString},");
+                builder.Append($"\t {fieldName.ToEnclosed()} {dbFieldType}{identityString},");
                 builder.Append(Environment.NewLine);
             }
-            builder.Append($"PRIMARY KEY CLUSTERED ({keyColumn} ASC));");
+            builder.Append($"PRIMARY KEY CLUSTERED ({keyColumn.ToEnclosed()} ASC));");
             return builder.ToString();
         }
 
@@ -102,7 +102,7 @@ namespace DotEntity
         public virtual string GetDropTableScript(Type type)
         {
             var tableName = DotEntityDb.GetTableNameForType(type);
-            return $"DROP TABLE {tableName};";
+            return $"DROP TABLE {tableName.ToEnclosed()};";
         }
 
         public virtual string GetCreateConstraintScript(Relation relation)
@@ -112,9 +112,9 @@ namespace DotEntity
             var constraintName = GetForeignKeyConstraintName(fromTable, toTable, relation.SourceColumnName,
                 relation.DestinationColumnName);
 
-            var builder = new StringBuilder($"ALTER TABLE {toTable}{Environment.NewLine}");
-            builder.Append($"ADD CONSTRAINT {constraintName}{Environment.NewLine}");
-            builder.Append($"FOREIGN KEY ({relation.DestinationColumnName}) REFERENCES {fromTable}({relation.SourceColumnName});");
+            var builder = new StringBuilder($"ALTER TABLE {toTable.ToEnclosed()}{Environment.NewLine}");
+            builder.Append($"ADD CONSTRAINT {constraintName.ToEnclosed()}{Environment.NewLine}");
+            builder.Append($"FOREIGN KEY ({relation.DestinationColumnName.ToEnclosed()}) REFERENCES {fromTable.ToEnclosed()}({relation.SourceColumnName.ToEnclosed()});");
             return builder.ToString();
         }
 
@@ -124,8 +124,8 @@ namespace DotEntity
             var toTable = DotEntityDb.GetTableNameForType(relation.DestinationType);
             var constraintName = GetForeignKeyConstraintName(fromTable, toTable, relation.SourceColumnName,
                 relation.DestinationColumnName);
-            var builder = new StringBuilder($"ALTER TABLE {toTable}{Environment.NewLine}");
-            builder.Append($"DROP CONSTRAINT {constraintName};");
+            var builder = new StringBuilder($"ALTER TABLE {toTable.ToEnclosed()}{Environment.NewLine}");
+            builder.Append($"DROP CONSTRAINT {constraintName.ToEnclosed()};");
             return builder.ToString();
         }
 
@@ -133,16 +133,16 @@ namespace DotEntity
         {
             var tableName = DotEntityDb.GetTableNameForType(type);
             var dataTypeString = GetFormattedDbTypeForType(columnType, maxLength);
-            var builder = new StringBuilder($"ALTER TABLE {tableName}{Environment.NewLine}");
-            builder.Append($"ADD COLUMN {columnName} {dataTypeString}");
+            var builder = new StringBuilder($"ALTER TABLE {tableName.ToEnclosed()}{Environment.NewLine}");
+            builder.Append($"ADD COLUMN {columnName.ToEnclosed()} {dataTypeString}");
             return builder.ToString();
         }
 
         public virtual string GetDropColumnScript(Type type, string columnName)
         {
             var tableName = DotEntityDb.GetTableNameForType(type);
-            var builder = new StringBuilder($"ALTER TABLE [{tableName}]{Environment.NewLine}");
-            builder.Append($"DROP COLUMN {columnName};");
+            var builder = new StringBuilder($"ALTER TABLE [{tableName.ToEnclosed()}]{Environment.NewLine}");
+            builder.Append($"DROP COLUMN {columnName.ToEnclosed()};");
             return builder.ToString();
         }
 
@@ -150,8 +150,8 @@ namespace DotEntity
         {
             var tableName = DotEntityDb.GetTableNameForType(type);
             var dataTypeString = GetFormattedDbTypeForType(columnType, maxLength);
-            var builder = new StringBuilder($"ALTER TABLE [{tableName}]{Environment.NewLine}");
-            builder.Append($"ALTER COLUMN {columnName} {dataTypeString}");
+            var builder = new StringBuilder($"ALTER TABLE [{tableName.ToEnclosed()}]{Environment.NewLine}");
+            builder.Append($"ALTER COLUMN {columnName.ToEnclosed()} {dataTypeString}");
             return builder.ToString();
         }
 
