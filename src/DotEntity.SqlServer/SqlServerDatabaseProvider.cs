@@ -23,5 +23,10 @@ namespace DotEntity.SqlServer
             get => 2100;
             set => _maximumParameterPerQuery = value;
         }
+
+        public string SafeEnclose(string objectName)
+        {
+            return $"[{objectName}]";
+        }
     }
 }

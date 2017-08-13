@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using DotEntity.Enumerations;
+using DotEntity.Extensions;
 
 namespace DotEntity.MySql
 {
@@ -13,11 +14,11 @@ namespace DotEntity.MySql
         {
             Dictionary<string, object> columnValueMap = QueryParserUtilities.ParseObjectKeyValues(entity, exclude: "Id");
             var insertColumns = columnValueMap.Keys.ToArray();
-            var joinInsertString = string.Join(",", insertColumns);
+            var joinInsertString = string.Join(",", insertColumns.Select(x => x.ToEnclosed()));
             var joinValueString = "@" + string.Join(",@", insertColumns); ;
             parameters = ToQueryInfos(columnValueMap);
 
-            return $"INSERT INTO {tableName} ({joinInsertString}) VALUES ({joinValueString});SELECT last_insert_id() AS Id;";
+            return $"INSERT INTO {tableName.ToEnclosed()} ({joinInsertString}) VALUES ({joinValueString});SELECT last_insert_id() AS { "Id".ToEnclosed()};";
         }
 
         public override string GenerateSelect<T>(out IList<QueryInfo> parameters, List<Expression<Func<T, bool>>> where = null, Dictionary<Expression<Func<T, object>>, RowOrder> orderBy = null, int page = 1, int count = int.MaxValue)
@@ -56,7 +57,7 @@ namespace DotEntity.MySql
          
             // make the query now
             builder.Append($"SELECT * FROM ");
-            builder.Append(tableName);
+            builder.Append(tableName.ToEnclosed());
 
             if (!string.IsNullOrEmpty(whereString))
             {
@@ -113,7 +114,7 @@ namespace DotEntity.MySql
            
             // make the query now
             builder.Append($"SELECT * FROM ");
-            builder.Append(tableName);
+            builder.Append(tableName.ToEnclosed());
 
             if (!string.IsNullOrEmpty(whereString))
             {
@@ -132,7 +133,7 @@ namespace DotEntity.MySql
             var query = builder.ToString().Trim() + ";";
 
             //and the count query
-            query = query + $"{Environment.NewLine}SELECT COUNT(*) FROM {tableName}" + (string.IsNullOrEmpty(whereString)
+            query = query + $"{Environment.NewLine}SELECT COUNT(*) FROM {tableName.ToEnclosed()}" + (string.IsNullOrEmpty(whereString)
                         ? ""
                         : $" WHERE {whereString}") + ";";
             return query;

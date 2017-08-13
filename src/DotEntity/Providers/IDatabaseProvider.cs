@@ -42,5 +42,7 @@ namespace DotEntity.Providers
         ITypeMapProvider TypeMapProvider { get; set; }
 
         int MaximumParametersPerQuery { get; set; }
+
+        string SafeEnclose(string objectName);
     }
 }

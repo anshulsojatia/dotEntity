@@ -3,7 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26430.16
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sample", "Sample", "{F33CFA87-3667-418E-A487-16CD24F31ADF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleApp", "SampleApp\SampleApp.csproj", "{8F5AD5DB-CD73-4E1D-8B25-03C8E9758686}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{78ACE309-A5DD-44B6-A245-19BE94067041}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleAppCore", "SampleApp.Core\SampleAppCore.csproj", "{CA597152-C809-4E46-A2AC-E9B484922538}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotEntity", "DotEntity\DotEntity.csproj", "{2EADD69A-EC3A-4D2A-B322-4E9A10F6A7F6}"
 EndProject
@@ -21,12 +27,25 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotEntity.Sqlite", "DotEnti
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotEntity.Benchmarks", "DotEntity.Benchmarks\DotEntity.Benchmarks.csproj", "{A54EBE92-B3D7-407A-A461-BBB627CA5F44}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "DotEntity.Licensing", "DotEntity.Licensing\DotEntity.Licensing.shproj", "{ACEA75B8-AEBC-459A-93C4-D44402EE9E91}"
+EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		DotEntity.Licensing\DotEntity.Licensing.projitems*{acea75b8-aebc-459a-93c4-d44402ee9e91}*SharedItemsImports = 13
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8F5AD5DB-CD73-4E1D-8B25-03C8E9758686}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F5AD5DB-CD73-4E1D-8B25-03C8E9758686}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F5AD5DB-CD73-4E1D-8B25-03C8E9758686}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F5AD5DB-CD73-4E1D-8B25-03C8E9758686}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CA597152-C809-4E46-A2AC-E9B484922538}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA597152-C809-4E46-A2AC-E9B484922538}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA597152-C809-4E46-A2AC-E9B484922538}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA597152-C809-4E46-A2AC-E9B484922538}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2EADD69A-EC3A-4D2A-B322-4E9A10F6A7F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2EADD69A-EC3A-4D2A-B322-4E9A10F6A7F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2EADD69A-EC3A-4D2A-B322-4E9A10F6A7F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -64,10 +83,11 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{8F5AD5DB-CD73-4E1D-8B25-03C8E9758686} = {F33CFA87-3667-418E-A487-16CD24F31ADF}
+		{CA597152-C809-4E46-A2AC-E9B484922538} = {F33CFA87-3667-418E-A487-16CD24F31ADF}
 		{408E5BE1-7E64-4696-9682-2FCECAC54435} = {78ACE309-A5DD-44B6-A245-19BE94067041}
 		{FCC61C35-C9D7-4CA0-8ADB-771EBA3F4723} = {78ACE309-A5DD-44B6-A245-19BE94067041}
 		{CABBFDF5-ECF8-4A55-B315-7B4AE751746B} = {78ACE309-A5DD-44B6-A245-19BE94067041}
-		{A54EBE92-B3D7-407A-A461-BBB627CA5F44} = {78ACE309-A5DD-44B6-A245-19BE94067041}
 	EndGlobalSection
 	GlobalSection(Performance) = preSolution
 		HasPerformanceSessions = true
