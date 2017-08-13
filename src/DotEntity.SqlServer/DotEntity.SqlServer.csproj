@@ -16,6 +16,7 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Version>1.0.0</Version>
     <PackageId>DotEntityPro.SqlServer</PackageId>
+    <AssemblyName>DotEntityPro.SqlServer</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
