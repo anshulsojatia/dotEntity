@@ -151,7 +151,7 @@ namespace DotEntity.Extensions
             }
             return resultColumns;
 #else
-            throw new NotSupportedException();
+           return null;
 #endif
 
         }
