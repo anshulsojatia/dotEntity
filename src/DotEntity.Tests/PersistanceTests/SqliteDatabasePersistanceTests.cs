@@ -22,7 +22,7 @@ namespace DotEntity.Tests.PersistanceTests
         public void Init()
         {
             DotEntityDb.Initialize(SqliteConnectionString, new SqliteDatabaseProvider());
-            DotEntityDb.EnqueueVersions(new DbVersion());
+            DotEntityDb.EnqueueVersions(ContextKey, new DbVersion());
             DotEntityDb.UpdateDatabaseToLatestVersion("DotEntity.Tests.PersistanceTests");
         }
 

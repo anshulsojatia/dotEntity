@@ -13,7 +13,7 @@ namespace DotEntity.Tests
         protected string MySqlConnectionString;
         protected string MsSqlConnectionString;
         protected string SqliteConnectionString;
-
+        protected const string ContextKey = "DotEntity.Tests.PersistanceTests";
         private readonly string _sqliteFile;
         public DotEntityTest()
         {

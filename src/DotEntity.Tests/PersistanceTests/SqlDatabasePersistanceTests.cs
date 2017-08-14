@@ -23,7 +23,7 @@ namespace DotEntity.Tests.PersistanceTests
         {
             DotEntityDb.Initialize(MsSqlConnectionString, new SqlServerDatabaseProvider());
             //add some versions
-            DotEntityDb.EnqueueVersions(new DbVersion());
+            DotEntityDb.EnqueueVersions(ContextKey, new DbVersion());
             DotEntityDb.UpdateDatabaseToLatestVersion("DotEntity.Tests.PersistanceTests");
         }
 

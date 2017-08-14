@@ -27,6 +27,7 @@
  */
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using DotEntity.Providers;
 using DotEntity.Versioning;
@@ -83,31 +84,40 @@ namespace DotEntity
             return EntityTableNames.ContainsKey(type) ? EntityTableNames[type] : type.Name;
         }
 
-        private static ConcurrentQueue<IDatabaseVersion> _databaseVersions;
+        private static ConcurrentDictionary<string, Queue<IDatabaseVersion>> _databaseVersions;
 
         private static void ResetVersions()
         {
             if(_databaseVersions != null)
-                while (_databaseVersions.TryDequeue(out IDatabaseVersion version)) { }
+                foreach(var kp in _databaseVersions)
+                    while (_databaseVersions[kp.Key].Count > 0)
+                    {
+                        _databaseVersions[kp.Key].Dequeue();
+                    }
         }
-        public static void EnqueueVersions(params IDatabaseVersion[] versions)
+        public static void EnqueueVersions(string contextKey, params IDatabaseVersion[] versions)
         {
-            _databaseVersions = _databaseVersions ?? new ConcurrentQueue<IDatabaseVersion>();
-            foreach(var version in versions)
-                _databaseVersions.Enqueue(version);
+            _databaseVersions = _databaseVersions ?? new ConcurrentDictionary<string, Queue<IDatabaseVersion>>();
+            if (!_databaseVersions.TryGetValue(contextKey, out Queue<IDatabaseVersion> queue))
+            {
+                queue = new Queue<IDatabaseVersion>();
+                _databaseVersions.TryAdd(contextKey, queue);
+            }
+            foreach (var version in versions)
+                queue.Enqueue(version);
         }
 
         public static void UpdateDatabaseToLatestVersion(string callingContextName)
         {
-            Throw.IfNoDatabaseVersions(_databaseVersions);
-            var versionRunner = new VersionUpdater(callingContextName, _databaseVersions.ToArray());
+            Throw.IfNoDatabaseVersions(_databaseVersions[callingContextName]);
+            var versionRunner = new VersionUpdater(callingContextName, _databaseVersions[callingContextName].ToArray());
             versionRunner.RunUpgrade();
         }
 
         public static void UpdateDatabaseToVersion(string callingContextName, string versionKey)
         {
-            Throw.IfNoDatabaseVersions(_databaseVersions);
-            var versionRunner = new VersionUpdater(callingContextName, _databaseVersions.ToArray());
+            Throw.IfNoDatabaseVersions(_databaseVersions[callingContextName]);
+            var versionRunner = new VersionUpdater(callingContextName, _databaseVersions[callingContextName].ToArray());
             versionRunner.RunDowngrade(versionKey);
         }
     }

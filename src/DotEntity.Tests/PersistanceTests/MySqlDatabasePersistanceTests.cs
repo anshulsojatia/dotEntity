@@ -23,8 +23,8 @@ namespace DotEntity.Tests.PersistanceTests
         public void Init()
         {
             DotEntityDb.Initialize(MySqlConnectionString, new MySqlDatabaseProvider("mytest"));
-            DotEntityDb.EnqueueVersions(new DbVersion());
-            DotEntityDb.UpdateDatabaseToLatestVersion("DotEntity.Tests.PersistanceTests");
+            DotEntityDb.EnqueueVersions(ContextKey, new DbVersion());
+            DotEntityDb.UpdateDatabaseToLatestVersion(ContextKey);
         }
 
         [OneTimeTearDown]

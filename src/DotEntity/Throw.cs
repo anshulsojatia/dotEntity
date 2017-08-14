@@ -27,7 +27,8 @@
  */
 using System;
 using System.Collections;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using DotEntity.Extensions;
 using DotEntity.Versioning;
@@ -131,9 +132,9 @@ namespace DotEntity
                     $"Can't find an equivalent database type for type {type.FullName}. Either mark the field as virtual or change the datatype to a more concrete type"));
         }
 
-        public static void IfNoDatabaseVersions(ConcurrentQueue<IDatabaseVersion> databaseVersions)
+        public static void IfNoDatabaseVersions(Queue<IDatabaseVersion> databaseVersions)
         {
-            It<InvalidOperationException>(databaseVersions == null || databaseVersions.IsEmpty,
+            It<InvalidOperationException>(databaseVersions == null || !databaseVersions.Any(),
                 () => new ThrowInfo(
                     $"Version upgrades or downgrades can't be done with no versions. Use {nameof(DotEntityDb)}.{nameof(DotEntityDb.EnqueueVersions)} to add some database versions"));
 
