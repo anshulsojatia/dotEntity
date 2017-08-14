@@ -19,13 +19,13 @@ namespace DotEntity.Tests.SqlGeneratorTests
         {
             var generator = new SqliteTableGenerator();
             var sql = generator.GetCreateTableScript<Product>();
-            var expected = @"CREATE TABLE Product
-(	 Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-	 ProductName TEXT NOT NULL,
-	 ProductDescription TEXT NOT NULL,
-	 DateCreated TEXT NOT NULL,
-	 Price NUMERIC NOT NULL,
-	 IsActive NUMERIC NOT NULL);";
+            var expected = @"CREATE TABLE [Product]
+(	 [Id] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	 [ProductName] TEXT NOT NULL,
+	 [ProductDescription] TEXT NOT NULL,
+	 [DateCreated] TEXT NOT NULL,
+	 [Price] NUMERIC NOT NULL,
+	 [IsActive] NUMERIC NOT NULL);";
             Assert.AreEqual(expected, sql);
         }
 
@@ -34,7 +34,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
         {
             var generator = new SqliteTableGenerator();
             var sql = generator.GetDropTableScript<Product>();
-            var expected = @"DROP TABLE Product;";
+            var expected = @"DROP TABLE [Product];";
             Assert.AreEqual(expected, sql);
         }
 
@@ -50,14 +50,14 @@ namespace DotEntity.Tests.SqlGeneratorTests
             };
             var generator = new SqliteTableGenerator();
             var sql = generator.GetCreateConstraintScript(relation);
-            var expected = @"ALTER TABLE ProductCategory RENAME TO ProductCategory_temporary;
-CREATE TABLE ProductCategory
-(	 Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-	 ProductId INTEGER NOT NULL,
-	 CategoryId INTEGER NOT NULL,
-FOREIGN KEY(ProductId) REFERENCES Product(Id));
-INSERT INTO ProductCategory SELECT * FROM ProductCategory_temporary;
-DROP TABLE ProductCategory_temporary;";
+            var expected = @"ALTER TABLE [ProductCategory] RENAME TO [ProductCategory_temporary];
+CREATE TABLE [ProductCategory]
+(	 [Id] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	 [ProductId] INTEGER NOT NULL,
+	 [CategoryId] INTEGER NOT NULL,
+FOREIGN KEY([ProductId]) REFERENCES [Product]([Id]));
+INSERT INTO [ProductCategory] SELECT * FROM [ProductCategory_temporary];
+DROP TABLE [ProductCategory_temporary];";
 
             Assert.AreEqual(expected, sql);
         }
@@ -74,13 +74,13 @@ DROP TABLE ProductCategory_temporary;";
             };
             var generator = new SqliteTableGenerator();
             var sql = generator.GetDropConstraintScript(relation);
-            var expected = @"ALTER TABLE ProductCategory RENAME TO ProductCategory_temporary;
-CREATE TABLE ProductCategory
-(	 Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-	 ProductId INTEGER NOT NULL,
-	 CategoryId INTEGER NOT NULL);
-INSERT INTO ProductCategory SELECT * FROM ProductCategory_temporary;
-DROP TABLE ProductCategory_temporary;";
+            var expected = @"ALTER TABLE [ProductCategory] RENAME TO [ProductCategory_temporary];
+CREATE TABLE [ProductCategory]
+(	 [Id] INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	 [ProductId] INTEGER NOT NULL,
+	 [CategoryId] INTEGER NOT NULL);
+INSERT INTO [ProductCategory] SELECT * FROM [ProductCategory_temporary];
+DROP TABLE [ProductCategory_temporary];";
             Assert.AreEqual(expected, sql);
         }
     }

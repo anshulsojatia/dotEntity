@@ -26,7 +26,7 @@ namespace DotEntity.Sqlite
             var tableName = DotEntityDb.GetTableNameForType(type);
             var properties = type.GetDatabaseUsableProperties();
 
-            var builder = new StringBuilder($"CREATE TABLE {tableName}{Environment.NewLine}(");
+            var builder = new StringBuilder($"CREATE TABLE {tableName.ToEnclosed()}{Environment.NewLine}(");
             var keyColumn = type.GetKeyColumnName();
 
             //is key column nullable
@@ -44,13 +44,13 @@ namespace DotEntity.Sqlite
                 {
                     identityString = " PRIMARY KEY AUTOINCREMENT";
                 }
-                builder.Append($"\t {fieldName} {dbFieldType}{identityString},");
+                builder.Append($"\t {fieldName.ToEnclosed()} {dbFieldType}{identityString},");
                 builder.Append(Environment.NewLine);
             }
             if (relation != null)
             {
                 var toTable = DotEntityDb.GetTableNameForType(relation.SourceType);
-                builder.Append($"FOREIGN KEY({relation.DestinationColumnName}) REFERENCES {toTable}({relation.SourceColumnName}),");
+                builder.Append($"FOREIGN KEY({relation.DestinationColumnName.ToEnclosed()}) REFERENCES {toTable.ToEnclosed()}({relation.SourceColumnName.ToEnclosed()}),");
                 builder.Append(Environment.NewLine);
             }
             var query = builder.ToString().TrimEnd(',', '\n', '\r') + ");";
@@ -63,13 +63,13 @@ namespace DotEntity.Sqlite
             //we will have to create a new table with constraints, copy the data from old table, drop the old table, rename the new table huh :|
 
             var toTable = DotEntityDb.GetTableNameForType(relation.DestinationType);
-            var builder = new StringBuilder($"ALTER TABLE {toTable} RENAME TO {toTable}_temporary;");
+            var builder = new StringBuilder($"ALTER TABLE {toTable.ToEnclosed()} RENAME TO {(toTable + "_temporary").ToEnclosed()};");
             builder.Append(Environment.NewLine);
             builder.Append(GetCreateTableScriptWithRelation(relation.DestinationType, relation));
             builder.Append(Environment.NewLine);
-            builder.Append($"INSERT INTO {toTable} SELECT * FROM {toTable}_temporary;");
+            builder.Append($"INSERT INTO {toTable.ToEnclosed()} SELECT * FROM {(toTable + "_temporary").ToEnclosed()};");
             builder.Append(Environment.NewLine);
-            builder.Append($"DROP TABLE {toTable}_temporary;");
+            builder.Append($"DROP TABLE {(toTable + "_temporary").ToEnclosed()};");
             return builder.ToString();
         }
 
@@ -79,13 +79,13 @@ namespace DotEntity.Sqlite
             //we will have to create a new table with constraints, copy the data from old table, drop the old table, rename the new table huh :|
 
             var toTable = DotEntityDb.GetTableNameForType(relation.DestinationType);
-            var builder = new StringBuilder($"ALTER TABLE {toTable} RENAME TO {toTable}_temporary;");
+            var builder = new StringBuilder($"ALTER TABLE {toTable.ToEnclosed()} RENAME TO {(toTable + "_temporary").ToEnclosed()};");
             builder.Append(Environment.NewLine);
             builder.Append(GetCreateTableScriptWithRelation(relation.DestinationType));
             builder.Append(Environment.NewLine);
-            builder.Append($"INSERT INTO {toTable} SELECT * FROM {toTable}_temporary;");
+            builder.Append($"INSERT INTO {toTable.ToEnclosed()} SELECT * FROM {(toTable + "_temporary").ToEnclosed()};");
             builder.Append(Environment.NewLine);
-            builder.Append($"DROP TABLE {toTable}_temporary;");
+            builder.Append($"DROP TABLE {(toTable + "_temporary").ToEnclosed()};");
             return builder.ToString();
         }
     }
