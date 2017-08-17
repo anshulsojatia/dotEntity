@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using DotEntity.Attributes;
 
 namespace DotEntity.Tests.Data
 {
@@ -9,6 +10,7 @@ namespace DotEntity.Tests.Data
         [Key]
         public int Id { get; set; }
 
+        [NotNull]
         public string ProductName { get; set; }
 
         public string ProductDescription { get; set; }

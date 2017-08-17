@@ -25,7 +25,7 @@ namespace DotEntity.Tests.PersistanceTests
             var createProduct = @"CREATE TABLE Product
 (     Id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
      ProductName TEXT NOT NULL,
-     ProductDescription TEXT NOT NULL,
+     ProductDescription TEXT NULL,
      DateCreated TEXT NOT NULL,
      Price NUMERIC NOT NULL,
      IsActive NUMERIC NOT NULL);";
