@@ -8,11 +8,12 @@ namespace DotEntity.Sqlite
 {
     public class SqliteTableGenerator : DefaultDatabaseTableGenerator
     {
-        public override string GetFormattedDbTypeForType(Type type, int maxLength = 0)
+        public override string GetFormattedDbTypeForType(Type type, PropertyInfo propertyInfo = null)
         {
             Throw.IfInvalidDataTypeMapping(!TypeMap.TryGetValue(type, out string dbTypeString), type);
             var typeBuilder = new StringBuilder(dbTypeString);
-            typeBuilder.Append(type.IsNullable() ? " NULL" : " NOT NULL");
+            var nullable = IsNullable(type, propertyInfo);
+            typeBuilder.Append(nullable ? " NULL" : " NOT NULL");
             return typeBuilder.ToString();
         }
 
@@ -37,7 +38,7 @@ namespace DotEntity.Sqlite
             {
                 var pType = property.PropertyType;
                 var fieldName = property.Name;
-                var dbFieldType = GetFormattedDbTypeForType(pType);
+                var dbFieldType = GetFormattedDbTypeForType(pType, property);
                 var identityString = "";
                 //do we have key attribute here?
                 if (fieldName == keyColumn && pType == typeof(int))

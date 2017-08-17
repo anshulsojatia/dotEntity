@@ -27,9 +27,11 @@
  */
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using DotEntity.Attributes;
 using DotEntity.Extensions;
 
 namespace DotEntity
@@ -47,15 +49,31 @@ namespace DotEntity
         
         #endregion
 
-        public virtual string GetFormattedDbTypeForType(Type type, int maxLength = 0)
+        protected virtual bool IsNullable(Type type, PropertyInfo propertyInfo = null)
+        {
+            var nullable = type.IsNullable();
+            if (!nullable)
+            {
+                nullable = type.GetTypeInfo().IsClass;
+                if (nullable && propertyInfo != null)
+                    nullable = propertyInfo.GetCustomAttribute<NotNullAttribute>() == null &&
+                               propertyInfo.GetCustomAttribute<KeyAttribute>() == null;
+            }
+            return nullable;
+        }
+
+        public virtual string GetFormattedDbTypeForType(Type type, PropertyInfo propertyInfo = null)
         {
             Throw.IfInvalidDataTypeMapping(!TypeMap.TryGetValue(type, out string dbTypeString), type);
             var typeBuilder = new StringBuilder(dbTypeString);
+            var maxLength = 0;
+            var nullable = IsNullable(type, propertyInfo);
+
             if (maxLength > 0)
                 typeBuilder.Append($"({maxLength})");
             else if(type == typeof(string))
                 typeBuilder.Append($"(MAX)");
-            typeBuilder.Append(type.IsNullable() ? " NULL" : " NOT NULL");
+            typeBuilder.Append(nullable ? " NULL" : " NOT NULL");
             return typeBuilder.ToString();
         }
 
@@ -80,7 +98,7 @@ namespace DotEntity
             {
                 var pType = property.PropertyType;
                 var fieldName = property.Name;
-                var dbFieldType = GetFormattedDbTypeForType(pType);
+                var dbFieldType = GetFormattedDbTypeForType(pType, property);
                 var identityString = "";
                 //do we have key attribute here?
                 if (fieldName == keyColumn && pType == typeof(int))
@@ -129,10 +147,10 @@ namespace DotEntity
             return builder.ToString();
         }
 
-        public virtual string GetAddColumnScript(Type type, string columnName, Type columnType, int maxLength = 0)
+        public virtual string GetAddColumnScript(Type type, string columnName, Type columnType, PropertyInfo propertyInfo = null)
         {
             var tableName = DotEntityDb.GetTableNameForType(type);
-            var dataTypeString = GetFormattedDbTypeForType(columnType, maxLength);
+            var dataTypeString = GetFormattedDbTypeForType(columnType, propertyInfo);
             var builder = new StringBuilder($"ALTER TABLE {tableName.ToEnclosed()}{Environment.NewLine}");
             builder.Append($"ADD COLUMN {columnName.ToEnclosed()} {dataTypeString}");
             return builder.ToString();
@@ -146,10 +164,10 @@ namespace DotEntity
             return builder.ToString();
         }
 
-        public virtual string GetAlterColumnScript(Type type, string columnName, Type columnType, int maxLength = 0)
+        public virtual string GetAlterColumnScript(Type type, string columnName, Type columnType, PropertyInfo propertyInfo = null)
         {
             var tableName = DotEntityDb.GetTableNameForType(type);
-            var dataTypeString = GetFormattedDbTypeForType(columnType, maxLength);
+            var dataTypeString = GetFormattedDbTypeForType(columnType, propertyInfo);
             var builder = new StringBuilder($"ALTER TABLE [{tableName.ToEnclosed()}]{Environment.NewLine}");
             builder.Append($"ALTER COLUMN {columnName.ToEnclosed()} {dataTypeString}");
             return builder.ToString();

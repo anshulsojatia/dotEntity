@@ -28,7 +28,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
             var expected = @"CREATE TABLE [Product]
 (	 [Id] INT NOT NULL IDENTITY(1,1),
 	 [ProductName] NVARCHAR(MAX) NOT NULL,
-	 [ProductDescription] NVARCHAR(MAX) NOT NULL,
+	 [ProductDescription] NVARCHAR(MAX) NULL,
 	 [DateCreated] DATETIME NOT NULL,
 	 [Price] NUMERIC(18,0) NOT NULL,
 	 [IsActive] BIT NOT NULL,

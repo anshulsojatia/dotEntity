@@ -26,12 +26,13 @@
  * visit http://dotentity.net/licensing
  */
 using System;
+using System.Reflection;
 
 namespace DotEntity
 {
     public interface IDatabaseTableGenerator
     {
-        string GetFormattedDbTypeForType(Type type, int maxLength = 0);
+        string GetFormattedDbTypeForType(Type type, PropertyInfo propertyInfo = null);
 
         string GetCreateTableScript<T>();
 
@@ -45,10 +46,10 @@ namespace DotEntity
 
         string GetDropConstraintScript(Relation relation);
 
-        string GetAddColumnScript(Type type, string columnName, Type columnType, int maxLength = 0);
+        string GetAddColumnScript(Type type, string columnName, Type columnType, PropertyInfo propertyInfo = null);
 
         string GetDropColumnScript(Type type, string columnName);
 
-        string GetAlterColumnScript(Type type, string columnName, Type columnType, int maxLength = 0);
+        string GetAlterColumnScript(Type type, string columnName, Type columnType, PropertyInfo propertyInfo = null);
     }
 }

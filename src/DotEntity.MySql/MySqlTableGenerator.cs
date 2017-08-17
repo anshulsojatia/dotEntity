@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -9,13 +8,15 @@ namespace DotEntity.MySql
 {
     public class MySqlTableGenerator : DefaultDatabaseTableGenerator
     {
-        public override string GetFormattedDbTypeForType(Type type, int maxLength = 0)
+        public override string GetFormattedDbTypeForType(Type type, PropertyInfo propertyInfo = null)
         {
             Throw.IfInvalidDataTypeMapping(!TypeMap.TryGetValue(type, out string dbTypeString), type);
             var typeBuilder = new StringBuilder(dbTypeString);
+            var nullable = IsNullable(type, propertyInfo);
+            var maxLength = 0;
             if (maxLength > 0)
                 typeBuilder.Append($"({maxLength})");
-            typeBuilder.Append(type.IsNullable() ? " NULL" : " NOT NULL");
+            typeBuilder.Append(nullable ? " NULL" : " NOT NULL");
             return typeBuilder.ToString();
         }
 
@@ -35,7 +36,7 @@ namespace DotEntity.MySql
             {
                 var pType = property.PropertyType;
                 var fieldName = property.Name;
-                var dbFieldType = GetFormattedDbTypeForType(pType);
+                var dbFieldType = GetFormattedDbTypeForType(pType, property);
                 var identityString = "";
                 //do we have key attribute here?
                 if (fieldName == keyColumn && pType == typeof(int))

@@ -46,7 +46,7 @@ namespace DotEntity
                 {
                     var cmdParameter = command.CreateParameter();
                     cmdParameter.ParameterName = parameter.ParameterName;
-                    cmdParameter.Value = parameter.PropertyValue;
+                    cmdParameter.Value = parameter.PropertyValue ?? DBNull.Value;
                     command.Parameters.Add(cmdParameter);
                 }
             }

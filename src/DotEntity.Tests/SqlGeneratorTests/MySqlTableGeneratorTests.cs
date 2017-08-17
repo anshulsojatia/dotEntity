@@ -29,7 +29,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
             var expected = @"CREATE TABLE `Product`
 (	 `Id` INT NOT NULL AUTO_INCREMENT,
 	 `ProductName` TEXT NOT NULL,
-	 `ProductDescription` TEXT NOT NULL,
+	 `ProductDescription` TEXT NULL,
 	 `DateCreated` DATETIME NOT NULL,
 	 `Price` NUMERIC(18,0) NOT NULL,
 	 `IsActive` TINYINT(1) NOT NULL,

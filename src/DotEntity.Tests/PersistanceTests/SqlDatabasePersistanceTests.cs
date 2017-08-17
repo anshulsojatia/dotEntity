@@ -39,7 +39,7 @@ namespace DotEntity.Tests.PersistanceTests
             var product = new Product()
             {
                 ProductName = "SqlServerInsert_Succeeds",
-                ProductDescription = "Some descriptoin won't hurt",
+                ProductDescription = null,
                 DateCreated = DateTime.Now,
                 Price = 25
             };
