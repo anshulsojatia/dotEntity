@@ -247,7 +247,14 @@ namespace DotEntity
             if (IsCallerCalling(expression))
             {
                 isProperty = true;
-                return GetAliasedPropertyName(expression, _aliases);
+                var propertyName = GetAliasedPropertyName(expression, _aliases);
+                if (QueryInfoList.Count == 0 && expression.Type == typeof(bool))
+                {
+                    //we have a unary type of expression where the column itself is boolean
+                    var qOperator = GetOperator(ExpressionType.Equal, this);
+                    AddQueryParameter(qOperator, propertyName, true, qOperator, propertyName);
+                }
+                return propertyName;
             }
             if (expression.Expression.NodeType == ExpressionType.Parameter)
                 return VisitParameterExpression((ParameterExpression)expression.Expression);
