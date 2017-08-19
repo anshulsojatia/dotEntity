@@ -27,6 +27,7 @@
  */
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -44,6 +45,9 @@ namespace DotEntity
             {
                 foreach (var parameter in parameters.Where(x => !x.SupportOperator && !x.IsPropertyValueAlsoProperty))
                 {
+                    if (parameter.PropertyValue is ICollection)
+                        continue; //because we'll be having the parameters in the subsequent iterations. adding this to parameter list will cause invalid mapping
+                    //because a collection won't have appropriate mapping in ado.net
                     var cmdParameter = command.CreateParameter();
                     cmdParameter.ParameterName = parameter.ParameterName;
                     cmdParameter.Value = parameter.PropertyValue ?? DBNull.Value;
