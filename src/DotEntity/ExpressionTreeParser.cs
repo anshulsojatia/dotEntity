@@ -505,6 +505,8 @@ namespace DotEntity
                 if (qp.PropertyValue != propertyValue)
                 {
                     //change propertyName to something else
+                    //but first check if propertyname is aliased?
+                    propertyName = propertyName.Replace(".", "_");
                     parameterName = propertyName +
                                    (queryParameters.Count(x => x.PropertyName == propertyName) + 1);
                 }
