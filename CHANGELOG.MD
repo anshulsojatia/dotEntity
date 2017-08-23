@@ -1,4 +1,11 @@
 # dotEntity Change Log
+
+## Unreleased
+- Added support for enumeration types
+- Allowed nullable string types
+- Quoted query objects to avoid keyword conflicts
+- Performance refactorings
+
 ## 1.0.0 (Stable) - 2017-08-09
 - Query Caching added to improve performance
 - Ordinal Caching added to improve performance
