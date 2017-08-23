@@ -106,6 +106,8 @@ namespace DotEntity.Caching
                         setter = property.CreateSetter<bool>(_type);
                     else if (propertyType == typeof(bool?))
                         setter = property.CreateSetter<bool?>(_type);
+                    else if (propertyType.GetTypeInfo().IsEnum)
+                        setter = property.CreateSetter(_type, propertyType);
                     _setter.TryAdd(property.Name, setter);
                 }
             }
@@ -143,6 +145,8 @@ namespace DotEntity.Caching
                         getter = property.CreateGetter<bool>(_type);
                     else if (propertyType == typeof(bool?))
                         getter = property.CreateGetter<bool?>(_type);
+                    else if (propertyType.GetTypeInfo().IsEnum)
+                        getter = property.CreateGetter(_type, propertyType);
                     _getter.TryAdd(property.Name, getter);
                 }
 
@@ -218,13 +222,18 @@ namespace DotEntity.Caching
 			if (propertyValue is DBNull)
                 propertyValue = null;
             var minfo = callback.GetMethodInfo();
+            var paramterType = minfo.GetParameters().First().ParameterType;
+            if (paramterType.GetTypeInfo().IsEnum && propertyValue != null)
+            {
+                propertyValue = Enum.Parse(paramterType, propertyValue.ToString());
+            }
             try
             {
-                minfo.Invoke(instance, new[] {propertyValue});
+                minfo.Invoke(instance, new[] { propertyValue });
             }
             catch
             {
-                var paramterType = minfo.GetParameters().First().ParameterType;
+                
                 var convertedValue = Convert.ChangeType(propertyValue, paramterType);
                 minfo.Invoke(instance, new[] { convertedValue });
             }

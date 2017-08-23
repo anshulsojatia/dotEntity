@@ -55,5 +55,17 @@ namespace DotEntity.Reflection
             return propertyInfo.GetGetMethod().CreateDelegate(genericType);
         }
 
+        internal static Delegate CreateSetter(this PropertyInfo propertyInfo, Type objType, Type propertyType)
+        {
+            var genericType = typeof(Action<,>).MakeGenericType(objType, propertyType);
+            return propertyInfo.GetSetMethod().CreateDelegate(genericType);
+        }
+
+        internal static Delegate CreateGetter(this PropertyInfo propertyInfo, Type objType, Type propertyType)
+        {
+            var genericType = typeof(Func<,>).MakeGenericType(objType, propertyType);
+            return propertyInfo.GetGetMethod().CreateDelegate(genericType);
+        }
+
     }
 }
