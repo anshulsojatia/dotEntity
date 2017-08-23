@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace DotEntity.Extensions
 {
@@ -48,7 +49,16 @@ namespace DotEntity.Extensions
 
         public static IEnumerable<PropertyInfo> GetDatabaseUsableProperties(this Type type)
         {
-            return type.GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(x => !x.GetAccessors()[0].IsVirtual);
+            var allProps = type.GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(x => !x.GetAccessors()[0].IsVirtual);
+            return type.IsAnonymousType() ? allProps : allProps.Where(x => x.CanWrite);
+        }
+
+        public static bool IsAnonymousType(this Type type)
+        {
+            var hasCompilerGeneratedAttribute = type.GetTypeInfo().GetCustomAttributes(typeof(CompilerGeneratedAttribute), false).Any();
+            var nameContainsAnonymousType = type.FullName.Contains("AnonymousType");
+            var isAnonymousType = hasCompilerGeneratedAttribute && nameContainsAnonymousType;
+            return isAnonymousType;
         }
     }
 }

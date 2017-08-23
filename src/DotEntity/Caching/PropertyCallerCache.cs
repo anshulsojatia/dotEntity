@@ -80,7 +80,8 @@ namespace DotEntity.Caching
                 var typeProperties = _type.GetDatabaseUsableProperties();
                 foreach (var property in typeProperties)
                 {
-
+                    if (!property.CanWrite)
+                        continue;
                     var propertyType = property.PropertyType;
                     Delegate setter = null;
                     if (propertyType == typeof(int))
@@ -116,7 +117,8 @@ namespace DotEntity.Caching
                 var typeProperties = _type.GetDatabaseUsableProperties();
                 foreach (var property in typeProperties)
                 {
-
+                    if (!property.CanRead)
+                        continue;
                     var propertyType = property.PropertyType;
                     Delegate getter = null;
                     if (propertyType == typeof(int))
