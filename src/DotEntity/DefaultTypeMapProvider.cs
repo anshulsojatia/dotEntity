@@ -66,7 +66,8 @@ namespace DotEntity
                     { typeof(char), "NVARCHAR(1)"},
                     { typeof(char?), "NVARCHAR(1)"},
                     { typeof(Guid), "UNIQUEIDENTIFIER" },
-                    { typeof(Guid?), "UNIQUEIDENTIFIER" }
+                    { typeof(Guid?), "UNIQUEIDENTIFIER" },
+                    { typeof(Enum), "INT" }
                 };
                 return _typeMap;
             }

@@ -17,12 +17,14 @@ namespace DotEntity.Tests
         private readonly string _sqliteFile;
         public DotEntityTest()
         {
-#if NETSTANDARD15
+#if DEBUG
+            _sqliteFile = @"F:\SourceRepositories\DotEntity\src\DotEntity.Tests\TestDb\sqlite.db";
+#elif NETSTANDARD15
             _sqliteFile = ApplicationEnvironment.ApplicationBasePath + @"\TestDb\sqlite.db";
 #else
             _sqliteFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"\TestDb\sqlite.db");
 
-#endif            
+#endif
             IsAppVeyor = Environment.GetEnvironmentVariable("appveyor") == "true";
             MySqlConnectionString = this.IsAppVeyor
                 ? @"Server=127.0.0.1;Uid=root;Pwd=Password12!;Database=mytest;"

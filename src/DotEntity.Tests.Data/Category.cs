@@ -15,5 +15,7 @@ namespace DotEntity.Tests.Data
         public int Id { get; set; }
 
         public string CategoryName { get; set; }
+
+        public CategoryType CategoryType { get; set; }
     }
 }

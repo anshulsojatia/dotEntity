@@ -74,6 +74,18 @@ namespace DotEntity.Tests.SqlGeneratorTests
         }
 
         [Test]
+        public void SelectGenerator_WithEnum_Where_Valid()
+        {
+            var sql = generator.GenerateSelect(out IList<QueryInfo> queryParameters, new List<Expression<Func<Category, bool>>>
+            {
+                category => category.CategoryType == CategoryType.Group
+            });
+            var expected = "SELECT * FROM [Category] WHERE [CategoryType] = @CategoryType;";
+            Assert.AreEqual(expected, sql);
+            Assert.AreEqual((int) CategoryType.Group, queryParameters.First(x => x.PropertyName == "CategoryType").PropertyValue);
+        }
+
+        [Test]
         public void SelectGenerator_WithWhereAndTotalRecords_Valid()
         {
             var sql = generator.GenerateSelectWithTotalMatchingCount(out IList<QueryInfo> queryParameters, new List<Expression<Func<Product, bool>>>

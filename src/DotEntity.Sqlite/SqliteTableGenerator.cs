@@ -10,7 +10,7 @@ namespace DotEntity.Sqlite
     {
         public override string GetFormattedDbTypeForType(Type type, PropertyInfo propertyInfo = null)
         {
-            Throw.IfInvalidDataTypeMapping(!TypeMap.TryGetValue(type, out string dbTypeString), type);
+            ThrowIfInvalidDataTypeMapping(type, out string dbTypeString);
             var typeBuilder = new StringBuilder(dbTypeString);
             var nullable = IsNullable(type, propertyInfo);
             typeBuilder.Append(nullable ? " NULL" : " NOT NULL");

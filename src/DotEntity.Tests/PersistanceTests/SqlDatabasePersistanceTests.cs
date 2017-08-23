@@ -317,5 +317,29 @@ namespace DotEntity.Tests.PersistanceTests
             var deletedProduct = EntitySet<Product>.Where(x => x.Id == id).SelectSingle();
             Assert.AreEqual(null, deletedProduct);
         }
+        [Test]
+        public void Enum_Persistance_Succeeds()
+        {
+            var c1 = new Category()
+            {
+               CategoryName = "Enum_Persistance_Succeeds One",
+               CategoryType = CategoryType.Simple
+            };
+
+            var c2 = new Category()
+            {
+                CategoryName = "Enum_Persistance_Succeeds Two",
+                CategoryType = CategoryType.Group
+            };
+
+            EntitySet<Category>.Insert(c1);
+            EntitySet<Category>.Insert(c2);
+
+            var saved = EntitySet<Category>.Where(x => x.CategoryName.Contains("Enum_Persistance_Succeeds"))
+                .Select().ToList();
+
+            Assert.AreEqual(CategoryType.Simple, saved[0].CategoryType);
+            Assert.AreEqual(CategoryType.Group, saved[1].CategoryType);
+        }
     }
 }

@@ -114,7 +114,8 @@ namespace DotEntity
             if (expression.NodeType != ExpressionType.AndAlso && expression.NodeType != ExpressionType.OrElse)
             {
                 _isBinaryOperation = true;
-                var propertyName = GetAliasedPropertyName((MemberExpression)expression.Left, _aliases);
+                var left = expression.Left as MemberExpression;
+                var propertyName = left != null ? GetAliasedPropertyName(left, _aliases) : Visit(expression.Left, out bool isProperty) as string;
                 var propertyValue = Visit(expression.Right, out bool isValueProperty);
                 var opr = GetOperator(expression.NodeType, this);
                 AddQueryParameter("", propertyName, propertyValue, opr, propertyName, isValueProperty);

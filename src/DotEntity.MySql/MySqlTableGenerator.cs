@@ -10,7 +10,7 @@ namespace DotEntity.MySql
     {
         public override string GetFormattedDbTypeForType(Type type, PropertyInfo propertyInfo = null)
         {
-            Throw.IfInvalidDataTypeMapping(!TypeMap.TryGetValue(type, out string dbTypeString), type);
+            ThrowIfInvalidDataTypeMapping(type, out string dbTypeString);
             var typeBuilder = new StringBuilder(dbTypeString);
             var nullable = IsNullable(type, propertyInfo);
             var maxLength = 0;

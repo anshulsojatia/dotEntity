@@ -64,7 +64,7 @@ namespace DotEntity
 
         public virtual string GetFormattedDbTypeForType(Type type, PropertyInfo propertyInfo = null)
         {
-            Throw.IfInvalidDataTypeMapping(!TypeMap.TryGetValue(type, out string dbTypeString), type);
+            ThrowIfInvalidDataTypeMapping(type, out string dbTypeString);
             var typeBuilder = new StringBuilder(dbTypeString);
             var maxLength = 0;
             var nullable = IsNullable(type, propertyInfo);
@@ -177,6 +177,11 @@ namespace DotEntity
         {
             const string constraintKey = "FK_{0}_{1}_{2}_{3}";
             return string.Format(constraintKey, fromTable, fromId, toTable, toId);
+        }
+
+        protected void ThrowIfInvalidDataTypeMapping(Type type, out string dbTypeString)
+        {
+            Throw.IfInvalidDataTypeMapping(!TypeMap.TryGetValue(type.GetTypeInfo().IsEnum ? typeof(Enum) : type, out dbTypeString), type);
         }
     }
 }

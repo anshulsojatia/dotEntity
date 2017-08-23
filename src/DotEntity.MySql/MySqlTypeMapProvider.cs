@@ -38,6 +38,7 @@ namespace DotEntity.MySql
                     { typeof(byte[]), "VARBINARY" },
                     { typeof(char), "VARCHAR(1)"},
                     { typeof(char?), "VARCHAR(1)"},
+                    { typeof(Enum), "INT" }
                 };
                 return _typeMap;
             }
