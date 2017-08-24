@@ -17,9 +17,7 @@ namespace DotEntity.Tests
         private readonly string _sqliteFile;
         public DotEntityTest()
         {
-#if DEBUG
-            _sqliteFile = @"F:\SourceRepositories\DotEntity\src\DotEntity.Tests\TestDb\sqlite.db";
-#elif NETSTANDARD15
+#if NETSTANDARD15
             _sqliteFile = ApplicationEnvironment.ApplicationBasePath + @"\TestDb\sqlite.db";
 #else
             _sqliteFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"\TestDb\sqlite.db");
