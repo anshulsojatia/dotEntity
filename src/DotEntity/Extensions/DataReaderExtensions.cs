@@ -75,11 +75,11 @@ namespace DotEntity.Extensions
 
             for (var i = 0; i < dataReader.FieldCount; i++)
             {
-                columnNames.Add(activeTypeName + "." + dataReader.GetName(i));
                 if (breakPointIndexes.Contains(i + 1))
                 {
                     activeTypeName = columnsWithSkipCount.First(x => x.Value == i + 1).Key.Name;
                 }
+                columnNames.Add(activeTypeName + "." + dataReader.GetName(i));
             }
 
             while (dataReader.Read())
