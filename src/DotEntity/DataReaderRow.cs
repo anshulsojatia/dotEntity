@@ -47,7 +47,11 @@ namespace DotEntity
 
         public object this[string columnName]
         {
-            get => RowInformation[columnName];
+            get
+            {
+                RowInformation.TryGetValue(columnName, out object value);
+                return value;
+            }
             set => RowInformation[columnName] = value;
         }
 
