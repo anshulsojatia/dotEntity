@@ -36,8 +36,18 @@ namespace DotEntity.Extensions
     {
         public static string GetKeyColumnName(this Type type)
         {
-            var propertyInfos = type.GetProperties().Where(x => x.IsDefined(typeof(KeyAttribute)));
-            var keyColumnName = propertyInfos.LastOrDefault()?.Name;
+            var allPropertyInfos = type.GetDatabaseUsableProperties().ToList();
+            var propertyInfos = allPropertyInfos.Where(x => x.IsDefined(typeof(KeyAttribute))).ToList();
+            string keyColumnName = null;
+            if (!propertyInfos.Any())
+            {
+                if (allPropertyInfos.Any(x => x.Name == "Id"))
+                    keyColumnName = "Id";
+            }
+            else
+            {
+                keyColumnName = propertyInfos.LastOrDefault().Name;
+            }
             Throw.IfKeyNull(keyColumnName, type);
             return keyColumnName;
         }
