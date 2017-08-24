@@ -108,6 +108,8 @@ namespace DotEntity.Caching
                         setter = property.CreateSetter<bool?>(_type);
                     else if (propertyType.GetTypeInfo().IsEnum)
                         setter = property.CreateSetter(_type, propertyType);
+                    else if (propertyType == typeof(Guid))
+                        setter = property.CreateSetter<Guid>(_type);
                     _setter.TryAdd(property.Name, setter);
                 }
             }
@@ -147,6 +149,8 @@ namespace DotEntity.Caching
                         getter = property.CreateGetter<bool?>(_type);
                     else if (propertyType.GetTypeInfo().IsEnum)
                         getter = property.CreateGetter(_type, propertyType);
+                    else if (propertyType == typeof(Guid))
+                        getter = property.CreateGetter<Guid>(_type);
                     _getter.TryAdd(property.Name, getter);
                 }
 
