@@ -130,7 +130,7 @@ namespace DotEntity
                 {
                     var value = _notCount <= 0;
                     AddQueryParameter("", p.ToString(), value, "=", p.ToString());
-                    _notCount--;
+                    DecrementNotCount();
                 }
                 _queryInfo.Add(new QueryInfo(true, Markers.Close));
                 _queryInfo.Add(new QueryInfo(true, GetOperator(expression.NodeType, this)));
@@ -141,10 +141,10 @@ namespace DotEntity
                 {
                     var value = _notCount <= 0;
                     AddQueryParameter("", p.ToString(), value, "=", p.ToString());
-                    _notCount--;
+                    DecrementNotCount();
                 }
                 _queryInfo.Add(new QueryInfo(true, Markers.Close));
-                _notCount--;
+                DecrementNotCount();
             }
 
         }
@@ -232,6 +232,11 @@ namespace DotEntity
             return Visit(expression.Operand, out isProperty);
         }
 
+        private void DecrementNotCount()
+        {
+            if (_notCount > 0)
+                _notCount--;
+        }
         private string VisitParameterExpression(ParameterExpression expression)
         {
             return expression.Name;
