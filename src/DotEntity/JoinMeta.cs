@@ -59,6 +59,8 @@ namespace DotEntity
         SourceColumn SourceColumn { get; set; }
 
         JoinType JoinType { get; set; }
+
+        int? TypeOffset { get; set; }
     }
 
     /// <summary>
@@ -74,18 +76,22 @@ namespace DotEntity
         /// <param name="destinationColumnName">The column name of the destination table</param>
         /// <param name="sourceColumnType">(optional) The <see cref="SourceColumn"/> type in this join. Default is <see cref="SourceColumn.Chained"/></param>
         /// <param name="joinType">(optional) The <see cref="JoinType"/> of this join. Default is <see cref="JoinType.Inner"/></param>
-        public JoinMeta(string sourceColumnName, string destinationColumnName, SourceColumn sourceColumnType = SourceColumn.Chained, JoinType joinType = JoinType.Inner)
+        /// <param name="columnOffset"></param>
+        public JoinMeta(string sourceColumnName, string destinationColumnName, SourceColumn sourceColumnType = SourceColumn.Chained, JoinType joinType = JoinType.Inner, int? columnOffset = null)
         {
             SourceColumnName = sourceColumnName;
             DestinationColumnName = destinationColumnName;
             SourceColumn = sourceColumnType;
             JoinType = joinType;
+            TypeOffset = columnOffset;
         }
         public string SourceColumnName { get; set; }
         public string DestinationColumnName { get; set; }
         public Type OnType => typeof(T);
         public SourceColumn SourceColumn { get; set; }
         public JoinType JoinType { get; set; }
+
+        public int? TypeOffset { get; set; }
     }
 
 }

@@ -75,9 +75,9 @@ namespace DotEntity.Extensions
 
             for (var i = 0; i < dataReader.FieldCount; i++)
             {
-                if (breakPointIndexes.Contains(i + 1))
+                if (breakPointIndexes.Contains(i - 1))
                 {
-                    activeTypeName = columnsWithSkipCount.First(x => x.Value == i + 1).Key.Name;
+                    activeTypeName = columnsWithSkipCount.First(x => x.Value == i - 1).Key.Name;
                 }
                 columnNames.Add(activeTypeName + "." + dataReader.GetName(i));
             }

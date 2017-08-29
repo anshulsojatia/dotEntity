@@ -120,8 +120,10 @@ namespace DotEntity
             {
                 var serializerObject = (IDataDeserializer) GenericInvoker.InvokeProperty(null, typeof(DataDeserializer<>), jm.OnType, "Instance");
                 deserializers.Add(jm.OnType, serializerObject);
+                toSkip = toSkip - jm.TypeOffset ?? 0;
                 columnsToSkip.Add(jm.OnType, toSkip);
-                toSkip += serializerObject.GetColumns().Length;
+                var slLength = serializerObject.GetColumns().Length;
+                toSkip = toSkip + slLength;
             }
 
             var rowIndex = 0;

@@ -419,12 +419,12 @@ namespace DotEntity
 
         }
 
-        IEntitySet<T> IEntitySet<T>.Join<T1>(string sourceColumnName, string destinationColumnName, SourceColumn sourceColumn, JoinType joinType)
+        IEntitySet<T> IEntitySet<T>.Join<T1>(string sourceColumnName, string destinationColumnName, SourceColumn sourceColumn, JoinType joinType, params Expression<Func<T, object>>[] skipColumns)
         {
             if (_joinList == null)
                 _joinList = new List<IJoinMeta>();
 
-            _joinList.Add(new JoinMeta<T1>(sourceColumnName, destinationColumnName, sourceColumn, joinType));
+            _joinList.Add(new JoinMeta<T1>(sourceColumnName, destinationColumnName, sourceColumn, joinType, skipColumns.Length));
             return this;
         }
 
