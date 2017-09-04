@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 namespace DotEntity.Extensions
 {
@@ -19,6 +20,16 @@ namespace DotEntity.Extensions
                 actualStr = parts[1];
             }
             return alias + DotEntityDb.Provider.SafeEnclose(actualStr);
+        }
+
+        public static string ReplaceFirst(this string text, string search, string replace)
+        {
+            var pos = text.IndexOf(search, StringComparison.Ordinal);
+            if (pos < 0)
+            {
+                return text;
+            }
+            return text.Substring(0, pos) + replace + text.Substring(pos + search.Length);
         }
     }
 }

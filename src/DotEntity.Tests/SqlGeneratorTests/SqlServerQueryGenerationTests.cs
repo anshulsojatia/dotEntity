@@ -17,7 +17,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
 
         public SqlServerQueryGenerationTests()
         {
-            DotEntityDb.Initialize(MsSqlConnectionString, new SqlServerDatabaseProvider());
+            DotEntityDb.Initialize(MsSqlConnectionString, new SqlServerDatabaseProvider(), SelectQueryMode.Wildcard);
             generator = DotEntityDb.Provider.QueryGenerator;
         }
 

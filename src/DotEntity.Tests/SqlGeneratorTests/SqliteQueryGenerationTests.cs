@@ -18,7 +18,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
 
         public SqliteQueryGenerationTests()
         {
-            DotEntityDb.Initialize(SqliteConnectionString, new SqliteDatabaseProvider());
+            DotEntityDb.Initialize(SqliteConnectionString, new SqliteDatabaseProvider(), SelectQueryMode.Wildcard);
             _generator = DotEntityDb.Provider.QueryGenerator;
         }
 

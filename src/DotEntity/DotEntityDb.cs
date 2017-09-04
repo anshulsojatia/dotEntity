@@ -27,7 +27,10 @@
  */
 using System;
 using System.Collections.Concurrent;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
+using DotEntity.Enumerations;
 using DotEntity.Providers;
 
 #if DEBUG
@@ -41,18 +44,22 @@ namespace DotEntity
 
         private static ConcurrentDictionary<Type, string> EntityTableNames { get; set; }
 
+        public static SelectQueryMode SelectQueryMode { get; set; }
+
         static DotEntityDb()
         {
             EntityTableNames = new ConcurrentDictionary<Type, string>();
             QueryProcessor = new QueryProcessor();
+            SelectQueryMode = SelectQueryMode.Explicit;
         }
 
-        public static void Initialize(string connectionString, IDatabaseProvider provider)
+        public static void Initialize(string connectionString, IDatabaseProvider provider, SelectQueryMode selectQueryMode = SelectQueryMode.Explicit)
         {
             ConnectionString = connectionString;
             Provider = provider;
             Provider.QueryGenerator = Provider.QueryGenerator ?? new DefaultQueryGenerator();
             Provider.TypeMapProvider = Provider.TypeMapProvider ?? new DefaultTypeMapProvider();
+            SelectQueryMode = selectQueryMode;
         }
 
         public static IDatabaseProvider Provider { get; internal set; }

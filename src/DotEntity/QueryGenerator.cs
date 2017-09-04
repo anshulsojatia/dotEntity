@@ -313,7 +313,7 @@ namespace DotEntity
                 orderByString = string.Empty;
             }
             // make the query now
-            builder.Append($"SELECT *{paginatedSelect} FROM ");
+            builder.Append($"SELECT {QueryParserUtilities.GetSelectColumnString(new List<Type>() { typeof(T) })}{paginatedSelect} FROM ");
             builder.Append(tableName.ToEnclosed());
 
             if (!string.IsNullOrEmpty(whereString))

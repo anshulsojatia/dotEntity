@@ -31,13 +31,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using DotEntity.Caching;
+using DotEntity.Enumerations;
 using DotEntity.Extensions;
 
 namespace DotEntity
 {
-    public class QueryParserUtilities
+    public static class QueryParserUtilities
     {        
        
         internal static string[] ParseTypeKeyValues(Type type, params string[] exclude)
@@ -74,8 +76,32 @@ namespace DotEntity
             return dict;
         }
 
-       
+        public static string GetSelectColumnString(IList<Type> types, Dictionary<string, string> typedAliases = null, params string[] exclude)
+        {
+            Throw.IfArgumentNull(types, nameof(types));
+            
+            if (DotEntityDb.SelectQueryMode == SelectQueryMode.Wildcard)
+                return "*";
 
-       
+            return string.Join(",", types.Select(type =>
+            {
+                var props = type.GetDatabaseUsableProperties();
+                var columns = props.Select(p => p.Name).Where(s => !exclude.Contains(s));
+                if (typedAliases == null)
+                    return string.Join(",", columns);
+                var tableName = type.Name;
+                string prefix = "";
+                typedAliases.TryGetValue(tableName, out prefix);
+                if (!string.IsNullOrEmpty(prefix))
+                    prefix = prefix + ".";
+                return string.Join(",", columns.Select(x => prefix + x.ToEnclosed() + " AS " + GetColumnAliasName(tableName, x)));
+            }));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static string GetColumnAliasName(string tableName, string columnName)
+        {
+            return tableName + "_" + columnName;
+        }
     }
 }

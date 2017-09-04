@@ -65,21 +65,15 @@ namespace DotEntity.Extensions
             return dataReaderRows;
         }
 
-        public static List<DataReaderRow> GetDataReaderRows(this IDataReader dataReader, Dictionary<Type, int> columnsWithSkipCount)
+        internal static List<DataReaderRow> GetDataReaderRows(this IDataReader dataReader, Dictionary<Type, int> columnsWithSkipCount)
         {
             var dataReaderRows = new List<DataReaderRow>();
             var columnNames = new List<string>();
 
-            var breakPointIndexes = columnsWithSkipCount.Values;
-            var activeTypeName = columnsWithSkipCount.Keys.First().Name;
-
             for (var i = 0; i < dataReader.FieldCount; i++)
             {
-                if (breakPointIndexes.Contains(i + 1))
-                {
-                    activeTypeName = columnsWithSkipCount.First(x => x.Value == i + 1).Key.Name;
-                }
-                columnNames.Add(activeTypeName + "." + dataReader.GetName(i));
+                var fieldName = dataReader.GetName(i).ReplaceFirst("_", ".");
+                columnNames.Add(fieldName);
             }
 
             while (dataReader.Read())

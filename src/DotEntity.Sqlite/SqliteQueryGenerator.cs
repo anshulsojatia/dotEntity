@@ -55,7 +55,7 @@ namespace DotEntity.Sqlite
             }
 
             // make the query now
-            builder.Append($"SELECT * FROM ");
+            builder.Append($"SELECT {QueryParserUtilities.GetSelectColumnString(new List<Type>() { typeof(T) })} FROM ");
             builder.Append(tableName.ToEnclosed());
 
             if (!string.IsNullOrEmpty(whereString))
@@ -111,7 +111,7 @@ namespace DotEntity.Sqlite
             }
 
             // make the query now
-            builder.Append($"SELECT * FROM ");
+            builder.Append($"SELECT {QueryParserUtilities.GetSelectColumnString(new List<Type>() { typeof(T) })} FROM ");
             builder.Append(tableName.ToEnclosed());
 
             if (!string.IsNullOrEmpty(whereString))
