@@ -49,7 +49,11 @@ namespace DotEntity.Extensions
 
         public static IEnumerable<PropertyInfo> GetDatabaseUsableProperties(this Type type)
         {
+            var excludedColumns = DotEntityDb.GetIgnoredColumns(type);
             var allProps = type.GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(x => !x.GetAccessors()[0].IsVirtual);
+            if (excludedColumns != null)
+                allProps = allProps.Where(prop => !excludedColumns.Contains(prop.Name));
+
             return type.IsAnonymousType() ? allProps : allProps.Where(x => x.CanWrite);
         }
 

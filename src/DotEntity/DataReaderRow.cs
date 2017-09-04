@@ -35,12 +35,9 @@ namespace DotEntity
     {
         private Dictionary<string, object> RowInformation { get; }
 
-        private bool _allowDuplicateColumns;
-
-        public DataReaderRow(bool allowDuplicateColumns = false)
+        public DataReaderRow()
         {
             RowInformation = new Dictionary<string, object>();
-            _allowDuplicateColumns = allowDuplicateColumns;
         }
 
         public string[] Columns => RowInformation.Keys.ToArray();
