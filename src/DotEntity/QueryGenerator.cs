@@ -323,7 +323,7 @@ namespace DotEntity
                 orderByString = string.Empty;
             }
             // make the query now
-            builder.Append($"SELECT *{paginatedSelect} FROM ");
+            builder.Append($"SELECT {QueryParserUtilities.GetSelectColumnString(new List<Type>() { typeof(T) })}{paginatedSelect} FROM ");
             builder.Append(tableName.ToEnclosed());
 
             if (!string.IsNullOrEmpty(whereString))
@@ -414,8 +414,10 @@ namespace DotEntity
                 paginatedSelect = "," + paginatedSelect;
                 orderByString = string.Empty;
             }
+            var allTypes = joinMetas.Select(x => x.OnType).Distinct().ToList();
+            allTypes.Add(typeof(T));
             // make the query now
-            builder.Append($"SELECT *{paginatedSelect} FROM ");
+            builder.Append($"SELECT {QueryParserUtilities.GetSelectColumnString(allTypes, typedAliases)}{paginatedSelect} FROM ");
 
             builder.Append(tableName.ToEnclosed() + $" {parentAliasUsed} ");
 

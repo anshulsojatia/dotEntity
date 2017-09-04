@@ -17,7 +17,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
 
         public MySqlQueryGenerationTests()
         {
-            DotEntityDb.Initialize(MySqlConnectionString, new MySqlDatabaseProvider("mytest"));
+            DotEntityDb.Initialize(MySqlConnectionString, new MySqlDatabaseProvider("mytest"), SelectQueryMode.Wildcard);
             generator = DotEntityDb.Provider.QueryGenerator;
         }
 

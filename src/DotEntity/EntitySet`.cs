@@ -398,7 +398,13 @@ namespace DotEntity
                 foreach (var o in _orderBy)
                     _joinOrderBy.Add(o.Key, o.Value);
 
-                return manager.DoSelect<T>(_joinList, _relationActions, _joinWhereList, _joinOrderBy, page, count);
+                //always use explicit select mode for joins
+                var selectMode = DotEntityDb.SelectQueryMode;
+                DotEntityDb.SelectQueryMode = SelectQueryMode.Explicit;
+                var entities = manager.DoSelect<T>(_joinList, _relationActions, _joinWhereList, _joinOrderBy, page, count);
+                //reset select mode
+                DotEntityDb.SelectQueryMode = selectMode;
+                return entities;
             }
         }
 

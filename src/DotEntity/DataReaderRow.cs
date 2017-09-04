@@ -70,28 +70,19 @@ namespace DotEntity
         {
             if (row1 == null || row2 == null)
                 return false;
-            var maxLoopValue = skipColumns + columnNames.Length;
-            for (var i = skipColumns; i < maxLoopValue; i++)
-            {
-                var columnName = row1.Columns[i];
-                if (row1[columnName].ToString() != row2[columnName].ToString())
+            foreach(var columnName in columnNames)
+                if (!row1[columnName].Equals(row2[columnName]))
                     return false;
 
-            }
-          
             return true;
         }
 
         public static bool AreAllColumnsNull(DataReaderRow row, string[] columnNames, int skipColumns)
         {
-            var maxLoopValue = skipColumns + columnNames.Length;
-            for (var i = skipColumns; i < maxLoopValue; i++)
-            {
-                var columnName = row.Columns[i];
+            foreach (var columnName in columnNames)
                 if (row[columnName] != DBNull.Value)
                     return false;
 
-            }
             return true;
         }
     }

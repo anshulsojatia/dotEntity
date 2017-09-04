@@ -21,7 +21,7 @@ namespace DotEntity.Tests.PersistanceTests
         [OneTimeSetUp]
         public void Init()
         {
-            DotEntityDb.Initialize(MsSqlConnectionString, new SqlServerDatabaseProvider());
+            DotEntityDb.Initialize(MsSqlConnectionString, new SqlServerDatabaseProvider(), SelectQueryMode.Wildcard);
             //add some versions
             DotEntityDb.EnqueueVersions(ContextKey, new DbVersion());
             DotEntityDb.UpdateDatabaseToLatestVersion("DotEntity.Tests.PersistanceTests");
