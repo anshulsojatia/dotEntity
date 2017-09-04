@@ -4,6 +4,9 @@
 - Added support for enumeration types
 - Allowed nullable string types
 - Quoted query objects to avoid keyword conflicts
+- Added support to ignore some properties of entities for query generation
+- Allowed to select SELECT generation type for either wildcard or explicit
+- Bug Fixes
 - Performance refactorings
 
 ## 1.0.0 (Stable) - 2017-08-09
