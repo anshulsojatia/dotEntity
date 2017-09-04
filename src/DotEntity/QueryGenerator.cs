@@ -124,8 +124,8 @@ namespace DotEntity
             var updateString = string.Join(",", updateValueMap.Select(x => $"{x.Key.ToEnclosed()} = @{x.Key}"));
 
             builder.Append(updateString);
-            var parser = new ExpressionTreeParser(where);
-            var whereString = parser.GetWhereString();
+            var parser = new ExpressionTreeParser();
+            var whereString = parser.GetWhereString(where);
             queryParameters = parser.QueryInfoList;
 
             if (!string.IsNullOrEmpty(whereString))
@@ -156,8 +156,8 @@ namespace DotEntity
         public virtual string GenerateDelete<T>(Expression<Func<T, bool>> where, out IList<QueryInfo> parameters) where T : class
         {
             var tableName = DotEntityDb.GetTableNameForType<T>();
-            var parser = new ExpressionTreeParser(where);
-            var whereString = parser.GetWhereString().Trim();
+            var parser = new ExpressionTreeParser();
+            var whereString = parser.GetWhereString(where).Trim();
             parameters = parser.QueryInfoList;
             return $"DELETE FROM {tableName.ToEnclosed()} WHERE {whereString};";
         }
@@ -182,14 +182,13 @@ namespace DotEntity
 
             if (where != null)
             {
+                var parser = new ExpressionTreeParser();
                 var whereStringBuilder = new List<string>();
                 foreach (var wh in where)
                 {
-                    var parser = new ExpressionTreeParser(wh);
-                    whereStringBuilder.Add(parser.GetWhereString());
-                    var queryParameters = parser.QueryInfoList;
-                    parameters = parameters.Concat(queryParameters).ToList();
+                    whereStringBuilder.Add(parser.GetWhereString(wh));
                 }
+                parameters = parser.QueryInfoList;
                 whereString = string.Join(" AND ", whereStringBuilder).Trim();
             }
 
@@ -220,14 +219,13 @@ namespace DotEntity
 
             if (where != null)
             {
+                var parser = new ExpressionTreeParser();
                 var whereStringBuilder = new List<string>();
                 foreach (var wh in where)
                 {
-                    var parser = new ExpressionTreeParser(wh);
-                    whereStringBuilder.Add(parser.GetWhereString());
-                    var queryParameters = parser.QueryInfoList;
-                    parameters = parameters.Concat(queryParameters).ToList();
+                    whereStringBuilder.Add(parser.GetWhereString(wh));
                 }
+                parameters = parser.QueryInfoList;
                 whereString = string.Join(" AND ", whereStringBuilder).Trim();
             }
 
@@ -235,10 +233,10 @@ namespace DotEntity
             var orderByString = "";
             if (orderBy != null)
             {
+                var parser = new ExpressionTreeParser();
                 foreach (var ob in orderBy)
                 {
-                    var parser = new ExpressionTreeParser(ob.Key);
-                    orderByStringBuilder.Add(parser.GetOrderByString() + (ob.Value == RowOrder.Descending ? " DESC" : ""));
+                    orderByStringBuilder.Add(parser.GetOrderByString(ob.Key) + (ob.Value == RowOrder.Descending ? " DESC" : ""));
                 }
 
                 orderByString = string.Join(", ", orderByStringBuilder).Trim(',');
@@ -285,14 +283,13 @@ namespace DotEntity
 
             if (where != null)
             {
+                var parser = new ExpressionTreeParser();
                 var whereStringBuilder = new List<string>();
                 foreach (var wh in where)
                 {
-                    var parser = new ExpressionTreeParser(wh);
-                    whereStringBuilder.Add(parser.GetWhereString());
-                    var queryParameters = parser.QueryInfoList;
-                    parameters = parameters.Concat(queryParameters).ToList();
+                    whereStringBuilder.Add(parser.GetWhereString(wh));
                 }
+                parameters = parser.QueryInfoList;
                 whereString = string.Join(" AND ", whereStringBuilder).Trim();
             }
 
@@ -300,10 +297,10 @@ namespace DotEntity
             var orderByString = "";
             if (orderBy != null)
             {
+                var parser = new ExpressionTreeParser();
                 foreach (var ob in orderBy)
                 {
-                    var parser = new ExpressionTreeParser(ob.Key);
-                    orderByStringBuilder.Add(parser.GetOrderByString() + (ob.Value == RowOrder.Descending ? " DESC" : ""));
+                    orderByStringBuilder.Add(parser.GetOrderByString(ob.Key) + (ob.Value == RowOrder.Descending ? " DESC" : ""));
                 }
 
                 orderByString = string.Join(", ", orderByStringBuilder).Trim(',');
