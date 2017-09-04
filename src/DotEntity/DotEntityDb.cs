@@ -53,6 +53,7 @@ namespace DotEntity
             EntityTableNames = new ConcurrentDictionary<Type, string>();
             QueryProcessor = new QueryProcessor();
             SelectQueryMode = SelectQueryMode.Explicit;
+            ExcludedColumns = new ConcurrentDictionary<Type, string[]>();
         }
 
         public static void Initialize(string connectionString, IDatabaseProvider provider, SelectQueryMode selectQueryMode = SelectQueryMode.Explicit)
@@ -126,6 +127,21 @@ namespace DotEntity
             Throw.IfNoDatabaseVersions(_databaseVersions[callingContextName]);
             var versionRunner = new VersionUpdater(callingContextName, _databaseVersions[callingContextName].ToArray());
             versionRunner.RunDowngrade(versionKey);
+        }
+
+        private static ConcurrentDictionary<Type, string[]> ExcludedColumns { get; }
+
+        public static void IgnoreColumns<T>(params string[] columnNames)
+        {
+            if (columnNames.Length == 0)
+                return;
+            ExcludedColumns.TryAdd(typeof(T), columnNames);
+        }
+
+        public static string[] GetIgnoredColumns(Type type)
+        {
+            ExcludedColumns.TryGetValue(type, out string[] columns);
+            return columns;
         }
     }
 }

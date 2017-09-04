@@ -115,14 +115,13 @@ namespace DotEntity
             var columnsToSkip = new Dictionary<Type, int> {{_typeofT, 0}};
             var localObjectCache = new Dictionary<string, object>();
 
-            var toSkip = tColumns.Length;
+            var toSkip = tColumns.Length - (DotEntityDb.GetIgnoredColumns(_typeofT)?.Length ?? 0);
             foreach (var jm in joinMetas)
             {
                 var serializerObject = (IDataDeserializer) GenericInvoker.InvokeProperty(null, typeof(DataDeserializer<>), jm.OnType, "Instance");
                 deserializers.Add(jm.OnType, serializerObject);
-                toSkip = toSkip - jm.TypeOffset ?? 0;
                 columnsToSkip.Add(jm.OnType, toSkip);
-                var slLength = serializerObject.GetColumns().Length;
+                var slLength = serializerObject.GetColumns().Length - (DotEntityDb.GetIgnoredColumns(jm.OnType)?.Length ?? 0);
                 toSkip = toSkip + slLength;
             }
 

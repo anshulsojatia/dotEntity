@@ -76,9 +76,8 @@ namespace DotEntity
         /// <param name="destinationColumnName">The column name of the destination table</param>
         /// <param name="sourceColumnType">(optional) The <see cref="SourceColumn"/> type in this join. Default is <see cref="SourceColumn.Chained"/></param>
         /// <param name="joinType">(optional) The <see cref="JoinType"/> of this join. Default is <see cref="JoinType.Inner"/></param>
-        /// <param name="skipColumns">(optional) Skips the specified columns from consideration into column evaluation</param>
         /// <returns>An implementation object of type <see cref="IEntitySet{T}"/></returns>
-        IEntitySet<T> Join<T1>(string sourceColumnName, string destinationColumnName, SourceColumn sourceColumnType = SourceColumn.Chained, JoinType joinType = JoinType.Inner, params Expression<Func<T, object>>[] skipColumns) where T1 : class;
+        IEntitySet<T> Join<T1>(string sourceColumnName, string destinationColumnName, SourceColumn sourceColumnType = SourceColumn.Chained, JoinType joinType = JoinType.Inner) where T1 : class;
 
         /// <summary>
         /// Relates entity of type <typeparamref name="T"/> with entity of type <typeparamref name="T1"/>
