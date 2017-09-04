@@ -36,6 +36,7 @@ namespace DotEntity
         public string QueryOperator { get; set; }
         public bool IsPropertyValueAlsoProperty { get; set; }
         public bool SupportOperator { get; set; }
+        public bool Processed { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="QueryInfo" /> class.
         /// </summary>

@@ -62,13 +62,13 @@ namespace DotEntity
         public IList<QueryInfo> QueryInfoList => _queryInfo;
 
         private Dictionary<string, string> _aliases = null;
-        private readonly Expression _expression;
 
-        public ExpressionTreeParser(Expression expression, Dictionary<string, string> aliases = null)
+        private IList<QueryInfo> _previousQueryInfo;
+        public ExpressionTreeParser(Dictionary<string, string> aliases = null, IList<QueryInfo> queryInfo = null)
         {
-            _expression = expression;
             _aliases = aliases;
             _queryInfo = new List<QueryInfo>();
+            _previousQueryInfo = queryInfo;
         }
 
         #region Evaluators
@@ -330,7 +330,7 @@ namespace DotEntity
 
         private QueryInfo AddQueryParameter(string linkingOperator, string propertyName, object propertyValue, string queryOperator, string parameterName, bool isPropertyValueAlsoAProperty = false)
         {
-            parameterName = GetSafeParameterName(_queryInfo, propertyName, propertyValue);
+            parameterName = GetSafeParameterName(_queryInfo, propertyName, propertyValue, _previousQueryInfo);
             var queryInfo = new QueryInfo(linkingOperator, propertyName, propertyValue, queryOperator, parameterName, isPropertyValueAlsoAProperty);
             _queryInfo.Add(queryInfo);
             return queryInfo;
@@ -401,15 +401,21 @@ namespace DotEntity
 
         #region query part generators
 
-        public string GetWhereString()
+        private void ResetHashCodes()
         {
-            Visit(_expression, out bool isProperty);
+            _callerObjectHashCodes = null;
+        }
+
+        public string GetWhereString(Expression expression)
+        {
+            ResetHashCodes();
+            Visit(expression, out bool isProperty);
             var builder = new StringBuilder();
 
             var extraQueryProperties = new List<QueryInfo>();
-            for (var i = 0; i < _queryInfo.Count(); i++)
+            foreach (var item in  _queryInfo.Where(x => !x.Processed))
             {
-                var item = QueryInfoList[i];
+                item.Processed = true;
                 if (item.SupportOperator)
                 {
                     switch (item.LinkingOperator)
@@ -494,18 +500,19 @@ namespace DotEntity
             return value != null;
         }
 
-        public string GetOrderByString()
+        public string GetOrderByString(Expression expression)
         {
-            
-            var ob = Visit(_expression, out bool _);
+            ResetHashCodes();
+            var ob = Visit(expression, out bool _);
             return ob.ToString().ToEnclosed();
         }
 
-        private static string GetSafeParameterName(IList<QueryInfo> queryParameters, string propertyName, object propertyValue)
+        private static string GetSafeParameterName(IList<QueryInfo> queryParameters, string propertyName, object propertyValue, IList<QueryInfo> previousQueryParameters = null)
         {
             var parameterName = propertyName.Replace("[", "").Replace("]", "").Replace(".", "_");
             //do we have any existing parameter with same name, we'll have to then rename the parameter
             var qp = queryParameters.FirstOrDefault(x => x.PropertyName == propertyName);
+            qp = qp ?? previousQueryParameters?.FirstOrDefault(x => x.PropertyName == propertyName);
             if (qp != null)
             {
                 if (qp.PropertyValue != propertyValue)

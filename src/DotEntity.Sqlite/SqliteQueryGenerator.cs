@@ -32,13 +32,12 @@ namespace DotEntity.Sqlite
             if (where != null)
             {
                 var whereStringBuilder = new List<string>();
+                var parser = new ExpressionTreeParser();
                 foreach (var wh in where)
                 {
-                    var parser = new ExpressionTreeParser(wh);
-                    whereStringBuilder.Add(parser.GetWhereString());
-                    var queryParameters = parser.QueryInfoList;
-                    parameters = parameters.Concat(queryParameters).ToList();
+                    whereStringBuilder.Add(parser.GetWhereString(wh));
                 }
+                parameters = parser.QueryInfoList;
                 whereString = string.Join(" AND ", whereStringBuilder).Trim();
             }
 
@@ -46,10 +45,10 @@ namespace DotEntity.Sqlite
             var orderByString = "";
             if (orderBy != null)
             {
+                var parser = new ExpressionTreeParser();
                 foreach (var ob in orderBy)
                 {
-                    var parser = new ExpressionTreeParser(ob.Key);
-                    orderByStringBuilder.Add(parser.GetOrderByString() + (ob.Value == RowOrder.Descending ? " DESC" : ""));
+                    orderByStringBuilder.Add(parser.GetOrderByString(ob.Key) + (ob.Value == RowOrder.Descending ? " DESC" : ""));
                 }
 
                 orderByString = string.Join(", ", orderByStringBuilder).Trim(',');
@@ -88,14 +87,13 @@ namespace DotEntity.Sqlite
 
             if (where != null)
             {
+                var parser = new ExpressionTreeParser();
                 var whereStringBuilder = new List<string>();
                 foreach (var wh in where)
                 {
-                    var parser = new ExpressionTreeParser(wh);
-                    whereStringBuilder.Add(parser.GetWhereString());
-                    var queryParameters = parser.QueryInfoList;
-                    parameters = parameters.Concat(queryParameters).ToList();
+                    whereStringBuilder.Add(parser.GetWhereString(wh));
                 }
+                parameters = parser.QueryInfoList;
                 whereString = string.Join(" AND ", whereStringBuilder).Trim();
             }
 
@@ -103,10 +101,10 @@ namespace DotEntity.Sqlite
             var orderByString = "";
             if (orderBy != null)
             {
+                var parser = new ExpressionTreeParser();
                 foreach (var ob in orderBy)
                 {
-                    var parser = new ExpressionTreeParser(ob.Key);
-                    orderByStringBuilder.Add(parser.GetOrderByString() + (ob.Value == RowOrder.Descending ? " DESC" : ""));
+                    orderByStringBuilder.Add(parser.GetOrderByString(ob.Key) + (ob.Value == RowOrder.Descending ? " DESC" : ""));
                 }
 
                 orderByString = string.Join(", ", orderByStringBuilder).Trim(',');
@@ -176,13 +174,12 @@ namespace DotEntity.Sqlite
 
             if (where != null)
             {
+                var parser = new ExpressionTreeParser(typedAliases);
                 foreach (var wh in where)
                 {
-                    var parser = new ExpressionTreeParser(wh, typedAliases);
-                    whereStringBuilder.Add(parser.GetWhereString());
-                    var queryParameters = parser.QueryInfoList;
-                    parameters = parameters.Concat(queryParameters).ToList();
+                    whereStringBuilder.Add(parser.GetWhereString(wh));
                 }
+                parameters = parser.QueryInfoList;
                 whereString = string.Join(" AND ", whereStringBuilder).Trim();
             }
 
@@ -190,10 +187,10 @@ namespace DotEntity.Sqlite
             var orderByString = "";
             if (orderBy != null)
             {
+                var parser = new ExpressionTreeParser(typedAliases);
                 foreach (var ob in orderBy)
                 {
-                    var parser = new ExpressionTreeParser(ob.Key);
-                    orderByStringBuilder.Add(parser.GetOrderByString() + (ob.Value == RowOrder.Descending ? " DESC" : ""));
+                    orderByStringBuilder.Add(parser.GetOrderByString(ob.Key) + (ob.Value == RowOrder.Descending ? " DESC" : ""));
                 }
 
                 orderByString = string.Join(", ", orderByStringBuilder).Trim(',');
