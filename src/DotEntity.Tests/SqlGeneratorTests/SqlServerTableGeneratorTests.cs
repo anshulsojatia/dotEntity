@@ -30,7 +30,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
 	 [ProductName] NVARCHAR(MAX) NOT NULL,
 	 [ProductDescription] NVARCHAR(MAX) NULL,
 	 [DateCreated] DATETIME NOT NULL,
-	 [Price] NUMERIC(18,0) NOT NULL,
+	 [Price] NUMERIC(18,2) NOT NULL,
 	 [IsActive] BIT NOT NULL,
 PRIMARY KEY CLUSTERED ([Id] ASC));";
             Assert.AreEqual(expected, sql);
