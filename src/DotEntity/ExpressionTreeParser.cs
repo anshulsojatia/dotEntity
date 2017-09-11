@@ -439,9 +439,11 @@ namespace DotEntity
                         var itemCollection = (IList)item.PropertyValue;
                         for (var itemIndex = 0; itemIndex < itemCollection.Count; itemIndex++)
                         {
-                            var paramName = $"{item.PropertyName}_InParam_{itemIndex + 1}";
+                            var paramName = $"{item.PropertyName}_InParam_{itemIndex + 1}".Replace(".", "_");
                             var inItemValue = itemCollection[itemIndex];
-                            extraQueryProperties.Add(new QueryInfo("", "inner_" + item.PropertyName, inItemValue, "", paramName));
+                            var innerParam = new QueryInfo("", "inner_" + item.PropertyName, inItemValue, "",
+                                paramName) {Processed = true};
+                            extraQueryProperties.Add(innerParam);
                         }
                         var inParameterString = "@" + string.Join(",@", extraQueryProperties.Select(x => x.ParameterName));
                         builder.Append(inParameterString);
