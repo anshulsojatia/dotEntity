@@ -254,7 +254,7 @@ namespace DotEntity
             {
                 isProperty = true;
                 var propertyName = GetAliasedPropertyName(expression, _aliases);
-                if (QueryInfoList.Count == 0 && expression.Type == typeof(bool))
+                if (expression.Type == typeof(bool))
                 {
                     //we have a unary type of expression where the column itself is boolean
                     var qOperator = GetOperator(ExpressionType.Equal, this);
