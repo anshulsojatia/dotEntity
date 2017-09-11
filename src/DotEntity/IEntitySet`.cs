@@ -80,6 +80,13 @@ namespace DotEntity
         IEntitySet<T> Join<T1>(string sourceColumnName, string destinationColumnName, SourceColumn sourceColumnType = SourceColumn.Chained, JoinType joinType = JoinType.Inner) where T1 : class;
 
         /// <summary>
+        /// Specifies a placeholder join to be used when a manually written join query or stored procedure returns data from tables not related to temporary tables
+        /// </summary>
+        /// <typeparam name="T1">The entity class that maps to a specific database table</typeparam>
+        /// <returns></returns>
+        IEntitySet<T> PlaceholderJoin<T1>();
+
+            /// <summary>
         /// Relates entity of type <typeparamref name="T"/> with entity of type <typeparamref name="T1"/>
         /// </summary>
         /// <typeparam name="T1">The entity class that maps to a specific database table</typeparam>
@@ -111,6 +118,15 @@ namespace DotEntity
         /// <param name="count">(optional) The number of entities to return. Defaults to all entities</param>
         /// <returns>An enumeration of <typeparamref name="T"/></returns>
         IEnumerable<T> SelectNested(int page = 1, int count = int.MaxValue);
+
+        /// <summary>
+        /// Executes the provided <paramref name="query"/> against the data provider
+        /// </summary>
+        /// <param name="query">The query to be executed against the provider. The query parameters references should be named with '@' prefix</param>
+        /// <param name="parameters">(optional) A dynamic object containing the parameters used in the query</param>
+        /// <param name="isProcedure">(optional) Is the query provided a stored procedure?</param>
+        /// <returns>An enumeration of <typeparamref name="T"/></returns>
+        IEnumerable<T> QueryNested(string query, object parameters = null, bool isProcedure = false);
 
         /// <summary>
         /// Counts the total number of matching entities within or without a transaction

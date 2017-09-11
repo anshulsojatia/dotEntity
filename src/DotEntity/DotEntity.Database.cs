@@ -105,6 +105,15 @@ namespace DotEntity
                 transaction.Manager.AsDotEntityQueryManager().Do(script, null);
             }
 
+            public static void Query(string query, object parameters, IDotEntityTransaction transaction, bool isProcedure = false)
+            {
+                var manager = transaction.Manager.AsDotEntityQueryManager();
+                if (isProcedure)
+                    manager.DoProcedure(query, parameters);
+                else
+                    manager.Do(query, parameters);
+            }
+
         }
     }
 }

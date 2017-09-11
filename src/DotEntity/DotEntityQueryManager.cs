@@ -153,6 +153,18 @@ namespace DotEntity
             DotEntityDbConnector.ExecuteCommand(cmd);
         }
 
+        public virtual void DoProcedure(string query, object parameters)
+        {
+            query = _queryGenerator.Query(query, parameters, out IList<QueryInfo> queryParameters);
+            var cmd = new DotEntityDbCommand(DbOperationType.Procedure, query, queryParameters);
+            if (_withTransaction)
+            {
+                _transactionCommands.Add(cmd);
+                return;
+            }
+            DotEntityDbConnector.ExecuteCommand(cmd);
+        }
+
         public virtual IMultiResult DoMultiResult(string query, object parameters)
         {
             query = _queryGenerator.Query(query, parameters, out IList<QueryInfo> queryParameters);
@@ -365,6 +377,16 @@ namespace DotEntity
             query = query ?? _queryGenerator.GenerateJoin<T>(out queryParameters, joinMetas, where, orderBy, page, count);
 
             var cmd = new DotEntityDbCommand(DbOperationType.Select, query, queryParameters);
+            cmd.ProcessReader(reader => DataDeserializer<T>.Instance.DeserializeManyNested(reader, joinMetas, relationActions));
+            DotEntityDbConnector.ExecuteCommand(cmd);
+            return cmd.GetResultAs<IEnumerable<T>>();
+        }
+
+        public virtual IEnumerable<T> DoQuery<T>(string query, object parameters = null, List<IJoinMeta> joinMetas = null, Dictionary<Type, Delegate> relationActions = null, bool isProcedure = false) where T : class
+        {
+            query = _queryGenerator.Query(query, parameters, out IList<QueryInfo> queryParameters);
+
+            var cmd = new DotEntityDbCommand(isProcedure ? DbOperationType.Procedure :  DbOperationType.Select, query, queryParameters);
             cmd.ProcessReader(reader => DataDeserializer<T>.Instance.DeserializeManyNested(reader, joinMetas, relationActions));
             DotEntityDbConnector.ExecuteCommand(cmd);
             return cmd.GetResultAs<IEnumerable<T>>();

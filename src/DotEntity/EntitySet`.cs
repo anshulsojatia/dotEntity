@@ -330,6 +330,10 @@ namespace DotEntity
             return Instance.WithQueryCache(cache, parameterValues);
         }
 
+        public static IEntitySet<T> Just()
+        {
+            return Instance;
+        }
         #endregion
 
         #region implementations
@@ -434,6 +438,15 @@ namespace DotEntity
             return this;
         }
 
+        IEntitySet<T> IEntitySet<T>.PlaceholderJoin<T1>()
+        {
+            if (_joinList == null)
+                _joinList = new List<IJoinMeta>();
+
+            _joinList.Add(new JoinMeta<T1>("", ""));
+            return this;
+        }
+
         private Dictionary<Type, Delegate> _relationActions;
         IEntitySet<T> IEntitySet<T>.Relate<T1>(Action<T, T1> relateAction)
         {
@@ -461,6 +474,27 @@ namespace DotEntity
             _cache = cache;
             _cache.ParameterValues = parameterValues;
             return this;
+        }
+
+        /// <summary>
+        /// Executes the provided <paramref name="query"/> against the data provider
+        /// </summary>
+        /// <param name="query">The query to be executed against the provider. The query parameters references should be named with '@' prefix</param>
+        /// <param name="parameters">(optional) A dynamic object containing the parameters used in the query</param>
+        /// <param name="isProcedure">(optional) Is the query provided a stored procedure?</param>
+        /// <returns>An enumeration of <typeparamref name="T"/></returns>
+        IEnumerable<T> IEntitySet<T>.QueryNested(string query, object parameters, bool isProcedure)
+        {
+            using (var manager = new DotEntityQueryManager())
+            {
+                //always use explicit select mode for joins
+                var selectMode = DotEntityDb.SelectQueryMode;
+                DotEntityDb.SelectQueryMode = SelectQueryMode.Explicit;
+                var entities = manager.DoQuery<T>(query, parameters, _joinList, _relationActions, isProcedure);
+                //reset select mode
+                DotEntityDb.SelectQueryMode = selectMode;
+                return entities;
+            }
         }
 
         #endregion
