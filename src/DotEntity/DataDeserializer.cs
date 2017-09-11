@@ -109,50 +109,41 @@ namespace DotEntity
         {
             
             var tInstances = new List<T>();
-            var tColumns = GetColumns();
             //make deserializers for each of relation types
             var deserializers = new Dictionary<Type, IDataDeserializer>();
-            var columnsToSkip = new Dictionary<Type, int> {{_typeofT, 0}};
+            var columnsToSkip = new Dictionary<Type, int> {{_typeofT, -1}};
             var localObjectCache = new Dictionary<string, object>();
 
-            var toSkip = tColumns.Length - (DotEntityDb.GetIgnoredColumns(_typeofT)?.Length ?? 0);
             foreach (var jm in joinMetas)
             {
                 var serializerObject = (IDataDeserializer) GenericInvoker.InvokeProperty(null, typeof(DataDeserializer<>), jm.OnType, "Instance");
                 deserializers.Add(jm.OnType, serializerObject);
-                columnsToSkip.Add(jm.OnType, toSkip);
-                var slLength = serializerObject.GetColumns().Length - (DotEntityDb.GetIgnoredColumns(jm.OnType)?.Length ?? 0);
-                toSkip = toSkip + slLength;
+                columnsToSkip.Add(jm.OnType, -1);
             }
 
             var rowIndex = 0;
             DataReaderRow prevRow = null;
             var rows = reader.GetDataReaderRows(columnsToSkip); //all rows
-            var lastProcesseedObjects = new Dictionary<Type, object>();
+            var lastProcessedObjects = new Dictionary<Type, object>();
 
             void AddOrUpdateLastProcessObject(Type type, object obj)
             {
-                if (lastProcesseedObjects.ContainsKey(type))
-                    lastProcesseedObjects[type] = obj;
+                if (lastProcessedObjects.ContainsKey(type))
+                    lastProcessedObjects[type] = obj;
                 else
                 {
-                    lastProcesseedObjects.Add(type, obj);
+                    lastProcessedObjects.Add(type, obj);
                 }
             }
 
             while (rowIndex < rows.Count)
             {
                 var row = rows[rowIndex];
-                //first create the root instances
-                if (CreateInstanceIfRequired(_typeofT, prevRow, row, this, 0, out object tInstance, ref localObjectCache))
-                {
+                var tInstance = GetAppropriateInstance(_typeofT, prevRow, row, this, ref localObjectCache);
+                if (tInstance == null)
+                    continue;
+                if(!tInstances.Contains(tInstance))
                     tInstances.Add((T) tInstance);
-                    AddOrUpdateLastProcessObject(_typeofT, tInstance);
-                }
-                else
-                {
-                    tInstance = lastProcesseedObjects[_typeofT];
-                }
 
                 //then for all the child instances
                 foreach (var ds in deserializers)
@@ -160,18 +151,47 @@ namespace DotEntity
                     if (!relationActions.ContainsKey(ds.Key))
                         continue;
 
-                    if (CreateInstanceIfRequired(ds.Key, prevRow, row, ds.Value, columnsToSkip[ds.Key], out object childInstance, ref localObjectCache))
-                    {
-                        //invoke the relation to bind the instances if required
-                        relationActions[ds.Key].DynamicInvoke(tInstance, childInstance);
-                        AddOrUpdateLastProcessObject(ds.Key, childInstance);
-                    }
+                    var childInstance = GetAppropriateInstance(ds.Key, prevRow, row, ds.Value, ref localObjectCache);
+                    if (childInstance == null)
+                        continue;
+
+                    //invoke the relation to bind the instances if required
+                    relationActions[ds.Key].DynamicInvoke(tInstance, childInstance);
                 }
                 prevRow = row;
                 rowIndex++;
             }
 
             return tInstances.AsEnumerable();
+        }
+
+        private object GetAppropriateInstance(Type instanceType, DataReaderRow prevDataRow,
+            DataReaderRow currentDataRow, IDataDeserializer deserializer, ref Dictionary<string, object> localCache)
+        {
+            const string localObjectKey = "{0}.{1}.{2}"; //<Type>.<Key>.<NUM>
+
+            var columns = deserializer.GetColumns();
+            var typedColumns = deserializer.GetTypedColumnNames(columns, instanceType);
+
+            //are all columns of current row null
+            if (DataReaderRow.AreAllColumnsNull(currentDataRow, typedColumns, 0))
+                return null;
+
+            //let's check if have this object in cache
+            var keyColumn = deserializer.GetKeyColumn();
+            var cacheKey = string.Format(localObjectKey, instanceType.Name, keyColumn,
+                currentDataRow[_typeofT.Name + "." + keyColumn]);
+
+            if (!localCache.TryGetValue(cacheKey, out object newInstance))
+            {
+                //we can create instance
+                newInstance = Instantiator.GetInstance(instanceType);
+
+                //assign properties
+                GenericInvoker.Invoke(deserializer, "SetProperties", newInstance, currentDataRow, columns);
+                localCache.Add(cacheKey, newInstance);
+            }
+            return newInstance;
         }
 
         private bool CreateInstanceIfRequired(Type instanceType, DataReaderRow prevDataRow, DataReaderRow currentDataRow, IDataDeserializer deserializer, int skipColumns, out object newInstance, ref Dictionary<string, object> localCache)
