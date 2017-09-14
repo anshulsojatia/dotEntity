@@ -216,6 +216,10 @@ namespace DotEntity
             return Instance.WithQueryCache(cache, parameterValues);
         }
 
+        public static IEntitySet<T> Just()
+        {
+            return Instance;
+        }
         #endregion
 
         #region implementations
