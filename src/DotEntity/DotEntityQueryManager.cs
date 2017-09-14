@@ -92,6 +92,14 @@ namespace DotEntity
             DotEntityDbConnector.ExecuteCommand(cmd);
         }
 
+        public virtual void DoProcedure(string query, object parameters)
+        {
+            query = _queryGenerator.Query(query, parameters, out IList<QueryInfo> queryParameters);
+            var cmd = new DotEntityDbCommand(DbOperationType.Procedure, query, queryParameters);
+            DotEntityDbConnector.ExecuteCommand(cmd);
+        }
+
+        
         public virtual int DoInsert<T>(T entity, Func<T, bool> resultAction = null) where T : class
         {
             var keyColumn = DataDeserializer<T>.Instance.GetKeyColumn();
