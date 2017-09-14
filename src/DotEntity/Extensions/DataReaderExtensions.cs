@@ -75,6 +75,11 @@ namespace DotEntity.Extensions
                 var fieldName = dataReader.GetName(i).ReplaceFirst("_", ".");
                 columnNames.Add(fieldName);
             }
+            while (columnsWithSkipCount.Any(x => x.Value == -1))
+            {
+                var item = columnsWithSkipCount.First(x => x.Value == -1);
+                columnsWithSkipCount[item.Key] = columnNames.FindIndex(x => x.StartsWith(item.Key.Name + "."));
+            }
 
             while (dataReader.Read())
             {
