@@ -259,6 +259,8 @@ namespace DotEntity
                     //we have a unary type of expression where the column itself is boolean
                     var qOperator = GetOperator(ExpressionType.Equal, this);
                     AddQueryParameter(qOperator, propertyName, true, qOperator, propertyName);
+                    isProperty = false;
+                    return null;
                 }
                 return propertyName;
             }
