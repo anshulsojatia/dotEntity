@@ -1,11 +1,13 @@
 # dotEntity Change Log
 
-## Unreleased
+## 1.1.0
 - Added support for enumeration types
+- Added support for GUID
 - Allowed nullable string types
 - Quoted query objects to avoid keyword conflicts
 - Added support to ignore some properties of entities for query generation
-- Allowed to select SELECT generation type for either wildcard or explicit
+- SELECT query generation will use explicit column names rather than wildcards (better for performance)
+- Used 'Id' as default primary key column name
 - Bug Fixes
 - Performance refactorings
 
