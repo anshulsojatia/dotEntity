@@ -1,6 +1,6 @@
 # dotEntity Change Log
 
-## 1.1.0
+## 1.1.0 (Stable) - 2017-11-06
 - Added support for enumeration types
 - Added support for GUID
 - Allowed nullable string types
@@ -11,7 +11,7 @@
 - Bug Fixes
 - Performance refactorings
 
-## 1.0.0 (Stable) - 2017-08-09
+## 1.0.0 - 2017-08-09
 - Query Caching added to improve performance
 - Ordinal Caching added to improve performance
 - Command behavior added to query processing
