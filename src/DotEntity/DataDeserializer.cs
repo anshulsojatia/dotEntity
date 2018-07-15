@@ -180,7 +180,7 @@ namespace DotEntity
             //let's check if have this object in cache
             var keyColumn = deserializer.GetKeyColumn();
             var cacheKey = string.Format(localObjectKey, instanceType.Name, keyColumn,
-                currentDataRow[_typeofT.Name + "." + keyColumn]);
+                currentDataRow[instanceType.Name + "." + keyColumn]);
 
             if (!localCache.TryGetValue(cacheKey, out object newInstance))
             {
