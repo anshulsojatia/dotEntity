@@ -15,8 +15,8 @@
     <PackageTags>Micro-ORM, Database, .NET Framework, POCO</PackageTags>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Version>1.0.0</Version>
-    <PackageId>DotEntityPro</PackageId>
-    <AssemblyName>DotEntityPro</AssemblyName>
+    <PackageId>DotEntity</PackageId>
+    <AssemblyName>DotEntity</AssemblyName>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net45|AnyCPU'">
