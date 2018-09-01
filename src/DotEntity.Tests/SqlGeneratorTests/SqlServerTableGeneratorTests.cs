@@ -37,6 +37,29 @@ PRIMARY KEY CLUSTERED ([Id] ASC));";
         }
 
         [Test]
+        public void CreateTable_WithCustom_Prefix_Succeeds()
+        {
+            DotEntityDb.GlobalTableNamePrefix = "app_";
+            var generator = new DefaultDatabaseTableGenerator();
+            var sql = generator.GetCreateTableScript<Product>();
+            var expected = @"CREATE TABLE [app_Product]
+(	 [Id] INT NOT NULL IDENTITY(1,1),
+	 [ProductName] NVARCHAR(MAX) NOT NULL,
+	 [ProductDescription] NVARCHAR(MAX) NULL,
+	 [DateCreated] DATETIME NOT NULL,
+	 [Price] NUMERIC(18,2) NOT NULL,
+	 [IsActive] BIT NOT NULL,
+PRIMARY KEY CLUSTERED ([Id] ASC));";
+            Assert.AreEqual(expected, sql);
+
+            sql = generator.GetDropTableScript<Product>();
+            expected = @"DROP TABLE [app_Product];";
+            Assert.AreEqual(expected, sql);
+
+            DotEntityDb.GlobalTableNamePrefix = "";
+        }
+
+        [Test]
         public void DropTable_Succeeds()
         {
             var generator = new DefaultDatabaseTableGenerator();

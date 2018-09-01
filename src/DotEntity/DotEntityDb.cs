@@ -48,6 +48,8 @@ namespace DotEntity
 
         public static SelectQueryMode SelectQueryMode { get; set; }
 
+        public static string GlobalTableNamePrefix { get; set; } = "";
+
         static DotEntityDb()
         {
             EntityTableNames = new ConcurrentDictionary<Type, string>();
@@ -89,7 +91,7 @@ namespace DotEntity
 
         public static string GetTableNameForType(Type type)
         {
-            return EntityTableNames.ContainsKey(type) ? EntityTableNames[type] : type.Name;
+            return GlobalTableNamePrefix + (EntityTableNames.ContainsKey(type) ? EntityTableNames[type] : type.Name);
         }
 
         private static ConcurrentDictionary<string, Queue<IDatabaseVersion>> _databaseVersions;
