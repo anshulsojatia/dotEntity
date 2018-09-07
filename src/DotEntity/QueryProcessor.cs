@@ -48,6 +48,9 @@ namespace DotEntity
                     if (parameter.PropertyValue is ICollection)
                         continue; //because we'll be having the parameters in the subsequent iterations. adding this to parameter list will cause invalid mapping
                     //because a collection won't have appropriate mapping in ado.net
+                    //only add new parameter if there is no existing one
+                    if (command.Parameters.Contains(parameter.ParameterName))
+                        continue;
                     var cmdParameter = command.CreateParameter();
                     cmdParameter.ParameterName = parameter.ParameterName;
                     cmdParameter.Value = parameter.PropertyValue ?? DBNull.Value;
