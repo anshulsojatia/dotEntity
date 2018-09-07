@@ -56,7 +56,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
                 {product => product.Id, RowOrder.Ascending}
             }, 1, 30);
 
-            var expected = "SELECT * FROM [Product] WHERE [ProductName] = @ProductName ORDER BY [Id] LIMIT 0,30;";
+            var expected = "SELECT * FROM [Product] WHERE ([ProductName] = @ProductName) ORDER BY [Id] LIMIT 0,30;";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual("Ice Candy", queryInfos.First(x => x.PropertyName == "ProductName").PropertyValue);
         }
@@ -69,7 +69,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
             {
                 product => product.ProductName == "Ice Candy"
             });
-            var expected = "SELECT * FROM [Product] WHERE [ProductName] = @ProductName;";
+            var expected = "SELECT * FROM [Product] WHERE ([ProductName] = @ProductName);";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual("Ice Candy", queryParameters.First(x => x.PropertyName == "ProductName").PropertyValue);
         }
@@ -81,7 +81,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
             {
                 product => product.ProductName == "Ice Candy"
             });
-            var expected = $"SELECT * FROM [Product] WHERE [ProductName] = @ProductName;{Environment.NewLine}SELECT COUNT(*) FROM [Product] WHERE [ProductName] = @ProductName;";
+            var expected = $"SELECT * FROM [Product] WHERE ([ProductName] = @ProductName);{Environment.NewLine}SELECT COUNT(*) FROM [Product] WHERE ([ProductName] = @ProductName);";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual("Ice Candy", queryParameters.First(x => x.PropertyName == "ProductName").PropertyValue);
         }
@@ -93,7 +93,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
             {
                 product => product.ProductName == product.ProductDescription
             });
-            var expected = "SELECT * FROM [Product] WHERE [ProductName] = [ProductDescription];";
+            var expected = "SELECT * FROM [Product] WHERE ([ProductName] = [ProductDescription]);";
             Assert.AreEqual(expected, sql);
             var qp = queryParameters.First(x => x.PropertyName == "ProductName");
             Assert.AreEqual("ProductDescription", qp.PropertyValue);
@@ -111,7 +111,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
             {
                 product => product.ProductName == p.ProductDescription
             });
-            var expected = "SELECT * FROM [Product] WHERE [ProductName] = @ProductName;";
+            var expected = "SELECT * FROM [Product] WHERE ([ProductName] = @ProductName);";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(p.ProductDescription, queryParameters.First(x => x.PropertyName == "ProductName").PropertyValue);
 
@@ -124,7 +124,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
             {
                 product => product.ProductName == "Ice Candy" || product.Id > 5
             });
-            var expected = "SELECT * FROM [Product] WHERE ([ProductName] = @ProductName) OR ([Id] > @Id);";
+            var expected = "SELECT * FROM [Product] WHERE (([ProductName] = @ProductName) OR ([Id] > @Id));";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual("Ice Candy", queryParameters.First(x => x.PropertyName == "ProductName").PropertyValue);
             Assert.AreEqual(5, queryParameters.First(x => x.PropertyName == "Id").PropertyValue);
@@ -137,7 +137,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
             {
                 product => product.ProductName == "Ice Candy" || product.ProductName == "Random" || product.ProductName == "Crap" || product.Id > 1
             });
-            var expected = "SELECT * FROM [Product] WHERE ((([ProductName] = @ProductName) OR ([ProductName] = @ProductName2)) OR ([ProductName] = @ProductName3)) OR ([Id] > @Id);";
+            var expected = "SELECT * FROM [Product] WHERE (((([ProductName] = @ProductName) OR ([ProductName] = @ProductName2)) OR ([ProductName] = @ProductName3)) OR ([Id] > @Id));";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual("Ice Candy", queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue);
             Assert.AreEqual("Random", queryParameters.First(x => x.ParameterName == "ProductName2").PropertyValue);
@@ -152,7 +152,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
             {
                 product => (product.ProductName == "Ice Candy" || product.ProductName == "Random") && product.Id > 1
             });
-            var expected = "SELECT * FROM [Product] WHERE (([ProductName] = @ProductName) OR ([ProductName] = @ProductName2)) AND ([Id] > @Id);";
+            var expected = "SELECT * FROM [Product] WHERE ((([ProductName] = @ProductName) OR ([ProductName] = @ProductName2)) AND ([Id] > @Id));";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual("Ice Candy", queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue);
             Assert.AreEqual("Random", queryParameters.First(x => x.ParameterName == "ProductName2").PropertyValue);
@@ -165,7 +165,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
             {
                 product => (product.ProductName == "Ice Candy" || product.ProductName == "Random") && (product.Id < 5 || product.Id > 10)
             });
-            var expected = "SELECT * FROM [Product] WHERE (([ProductName] = @ProductName) OR ([ProductName] = @ProductName2)) AND (([Id] < @Id) OR ([Id] > @Id2));";
+            var expected = "SELECT * FROM [Product] WHERE ((([ProductName] = @ProductName) OR ([ProductName] = @ProductName2)) AND (([Id] < @Id) OR ([Id] > @Id2)));";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual("Ice Candy", queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue);
             Assert.AreEqual("Random", queryParameters.First(x => x.ParameterName == "ProductName2").PropertyValue);
@@ -184,7 +184,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
             {
                 product => (product.ProductName == value1 || product.ProductName == value2) && (product.Id < value3 || product.Id > value4)
             });
-            var expected = "SELECT * FROM [Product] WHERE (([ProductName] = @ProductName) OR ([ProductName] = @ProductName2)) AND (([Id] < @Id) OR ([Id] > @Id2));";
+            var expected = "SELECT * FROM [Product] WHERE ((([ProductName] = @ProductName) OR ([ProductName] = @ProductName2)) AND (([Id] < @Id) OR ([Id] > @Id2)));";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(value1, queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue);
             Assert.AreEqual(value2, queryParameters.First(x => x.ParameterName == "ProductName2").PropertyValue);
@@ -199,7 +199,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
             {
                 product => true
             });
-            var expected = "SELECT * FROM [Product] WHERE 1 = 1;";
+            var expected = "SELECT * FROM [Product] WHERE (1 = 1);";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(1, queryParameters.Count);
             Assert.AreEqual(true, queryParameters.First().IsPropertyValueAlsoProperty);
@@ -214,7 +214,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
                 product => product.ProductName == str,
                 product => product.DateCreated == DateTime.Now
             });
-            var expected = "SELECT * FROM [Product] WHERE [ProductName] = @ProductName AND [DateCreated] = @DateCreated;";
+            var expected = "SELECT * FROM [Product] WHERE ([ProductName] = @ProductName) AND ([DateCreated] = @DateCreated);";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(str, queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue);
             Assert.AreEqual(DateTime.Now.Date, ((DateTime)queryParameters.First(x => x.ParameterName == "DateCreated").PropertyValue).Date);
@@ -229,7 +229,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
                 product => product.ProductName == GetName(),
                 product => product.DateCreated == DateTime.Now
             });
-            var expected = "SELECT * FROM [Product] WHERE [ProductName] = @ProductName AND [DateCreated] = @DateCreated;";
+            var expected = "SELECT * FROM [Product] WHERE ([ProductName] = @ProductName) AND ([DateCreated] = @DateCreated);";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(GetName(), queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue);
             Assert.AreEqual(DateTime.Now.Date, ((DateTime)queryParameters.First(x => x.ParameterName == "DateCreated").PropertyValue).Date);
@@ -244,7 +244,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
                 product => product.ProductName == GetName(),
                 product => lst.Contains(product.Id)
             });
-            var expected = "SELECT * FROM [Product] WHERE [ProductName] = @ProductName AND [Id] IN (@Id_InParam_1,@Id_InParam_2,@Id_InParam_3,@Id_InParam_4);";
+            var expected = "SELECT * FROM [Product] WHERE ([ProductName] = @ProductName) AND ([Id] IN (@Id_InParam_1,@Id_InParam_2,@Id_InParam_3,@Id_InParam_4) );";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(GetName(), queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue);
             Assert.AreEqual(1, queryParameters.First(x => x.ParameterName == "Id_InParam_1").PropertyValue);
@@ -263,7 +263,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
                 product => product.ProductName == GetName(),
                 product => !lst.Contains(product.Id)
             });
-            var expected = "SELECT * FROM [Product] WHERE [ProductName] = @ProductName AND [Id] NOT IN (@Id_InParam_1,@Id_InParam_2,@Id_InParam_3,@Id_InParam_4);";
+            var expected = "SELECT * FROM [Product] WHERE ([ProductName] = @ProductName) AND ([Id] NOT IN (@Id_InParam_1,@Id_InParam_2,@Id_InParam_3,@Id_InParam_4) );";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(GetName(), queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue);
             Assert.AreEqual(1, queryParameters.First(x => x.ParameterName == "Id_InParam_1").PropertyValue);
@@ -281,7 +281,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
                 product => product.ProductName == GetName(),
                 product => !lst.Contains(product.Id)
             }, out IList<QueryInfo> queryParameters);
-            var expected = "SELECT COUNT(*) FROM [Product] WHERE [ProductName] = @ProductName AND [Id] NOT IN (@Id_InParam_1,@Id_InParam_2,@Id_InParam_3,@Id_InParam_4);";
+            var expected = "SELECT COUNT(*) FROM [Product] WHERE ([ProductName] = @ProductName) AND ([Id] NOT IN (@Id_InParam_1,@Id_InParam_2,@Id_InParam_3,@Id_InParam_4) );";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(GetName(), queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue);
             Assert.AreEqual(1, queryParameters.First(x => x.ParameterName == "Id_InParam_1").PropertyValue);
@@ -298,7 +298,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
                 product => product.ProductName == GetName(),
                 product => !(new List<int> { 1, 2, 3, 4 }).Contains(product.Id)
             });
-            var expected = "SELECT * FROM [Product] WHERE [ProductName] = @ProductName AND [Id] NOT IN (@Id_InParam_1,@Id_InParam_2,@Id_InParam_3,@Id_InParam_4);";
+            var expected = "SELECT * FROM [Product] WHERE ([ProductName] = @ProductName) AND ([Id] NOT IN (@Id_InParam_1,@Id_InParam_2,@Id_InParam_3,@Id_InParam_4) );";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(GetName(), queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue);
             Assert.AreEqual(1, queryParameters.First(x => x.ParameterName == "Id_InParam_1").PropertyValue);
@@ -314,7 +314,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
             {
                 product => (new List<string> { "a", "b", "c", "d" }).Contains(product.ProductName)
             });
-            var expected = "SELECT * FROM [Product] WHERE [ProductName] IN (@ProductName_InParam_1,@ProductName_InParam_2,@ProductName_InParam_3,@ProductName_InParam_4);";
+            var expected = "SELECT * FROM [Product] WHERE ([ProductName] IN (@ProductName_InParam_1,@ProductName_InParam_2,@ProductName_InParam_3,@ProductName_InParam_4) );";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(4,
                 ((ICollection)queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue).Count);
@@ -332,7 +332,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
             {
                 product => product.ProductName.Contains(GetName())
             });
-            var expected = "SELECT * FROM [Product] WHERE [ProductName] LIKE @ProductName;";
+            var expected = "SELECT * FROM [Product] WHERE ([ProductName] LIKE @ProductName);";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual('%' + GetName() + '%', queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue);
         }
@@ -344,7 +344,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
             {
                 product => product.ProductName.StartsWith(GetName())
             });
-            var expected = "SELECT * FROM [Product] WHERE [ProductName] LIKE @ProductName;";
+            var expected = "SELECT * FROM [Product] WHERE ([ProductName] LIKE @ProductName);";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(GetName() + '%', queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue);
         }
@@ -357,7 +357,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
             {
                 product => product.ProductName.StartsWith(str)
             });
-            var expected = "SELECT * FROM [Product] WHERE [ProductName] LIKE @ProductName;";
+            var expected = "SELECT * FROM [Product] WHERE ([ProductName] LIKE @ProductName);";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(str + '%', queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue);
         }
@@ -369,7 +369,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
             {
                 product => product.ProductName.StartsWith("a")
             });
-            var expected = "SELECT * FROM [Product] WHERE [ProductName] LIKE @ProductName;";
+            var expected = "SELECT * FROM [Product] WHERE ([ProductName] LIKE @ProductName);";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual("a%", queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue);
         }
@@ -383,7 +383,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
             {
                 product => !product.ProductName.StartsWith(GetName())
             });
-            var expected = "SELECT * FROM [Product] WHERE [ProductName] NOT LIKE @ProductName;";
+            var expected = "SELECT * FROM [Product] WHERE ([ProductName] NOT LIKE @ProductName);";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(GetName() + '%', queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue);
         }
@@ -402,7 +402,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
                 {product => product.ProductName, RowOrder.Ascending}
             };
             var sql = _generator.GenerateSelect(out IList<QueryInfo> queryParameters, where, orderBy);
-            var expected = "SELECT * FROM [Product] WHERE [ProductName] = @ProductName AND [DateCreated] > @DateCreated ORDER BY [ProductName];";
+            var expected = "SELECT * FROM [Product] WHERE ([ProductName] = @ProductName) AND ([DateCreated] > @DateCreated) ORDER BY [ProductName];";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(GetName(), queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue);
             Assert.AreEqual(DateTime.Now.Date, ((DateTime)queryParameters.First(x => x.ParameterName == "DateCreated").PropertyValue).Date);
@@ -424,7 +424,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
                 {product => product.Price, RowOrder.Descending }
             };
             var sql = _generator.GenerateSelect(out IList<QueryInfo> queryParameters, where, orderBy);
-            var expected = "SELECT * FROM [Product] WHERE [ProductName] = @ProductName AND [DateCreated] != @DateCreated ORDER BY [ProductName], [Price] DESC;";
+            var expected = "SELECT * FROM [Product] WHERE ([ProductName] = @ProductName) AND ([DateCreated] != @DateCreated) ORDER BY [ProductName], [Price] DESC;";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(GetName(), queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue);
             Assert.AreEqual(DateTime.Now.Date, ((DateTime)queryParameters.First(x => x.ParameterName == "DateCreated").PropertyValue).Date);
@@ -472,7 +472,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
                 DateCreated = DateTime.Today
             };
             var sql = _generator.GenerateUpdate(product, out IList<QueryInfo> queryParameters);
-            var expected = "UPDATE [Product] SET [ProductName] = @ProductName,[ProductDescription] = @ProductDescription,[DateCreated] = @DateCreated,[Price] = @Price,[IsActive] = @IsActive WHERE [Id] = @Id;";
+            var expected = "UPDATE [Product] SET [ProductName] = @ProductName,[ProductDescription] = @ProductDescription,[DateCreated] = @DateCreated,[Price] = @Price,[IsActive] = @IsActive WHERE ([Id] = @Id);";
 
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(6, queryParameters.Count);
@@ -489,7 +489,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
         public void UpdateGenerator_DynamicType_Valid()
         {
             var sql = _generator.GenerateUpdate("Product", new { ProductName = "x", ProductDescription = "y", DateCreated = DateTime.Now, Price = 1.2d }, new { Id = 5 }, out IList<QueryInfo> queryParameters);
-            var expected = "UPDATE [Product] SET [ProductName] = @ProductName,[ProductDescription] = @ProductDescription,[DateCreated] = @DateCreated,[Price] = @Price WHERE [Id] = @Id;";
+            var expected = "UPDATE [Product] SET [ProductName] = @ProductName,[ProductDescription] = @ProductDescription,[DateCreated] = @DateCreated,[Price] = @Price WHERE ([Id] = @Id);";
 
             Assert.AreEqual("x", queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue);
             Assert.AreEqual("y", queryParameters.First(x => x.ParameterName == "ProductDescription").PropertyValue);
@@ -503,7 +503,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
         public void UpdateGenerator_DynamicType_With_Multiple_Where_Valid()
         {
             var sql = _generator.GenerateUpdate("Product", new { ProductName = "x", ProductDescription = "y", DateCreated = DateTime.Now, Price = 1.2d }, new { Id = 5, DateCreated = DateTime.Now }, out IList<QueryInfo> queryParameters);
-            var expected = "UPDATE [Product] SET [ProductName] = @ProductName,[ProductDescription] = @ProductDescription,[DateCreated] = @DateCreated,[Price] = @Price WHERE [Id] = @Id AND [DateCreated] = @DateCreated2;";
+            var expected = "UPDATE [Product] SET [ProductName] = @ProductName,[ProductDescription] = @ProductDescription,[DateCreated] = @DateCreated,[Price] = @Price WHERE ([Id] = @Id) AND ([DateCreated] = @DateCreated2);";
 
             Assert.AreEqual(expected, sql);
             Assert.AreEqual("x", queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue);
@@ -518,7 +518,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
         public void UpdateGenerator_DynamicType_With_Same_Where_Valid()
         {
             var sql = _generator.GenerateUpdate("Product", new { ProductName = "x" }, new { ProductName = "y" }, out IList<QueryInfo> queryParameters);
-            var expected = "UPDATE [Product] SET [ProductName] = @ProductName WHERE [ProductName] = @ProductName2;";
+            var expected = "UPDATE [Product] SET [ProductName] = @ProductName WHERE ([ProductName] = @ProductName2);";
 
             Assert.AreEqual("x", queryParameters.First(x => x.ParameterName == "ProductName").PropertyValue);
             Assert.AreEqual("y", queryParameters.First(x => x.ParameterName == "ProductName2").PropertyValue);
@@ -549,7 +549,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
         public void DeleteGenerator_DynamicType_Valid()
         {
             var sql = _generator.GenerateDelete("Product", new { Price = 5 }, out IList<QueryInfo> queryParameters);
-            var expected = "DELETE FROM [Product] WHERE [Price] = @Price;";
+            var expected = "DELETE FROM [Product] WHERE ([Price] = @Price);";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(5d, queryParameters.First(x => x.ParameterName == "Price").PropertyValue);
         }
@@ -603,7 +603,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
                 new JoinMeta<Category>("CategoryId", "Id")
             }, new List<LambdaExpression>() { expression });
 
-            var expected = "SELECT * FROM [Product] t1 INNER JOIN [ProductCategory] t2 ON t1.[Id] = t2.[ProductId] INNER JOIN [Category] t3 ON t2.[CategoryId] = t3.[Id]  WHERE t1.[Id] = t3.[Id];";
+            var expected = "SELECT * FROM [Product] t1 INNER JOIN [ProductCategory] t2 ON t1.[Id] = t2.[ProductId] INNER JOIN [Category] t3 ON t2.[CategoryId] = t3.[Id]  WHERE (t1.[Id] = t3.[Id]);";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(1, queryParameters.Count);
         }
@@ -619,7 +619,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
                 new JoinMeta<Category>("CategoryId", "Id")
             }, new List<LambdaExpression>() { expression1, expression2 });
 
-            var expected = "SELECT * FROM [Product] t1 LEFT OUTER JOIN [ProductCategory] t2 ON t1.[Id] = t2.[ProductId] INNER JOIN [Category] t3 ON t2.[CategoryId] = t3.[Id]  WHERE t1.[Id] = t3.[Id] AND t2.[CategoryId] > t3.[Id];";
+            var expected = "SELECT * FROM [Product] t1 LEFT OUTER JOIN [ProductCategory] t2 ON t1.[Id] = t2.[ProductId] INNER JOIN [Category] t3 ON t2.[CategoryId] = t3.[Id]  WHERE (t1.[Id] = t3.[Id]) AND (t2.[CategoryId] > t3.[Id]);";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(2, queryParameters.Count);
         }

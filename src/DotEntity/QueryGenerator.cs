@@ -111,11 +111,11 @@ namespace DotEntity
             var updateString = string.Join(",", updateValueMap.Select(x => $"{x.Key.ToEnclosed()} = @{x.Key}"));
             //get the common keys
             var commonKeys = updateValueMap.Keys.Intersect(whereMap.Keys);
-            var whereString = string.Join(" AND ", whereMap.Select(x =>
+            var whereString = string.Join(" AND ", WrapWithBraces(whereMap.Select(x =>
             {
                 var prefix = commonKeys.Contains(x.Key) ? "2" : "";
                 return $"{x.Key.ToEnclosed()} = @{x.Key}{prefix}";
-            }));
+            })));
             return $"UPDATE {tableName.ToEnclosed()} SET {updateString} WHERE {whereString};";
         }
 
@@ -156,7 +156,7 @@ namespace DotEntity
         public virtual string GenerateDelete(string tableName, object where, out IList<QueryInfo> parameters)
         {
             Dictionary<string, object> whereMap = QueryParserUtilities.ParseObjectKeyValues(where);
-            var whereString = string.Join(" AND ", whereMap.Select(x => $"{x.Key.ToEnclosed()} = @{x.Key}"));
+            var whereString = string.Join(" AND ", WrapWithBraces(whereMap.Select(x => $"{x.Key.ToEnclosed()} = @{x.Key}")));
             parameters = ToQueryInfos(whereMap);
             return $"DELETE FROM {tableName.ToEnclosed()} WHERE {whereString};";
         }
@@ -197,8 +197,8 @@ namespace DotEntity
                     whereStringBuilder.Add(parser.GetWhereString(wh));
                 }
                 parameters = parser.QueryInfoList;
-                whereString = string.Join(" AND ", whereStringBuilder).Trim();
-            }
+                whereString = string.Join(" AND ", WrapWithBraces(whereStringBuilder)).Trim();
+            } 
 
             return $"SELECT COUNT(*) FROM {tableName.ToEnclosed()} WHERE {whereString};";
         }
@@ -214,7 +214,7 @@ namespace DotEntity
         public virtual string GenerateCount(string tableName, object @where, out IList<QueryInfo> parameters)
         {
             Dictionary<string, object> whereMap = QueryParserUtilities.ParseObjectKeyValues(where);
-            var whereString = string.Join(" AND ", whereMap.Select(x => $"{x.Key} = @{x.Key}"));
+            var whereString = string.Join(" AND ", WrapWithBraces(whereMap.Select(x => $"{x.Key} = @{x.Key}")));
             parameters = ToQueryInfos(whereMap);
             return $"SELECT COUNT(*) FROM {tableName.ToEnclosed()} WHERE {whereString};";
         }
@@ -236,7 +236,7 @@ namespace DotEntity
                     whereStringBuilder.Add(parser.GetWhereString(wh));
                 }
                 parameters = parser.QueryInfoList;
-                whereString = string.Join(" AND ", whereStringBuilder).Trim();
+                whereString = string.Join(" AND ", WrapWithBraces(whereStringBuilder)).Trim();
             }
 
             var orderByStringBuilder = new List<string>();
@@ -300,7 +300,7 @@ namespace DotEntity
                     whereStringBuilder.Add(parser.GetWhereString(wh));
                 }
                 parameters = parser.QueryInfoList;
-                whereString = string.Join(" AND ", whereStringBuilder).Trim();
+                whereString = string.Join(" AND ", WrapWithBraces(whereStringBuilder)).Trim();
             }
 
             var orderByStringBuilder = new List<string>();
@@ -392,7 +392,7 @@ namespace DotEntity
                     whereStringBuilder.Add(parser.GetWhereString(wh));
                 }
                 parameters = parser.QueryInfoList;
-                whereString = string.Join(" AND ", whereStringBuilder).Trim();
+                whereString = string.Join(" AND ", WrapWithBraces(whereStringBuilder)).Trim();
             }
 
             var orderByStringBuilder = new List<string>();
@@ -506,6 +506,11 @@ namespace DotEntity
                 return $"ROW_NUMBER() OVER (ORDER BY {orderByString}) AS {rowNumVariable}";
             }
             return newWhereString = string.Empty;
+        }
+
+        protected static IEnumerable<string> WrapWithBraces(IEnumerable<string> original)
+        {
+            return original.Select(x => "(" + x + ")");
         }
     }
 }

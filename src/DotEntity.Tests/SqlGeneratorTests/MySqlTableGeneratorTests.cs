@@ -5,6 +5,7 @@
 // // 
 // #endregion
 
+using System;
 using DotEntity.MySql;
 using NUnit.Framework;
 using DotEntity.Tests.Data;
@@ -26,14 +27,14 @@ namespace DotEntity.Tests.SqlGeneratorTests
         public void CreateTable_Succeeds()
         {
             var sql = generator.GetCreateTableScript<Product>();
-            var expected = @"CREATE TABLE `Product`
-(	 `Id` INT NOT NULL AUTO_INCREMENT,
-	 `ProductName` TEXT NOT NULL,
-	 `ProductDescription` TEXT NULL,
-	 `DateCreated` DATETIME NOT NULL,
-	 `Price` NUMERIC(18,0) NOT NULL,
-	 `IsActive` TINYINT(1) NOT NULL,
-PRIMARY KEY (`Id`));";
+            var expected = @"CREATE TABLE `Product`" + Environment.NewLine +
+                           "(\t `Id` INT NOT NULL AUTO_INCREMENT," + Environment.NewLine +
+                           "\t `ProductName` TEXT NOT NULL," + Environment.NewLine +
+                           "\t `ProductDescription` TEXT NULL," + Environment.NewLine +
+                           "\t `DateCreated` DATETIME NOT NULL," + Environment.NewLine +
+                           "\t `Price` NUMERIC(18,0) NOT NULL," + Environment.NewLine +
+                           "\t `IsActive` TINYINT(1) NOT NULL," + Environment.NewLine +
+                           "PRIMARY KEY (`Id`));";
             Assert.AreEqual(expected, sql);
         }
 
@@ -56,9 +57,9 @@ PRIMARY KEY (`Id`));";
                 DestinationColumnName = "ProductId"
             };
             var sql = generator.GetCreateConstraintScript(relation);
-            var expected = @"ALTER TABLE `ProductCategory`
-ADD CONSTRAINT `FK_Product_Id_ProductCategory_ProductId`
-FOREIGN KEY (`ProductId`) REFERENCES `Product`(`Id`);";
+            var expected = @"ALTER TABLE `ProductCategory`" + Environment.NewLine +
+                           "ADD CONSTRAINT `FK_Product_Id_ProductCategory_ProductId`" + Environment.NewLine +
+                           "FOREIGN KEY (`ProductId`) REFERENCES `Product`(`Id`);";
 
             Assert.AreEqual(expected, sql);
         }
@@ -74,8 +75,7 @@ FOREIGN KEY (`ProductId`) REFERENCES `Product`(`Id`);";
                 DestinationColumnName = "ProductId"
             };
             var sql = generator.GetDropConstraintScript(relation);
-            var expected = @"ALTER TABLE `ProductCategory`
-DROP FOREIGN KEY `FK_Product_Id_ProductCategory_ProductId`;";
+            var expected = @"ALTER TABLE `ProductCategory`" + Environment.NewLine + "DROP FOREIGN KEY `FK_Product_Id_ProductCategory_ProductId`;";
             Assert.AreEqual(expected, sql);
         }
     }

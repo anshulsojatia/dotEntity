@@ -5,6 +5,7 @@
 // // 
 // #endregion
 
+using System;
 using DotEntity.SqlServer;
 using NUnit.Framework;
 using DotEntity.Tests.Data;
@@ -25,14 +26,14 @@ namespace DotEntity.Tests.SqlGeneratorTests
         {
             var generator = new DefaultDatabaseTableGenerator();
             var sql = generator.GetCreateTableScript<Product>();
-            var expected = @"CREATE TABLE [Product]
-(	 [Id] INT NOT NULL IDENTITY(1,1),
-	 [ProductName] NVARCHAR(MAX) NOT NULL,
-	 [ProductDescription] NVARCHAR(MAX) NULL,
-	 [DateCreated] DATETIME NOT NULL,
-	 [Price] NUMERIC(18,2) NOT NULL,
-	 [IsActive] BIT NOT NULL,
-PRIMARY KEY CLUSTERED ([Id] ASC));";
+            var expected = @"CREATE TABLE [Product]" + Environment.NewLine +
+                           "(\t [Id] INT NOT NULL IDENTITY(1,1)," + Environment.NewLine +
+                           "\t [ProductName] NVARCHAR(MAX) NOT NULL," + Environment.NewLine +
+                           "\t [ProductDescription] NVARCHAR(MAX) NULL," + Environment.NewLine +
+                           "\t [DateCreated] DATETIME NOT NULL," + Environment.NewLine +
+                           "\t [Price] NUMERIC(18,2) NOT NULL," + Environment.NewLine +
+                           "\t [IsActive] BIT NOT NULL," + Environment.NewLine +
+                           "PRIMARY KEY CLUSTERED ([Id] ASC));";
             Assert.AreEqual(expected, sql);
         }
 
@@ -42,14 +43,14 @@ PRIMARY KEY CLUSTERED ([Id] ASC));";
             DotEntityDb.GlobalTableNamePrefix = "app_";
             var generator = new DefaultDatabaseTableGenerator();
             var sql = generator.GetCreateTableScript<Product>();
-            var expected = @"CREATE TABLE [app_Product]
-(	 [Id] INT NOT NULL IDENTITY(1,1),
-	 [ProductName] NVARCHAR(MAX) NOT NULL,
-	 [ProductDescription] NVARCHAR(MAX) NULL,
-	 [DateCreated] DATETIME NOT NULL,
-	 [Price] NUMERIC(18,2) NOT NULL,
-	 [IsActive] BIT NOT NULL,
-PRIMARY KEY CLUSTERED ([Id] ASC));";
+            var expected = @"CREATE TABLE [app_Product]" + Environment.NewLine +
+                           "(\t [Id] INT NOT NULL IDENTITY(1,1)," + Environment.NewLine +
+                           "\t [ProductName] NVARCHAR(MAX) NOT NULL," + Environment.NewLine +
+                           "\t [ProductDescription] NVARCHAR(MAX) NULL," + Environment.NewLine +
+                           "\t [DateCreated] DATETIME NOT NULL," + Environment.NewLine +
+                           "\t [Price] NUMERIC(18,2) NOT NULL," + Environment.NewLine +
+                           "\t [IsActive] BIT NOT NULL," + Environment.NewLine +
+                           "PRIMARY KEY CLUSTERED ([Id] ASC));";
             Assert.AreEqual(expected, sql);
 
             sql = generator.GetDropTableScript<Product>();
@@ -71,8 +72,7 @@ PRIMARY KEY CLUSTERED ([Id] ASC));";
         [Test]
         public void CreateForeignKeyConstraint_Succeeds()
         {
-            var relation = new Relation
-            {
+            var relation = new Relation {
                 SourceType = typeof(Product),
                 DestinationType = typeof(ProductCategory),
                 SourceColumnName = "Id",
@@ -80,9 +80,9 @@ PRIMARY KEY CLUSTERED ([Id] ASC));";
             };
             var generator = new DefaultDatabaseTableGenerator();
             var sql = generator.GetCreateConstraintScript(relation);
-            var expected = @"ALTER TABLE [ProductCategory]
-ADD CONSTRAINT [FK_Product_Id_ProductCategory_ProductId]
-FOREIGN KEY ([ProductId]) REFERENCES [Product]([Id]);";
+            var expected = @"ALTER TABLE [ProductCategory]" + Environment.NewLine +
+                           "ADD CONSTRAINT [FK_Product_Id_ProductCategory_ProductId]" + Environment.NewLine +
+                           "FOREIGN KEY ([ProductId]) REFERENCES [Product]([Id]);";
 
             Assert.AreEqual(expected, sql);
         }
@@ -90,8 +90,7 @@ FOREIGN KEY ([ProductId]) REFERENCES [Product]([Id]);";
         [Test]
         public void DeleteForeignKeyConstraint_Succeeds()
         {
-            var relation = new Relation
-            {
+            var relation = new Relation {
                 SourceType = typeof(Product),
                 DestinationType = typeof(ProductCategory),
                 SourceColumnName = "Id",
@@ -99,8 +98,8 @@ FOREIGN KEY ([ProductId]) REFERENCES [Product]([Id]);";
             };
             var generator = new DefaultDatabaseTableGenerator();
             var sql = generator.GetDropConstraintScript(relation);
-            var expected = @"ALTER TABLE [ProductCategory]
-DROP CONSTRAINT [FK_Product_Id_ProductCategory_ProductId];";
+            var expected = @"ALTER TABLE [ProductCategory]" + Environment.NewLine +
+                           "DROP CONSTRAINT [FK_Product_Id_ProductCategory_ProductId];";
             Assert.AreEqual(expected, sql);
         }
     }

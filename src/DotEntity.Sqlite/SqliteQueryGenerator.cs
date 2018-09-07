@@ -38,7 +38,7 @@ namespace DotEntity.Sqlite
                     whereStringBuilder.Add(parser.GetWhereString(wh));
                 }
                 parameters = parser.QueryInfoList;
-                whereString = string.Join(" AND ", whereStringBuilder).Trim();
+                whereString = string.Join(" AND ", WrapWithBraces(whereStringBuilder)).Trim();
             }
 
             var orderByStringBuilder = new List<string>();
@@ -94,7 +94,7 @@ namespace DotEntity.Sqlite
                     whereStringBuilder.Add(parser.GetWhereString(wh));
                 }
                 parameters = parser.QueryInfoList;
-                whereString = string.Join(" AND ", whereStringBuilder).Trim();
+                whereString = string.Join(" AND ", WrapWithBraces(whereStringBuilder)).Trim();
             }
 
             var orderByStringBuilder = new List<string>();
@@ -180,7 +180,7 @@ namespace DotEntity.Sqlite
                     whereStringBuilder.Add(parser.GetWhereString(wh));
                 }
                 parameters = parser.QueryInfoList;
-                whereString = string.Join(" AND ", whereStringBuilder).Trim();
+                whereString = string.Join(" AND ", WrapWithBraces(whereStringBuilder)).Trim();
             }
 
             var orderByStringBuilder = new List<string>();
