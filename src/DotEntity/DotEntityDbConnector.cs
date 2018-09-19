@@ -53,7 +53,7 @@ namespace DotEntity
                             case DbOperationType.Insert:
                             case DbOperationType.SelectScaler:
                                 using (var cmd =
-                                    queryProcessor.GetQueryCommand(con, dotEntityDbCommand.Query, dotEntityDbCommand.QueryInfos, true, dotEntityDbCommand.KeyColumn))
+                                    queryProcessor.GetQueryCommand(con, dotEntityDbCommand.Query, dotEntityDbCommand.QueryInfos, dotEntityDbCommand.OperationType == DbOperationType.Insert, dotEntityDbCommand.KeyColumn))
                                 {
                                     cmd.Transaction = trans;
                                     var value = cmd.ExecuteScalar();
