@@ -27,6 +27,7 @@
  */
 using System;
 using System.Linq.Expressions;
+using System.Reflection;
 using DotEntity.Extensions;
 
 namespace DotEntity
@@ -80,12 +81,9 @@ namespace DotEntity
                 transaction.Manager.AsDotEntityQueryManager().Do(script, null);
             }
 
-            public static void AddColumn<T>(Expression<Action<T, object>> columnExpression, IDotEntityTransaction transaction)
+            public static void AddColumn<T, T1>(string columnName, T1 value, IDotEntityTransaction transaction)
             {
-                var tableType = typeof(T);
-                var columnName = columnExpression.Name;
-                var columnType = columnExpression.Type;
-                var script = DatabaseTableGenerator.GetAddColumnScript(tableType, columnName, columnType);
+                var script = DatabaseTableGenerator.GetAddColumnScript<T, T1>(columnName, value, typeof(T).GetProperty(columnName));
                 transaction.Manager.AsDotEntityQueryManager().Do(script, null);
             }
 

@@ -46,7 +46,7 @@ namespace DotEntity
 
         string GetDropConstraintScript(Relation relation);
 
-        string GetAddColumnScript(Type type, string columnName, Type columnType, PropertyInfo propertyInfo = null);
+        string GetAddColumnScript<T, T1>(string columnName, T1 value, PropertyInfo propertyInfo = null);
 
         string GetDropColumnScript(Type type, string columnName);
 

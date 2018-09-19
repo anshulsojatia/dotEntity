@@ -147,12 +147,12 @@ namespace DotEntity
             return builder.ToString();
         }
 
-        public virtual string GetAddColumnScript(Type type, string columnName, Type columnType, PropertyInfo propertyInfo = null)
+        public virtual string GetAddColumnScript<T, T1>(string columnName, T1 value, PropertyInfo propertyInfo = null)
         {
-            var tableName = DotEntityDb.GetTableNameForType(type);
-            var dataTypeString = GetFormattedDbTypeForType(columnType, propertyInfo);
+            var tableName = DotEntityDb.GetTableNameForType(typeof(T));
+            var dataTypeString = GetFormattedDbTypeForType(typeof(T1), propertyInfo);
             var builder = new StringBuilder($"ALTER TABLE {tableName.ToEnclosed()}{Environment.NewLine}");
-            builder.Append($"ADD COLUMN {columnName.ToEnclosed()} {dataTypeString}");
+            builder.Append($"ADD {columnName.ToEnclosed()} {dataTypeString} DEFAULT {value}");
             return builder.ToString();
         }
 
