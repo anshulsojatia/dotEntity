@@ -159,7 +159,7 @@ namespace DotEntity
         public virtual string GetDropColumnScript(Type type, string columnName)
         {
             var tableName = DotEntityDb.GetTableNameForType(type);
-            var builder = new StringBuilder($"ALTER TABLE [{tableName.ToEnclosed()}]{Environment.NewLine}");
+            var builder = new StringBuilder($"ALTER TABLE {tableName.ToEnclosed()}{Environment.NewLine}");
             builder.Append($"DROP COLUMN {columnName.ToEnclosed()};");
             return builder.ToString();
         }
@@ -168,7 +168,7 @@ namespace DotEntity
         {
             var tableName = DotEntityDb.GetTableNameForType(type);
             var dataTypeString = GetFormattedDbTypeForType(columnType, propertyInfo);
-            var builder = new StringBuilder($"ALTER TABLE [{tableName.ToEnclosed()}]{Environment.NewLine}");
+            var builder = new StringBuilder($"ALTER TABLE {tableName.ToEnclosed()}{Environment.NewLine}");
             builder.Append($"ALTER COLUMN {columnName.ToEnclosed()} {dataTypeString}");
             return builder.ToString();
         }
