@@ -26,6 +26,7 @@
  * visit http://dotentity.net/licensing
  */
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 using DotEntity.Extensions;
@@ -37,9 +38,13 @@ namespace DotEntity
         public static class Database
         {
             private static IDatabaseTableGenerator DatabaseTableGenerator => DotEntityDb.Provider.DatabaseTableGenerator;
-
+            private static readonly IList<string> ProcessedTables = new List<string>();
             public static void CreateTable<T>(IDotEntityTransaction transaction) where T : class
             {
+                var tableName = GetTableName<T>();
+                Throw.IfTableCreated(WasTableCreated<T>(), tableName);
+                //add to prcessed tables
+                ProcessedTables.Add(tableName);
                 var script = DatabaseTableGenerator.GetCreateTableScript<T>();
                 transaction.Manager.AsDotEntityQueryManager().Do(script, null);
             }
@@ -48,6 +53,8 @@ namespace DotEntity
             {
                 foreach (var tableType in tableTypes)
                 {
+                    var tableName = GetTableName(tableType);
+                    Throw.IfTableCreated(WasTableCreated(tableType), tableName);
                     var script = DatabaseTableGenerator.GetCreateTableScript(tableType);
                     transaction.Manager.AsDotEntityQueryManager().Do(script, null);
                 }
@@ -56,6 +63,12 @@ namespace DotEntity
             public static void DropTable<T>(IDotEntityTransaction transaction) where T : class
             {
                 var script = DatabaseTableGenerator.GetDropTableScript<T>();
+                transaction.Manager.AsDotEntityQueryManager().Do(script, null);
+            }
+
+            public static void DropTable(string tableName, IDotEntityTransaction transaction)
+            {
+                var script = DatabaseTableGenerator.GetDropTableScript(DotEntityDb.GlobalTableNamePrefix + tableName);
                 transaction.Manager.AsDotEntityQueryManager().Do(script, null);
             }
 
@@ -83,6 +96,8 @@ namespace DotEntity
 
             public static void AddColumn<T, T1>(string columnName, T1 value, IDotEntityTransaction transaction)
             {
+                if (WasTableCreated<T>())
+                    return; //don't do anything, as table was already created by some previous version
                 var script = DatabaseTableGenerator.GetAddColumnScript<T, T1>(columnName, value, typeof(T).GetProperty(columnName));
                 transaction.Manager.AsDotEntityQueryManager().Do(script, null);
             }
@@ -112,6 +127,27 @@ namespace DotEntity
                     manager.Do(query, parameters);
             }
 
+            #region Helpers
+            private static bool WasTableCreated<T>()
+            {
+                return ProcessedTables.Contains(GetTableName<T>());
+            }
+
+            private static bool WasTableCreated(Type type)
+            {
+                return ProcessedTables.Contains(GetTableName(type));
+            }
+            private static string GetTableName<T>()
+            {
+                return GetTableName(typeof(T));
+            }
+
+            private static string GetTableName(Type type)
+            {
+                var tableName = DotEntityDb.GetTableNameForType(type);
+                return tableName;
+            }
+            #endregion
         }
     }
 }

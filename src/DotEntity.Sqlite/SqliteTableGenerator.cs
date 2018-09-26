@@ -89,5 +89,10 @@ namespace DotEntity.Sqlite
             builder.Append($"DROP TABLE {(toTable + "_temporary").ToEnclosed()};");
             return builder.ToString();
         }
+
+        public override string GetDropTableScript(string tableName)
+        {
+            return $"DROP TABLE IF EXISTS {tableName.ToEnclosed()};";
+        }
     }
 }

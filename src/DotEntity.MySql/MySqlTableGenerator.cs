@@ -60,5 +60,10 @@ namespace DotEntity.MySql
             builder.Append($"DROP FOREIGN KEY {constraintName.ToEnclosed()};");
             return builder.ToString();
         }
+
+        public override string GetDropTableScript(string tableName)
+        {
+            return $"DROP TABLE IF EXISTS {tableName.ToEnclosed()};";
+        }
     }
 }

@@ -35,7 +35,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
         {
             var generator = new SqliteTableGenerator();
             var sql = generator.GetDropTableScript<Product>();
-            var expected = @"DROP TABLE [Product];";
+            var expected = @"DROP TABLE IF EXISTS [Product];";
             Assert.AreEqual(expected, sql);
         }
 

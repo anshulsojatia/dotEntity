@@ -42,6 +42,8 @@ namespace DotEntity
 
         string GetDropTableScript(Type type);
 
+        string GetDropTableScript(string tableName);
+
         string GetCreateConstraintScript(Relation relation);
 
         string GetDropConstraintScript(Relation relation);

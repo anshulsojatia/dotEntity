@@ -54,7 +54,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
             Assert.AreEqual(expected, sql);
 
             sql = generator.GetDropTableScript<Product>();
-            expected = @"DROP TABLE [app_Product];";
+            expected = @"IF OBJECT_ID('app_Product', 'U') IS NOT NULL DROP TABLE [app_Product];";
             Assert.AreEqual(expected, sql);
 
             DotEntityDb.GlobalTableNamePrefix = "";
@@ -65,7 +65,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
         {
             var generator = new DefaultDatabaseTableGenerator();
             var sql = generator.GetDropTableScript<Product>();
-            var expected = @"DROP TABLE [Product];";
+            var expected = @"IF OBJECT_ID('Product', 'U') IS NOT NULL DROP TABLE [Product];";
             Assert.AreEqual(expected, sql);
         }
 

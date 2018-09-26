@@ -120,7 +120,13 @@ namespace DotEntity
         public virtual string GetDropTableScript(Type type)
         {
             var tableName = DotEntityDb.GetTableNameForType(type);
-            return $"DROP TABLE {tableName.ToEnclosed()};";
+            return GetDropTableScript(tableName);
+        }
+
+        public virtual string GetDropTableScript(string tableName)
+        {
+            var query = $"IF OBJECT_ID('{tableName}', 'U') IS NOT NULL DROP TABLE {tableName.ToEnclosed()};";
+            return query;
         }
 
         public virtual string GetCreateConstraintScript(Relation relation)

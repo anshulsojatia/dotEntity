@@ -42,7 +42,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
         public void DropTable_Succeeds()
         {
             var sql = generator.GetDropTableScript<Product>();
-            var expected = @"DROP TABLE `Product`;";
+            var expected = @"DROP TABLE IF EXISTS `Product`;";
             Assert.AreEqual(expected, sql);
         }
 

@@ -140,6 +140,12 @@ namespace DotEntity
 
         }
 
+        public static void IfTableCreated(bool created, string parameterName)
+        {
+            It<InvalidOperationException>(created,
+                () => new ThrowInfo($"Table {parameterName} has been already created earlier.", parameterName));
+        }
+
         public static void It<TException>(bool condition, Func<ThrowInfo> getParameters) where TException : Exception
         {
             if (!condition) return;
