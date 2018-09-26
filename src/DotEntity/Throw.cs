@@ -146,6 +146,12 @@ namespace DotEntity
                 () => new ThrowInfo($"Table {parameterName} has been already created earlier.", parameterName));
         }
 
+        public static void IfTransactionIsNullOrDisposed(bool isNullOrDisposed, string parameterName)
+        {
+            It<ArgumentNullException>(isNullOrDisposed,
+                () => new ThrowInfo($"Transaction is null or has been disposed.", parameterName));
+        }
+
         public static void It<TException>(bool condition, Func<ThrowInfo> getParameters) where TException : Exception
         {
             if (!condition) return;

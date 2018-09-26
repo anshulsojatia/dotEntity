@@ -84,10 +84,8 @@ namespace DotEntity
         /// <param name="action">(optional) The function to capture the inserted entity. The return value of this function determines if the next operation in the transaction executes or not. Default return value is True</param>
         public static void Insert(T entity, IDotEntityTransaction transaction, Func<T, bool> action = null)
         {
-            if (!transaction.IsNullOrDisposed())
-            {
-                transaction.Manager.AsDotEntityQueryManager().DoInsert(entity, action);
-            }
+            Throw.IfTransactionIsNullOrDisposed(transaction.IsNullOrDisposed(), nameof(transaction));
+            transaction.Manager.AsDotEntityQueryManager().DoInsert(entity, action);
         }
 
         /// <summary>
@@ -110,10 +108,8 @@ namespace DotEntity
         /// <param name="action">(optional) The function to capture the inserted entity. The return value of this function determines if the next operation in the transaction executes or not. Default return value is True</param>
         public static void Delete(T entity, IDotEntityTransaction transaction, Func<T, bool> action = null)
         {
-            if (!transaction.IsNullOrDisposed())
-            {
-                transaction.Manager.AsDotEntityQueryManager().DoDelete(entity, action);
-            }
+            Throw.IfTransactionIsNullOrDisposed(transaction.IsNullOrDisposed(), nameof(transaction));
+            transaction.Manager.AsDotEntityQueryManager().DoDelete(entity, action);
         }
 
         /// <summary>
@@ -134,10 +130,8 @@ namespace DotEntity
         /// <param name="transaction">The <see cref="IDotEntityTransaction"/> transaction under which the operation executes</param>
         public static void Delete(Expression<Func<T, bool>> where, IDotEntityTransaction transaction)
         {
-            if (!transaction.IsNullOrDisposed())
-            {
-                transaction.Manager.AsDotEntityQueryManager().DoDelete<T>(where);
-            }
+            Throw.IfTransactionIsNullOrDisposed(transaction.IsNullOrDisposed(), nameof(transaction));
+            transaction.Manager.AsDotEntityQueryManager().DoDelete<T>(where);
         }
 
         /// <summary>
@@ -173,10 +167,8 @@ namespace DotEntity
         /// <param name="action">(optional) The function to capture the updated entity. The return value of this function determines if the next operation in the transaction executes or not. Default return value is True</param>
         public static void Update(T entity, IDotEntityTransaction transaction, Func<T, bool> action = null)
         {
-            if (!transaction.IsNullOrDisposed())
-            {
-                transaction.Manager.AsDotEntityQueryManager().DoUpdate(entity, action);
-            }
+            Throw.IfTransactionIsNullOrDisposed(transaction.IsNullOrDisposed(), nameof(transaction));
+            transaction.Manager.AsDotEntityQueryManager().DoUpdate(entity, action);
         }
 
         /// <summary>
@@ -188,10 +180,8 @@ namespace DotEntity
         /// <param name="action">(optional) The function to capture the updated entity. The return value of this function determines if the next operation in the transaction executes or not. Default return value is True</param>
         public static void Update(object entity, Expression<Func<T, bool>> where, IDotEntityTransaction transaction, Func<T, bool> action = null)
         {
-            if (!transaction.IsNullOrDisposed())
-            {
-                transaction.Manager.AsDotEntityQueryManager().DoUpdate(entity, where, action);
-            }
+            Throw.IfTransactionIsNullOrDisposed(transaction.IsNullOrDisposed(), nameof(transaction));
+            transaction.Manager.AsDotEntityQueryManager().DoUpdate(entity, where, action);
         }
 
         /// <summary>
@@ -251,10 +241,8 @@ namespace DotEntity
         /// <param name="action">(optional) The function to capture the updated entities. The entities are provided as parameter to the function. The return value of this function determines if the next operation in the transaction executes or not. Default return value is True</param>
         public static void Query(string query, object parameters, IDotEntityTransaction transaction, Func<IEnumerable<T>, bool> action = null)
         {
-            if (!transaction.IsNullOrDisposed())
-            {
-                transaction.Manager.AsDotEntityQueryManager().Do<T>(query, parameters, action);
-            }
+            Throw.IfTransactionIsNullOrDisposed(transaction.IsNullOrDisposed(), nameof(transaction));
+            transaction.Manager.AsDotEntityQueryManager().Do<T>(query, parameters, action);
         }
 
         /// <summary>
@@ -282,10 +270,8 @@ namespace DotEntity
         /// <param name="action">(optional) The function to capture the updated entities. The entities are provided as parameter to the function. The return value of this function determines if the next operation in the transaction executes or not. Default return value is True</param>
         public static void QueryScaler<TType>(string query, object parameters, IDotEntityTransaction transaction, Func<TType, bool> action = null)
         {
-            if (!transaction.IsNullOrDisposed())
-            {
-                transaction.Manager.AsDotEntityQueryManager().DoScaler<TType>(query, parameters, action);
-            }
+            Throw.IfTransactionIsNullOrDisposed(transaction.IsNullOrDisposed(), nameof(transaction));
+            transaction.Manager.AsDotEntityQueryManager().DoScaler<TType>(query, parameters, action);
         }
 
         /// <summary>
@@ -416,7 +402,7 @@ namespace DotEntity
         {
             if (transaction != null)
             {
-                Throw.IfNullOrDisposed(transaction, nameof(transaction));
+                Throw.IfTransactionIsNullOrDisposed(transaction.IsNullOrDisposed(), nameof(transaction));
                 return transaction.Manager.AsDotEntityQueryManager().DoCount(_whereList);
             }
             else
@@ -462,6 +448,7 @@ namespace DotEntity
 
         T IEntitySet<T>.SelectSingle(IDotEntityTransaction transaction)
         {
+            Throw.IfTransactionIsNullOrDisposed(transaction.IsNullOrDisposed(), nameof(transaction));
             using (var manager = new DotEntityQueryManager())
             {
                 return manager.DoSelectSingle(_whereList, _orderBy);
