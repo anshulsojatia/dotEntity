@@ -448,7 +448,6 @@ namespace DotEntity
 
         T IEntitySet<T>.SelectSingle(IDotEntityTransaction transaction)
         {
-            Throw.IfTransactionIsNullOrDisposed(transaction.IsNullOrDisposed(), nameof(transaction));
             using (var manager = new DotEntityQueryManager())
             {
                 return manager.DoSelectSingle(_whereList, _orderBy);
