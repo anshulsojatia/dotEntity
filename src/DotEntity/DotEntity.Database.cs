@@ -82,9 +82,9 @@ namespace DotEntity
 
             }
 
-            public static void CreateConstraint(Relation relation, IDotEntityTransaction transaction)
+            public static void CreateConstraint(Relation relation, IDotEntityTransaction transaction, bool withCascade = false)
             {
-                var script = DatabaseTableGenerator.GetCreateConstraintScript(relation);
+                var script = DatabaseTableGenerator.GetCreateConstraintScript(relation, withCascade);
                 transaction.Manager.AsDotEntityQueryManager().Do(script, null);
             }
 

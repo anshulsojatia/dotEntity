@@ -16,7 +16,7 @@ namespace DotEntity.Tests.PersistanceTests
             }, transaction);
 
             DotEntity.Database.CreateConstraint(Relation.Create<Product, ProductCategory>("Id", "ProductId"), transaction);
-            DotEntity.Database.CreateConstraint(Relation.Create<Category, ProductCategory>("Id", "CategoryId"), transaction);
+            DotEntity.Database.CreateConstraint(Relation.Create<Category, ProductCategory>("Id", "CategoryId"), transaction, true);
         }
 
         public void Downgrade(IDotEntityTransaction transaction)

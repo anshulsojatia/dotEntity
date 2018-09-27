@@ -129,7 +129,7 @@ namespace DotEntity
             return query;
         }
 
-        public virtual string GetCreateConstraintScript(Relation relation)
+        public virtual string GetCreateConstraintScript(Relation relation, bool withCascade = false)
         {
             var fromTable = DotEntityDb.GetTableNameForType(relation.SourceType);
             var toTable = DotEntityDb.GetTableNameForType(relation.DestinationType);
@@ -138,7 +138,12 @@ namespace DotEntity
 
             var builder = new StringBuilder($"ALTER TABLE {toTable.ToEnclosed()}{Environment.NewLine}");
             builder.Append($"ADD CONSTRAINT {constraintName.ToEnclosed()}{Environment.NewLine}");
-            builder.Append($"FOREIGN KEY ({relation.DestinationColumnName.ToEnclosed()}) REFERENCES {fromTable.ToEnclosed()}({relation.SourceColumnName.ToEnclosed()});");
+            builder.Append($"FOREIGN KEY ({relation.DestinationColumnName.ToEnclosed()}) REFERENCES {fromTable.ToEnclosed()}({relation.SourceColumnName.ToEnclosed()})");
+            if (withCascade)
+            {
+                builder.Append($" ON DELETE CASCADE");
+            }
+            builder.Append(";");
             return builder.ToString();
         }
 

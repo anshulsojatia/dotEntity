@@ -54,9 +54,9 @@ namespace DotEntity
         {
             _setter = PropertyCallerCache.SetterOfType(_typeofT);
         }
-      
 
-        
+
+
         public T DeserializeSingle(IDataReader reader, DotEntityDbCommand command)
         {
             return DeserializeMany(reader, command).FirstOrDefault();
@@ -82,7 +82,7 @@ namespace DotEntity
 
         public void SetProperties(T instance, DataReaderRow row, string[] columnNames)
         {
-            for(var i = 0; i < columnNames.Length; i++)
+            for (var i = 0; i < columnNames.Length; i++)
             {
                 var fieldName = columnNames[i];
                 //if (!_setterMap.ContainsKey(fieldName)) continue;
@@ -90,7 +90,7 @@ namespace DotEntity
                 _setter.Set(instance, fieldName, fieldValue);
             }
         }
-       
+
         private IEnumerable<T> FurnishInstances(List<DataReaderRow> rows)
         {
             var columnNames = GetColumns();
@@ -107,16 +107,16 @@ namespace DotEntity
 
         public IEnumerable<T> DeserializeManyNested(IDataReader reader, IList<IJoinMeta> joinMetas, Dictionary<Type, Delegate> relationActions)
         {
-            
+
             var tInstances = new List<T>();
             //make deserializers for each of relation types
             var deserializers = new Dictionary<Type, IDataDeserializer>();
-            var columnsToSkip = new Dictionary<Type, int> {{_typeofT, -1}};
+            var columnsToSkip = new Dictionary<Type, int> { { _typeofT, -1 } };
             var localObjectCache = new Dictionary<string, object>();
 
             foreach (var jm in joinMetas)
             {
-                var serializerObject = (IDataDeserializer) GenericInvoker.InvokeProperty(null, typeof(DataDeserializer<>), jm.OnType, "Instance");
+                var serializerObject = (IDataDeserializer)GenericInvoker.InvokeProperty(null, typeof(DataDeserializer<>), jm.OnType, "Instance");
                 deserializers.Add(jm.OnType, serializerObject);
                 columnsToSkip.Add(jm.OnType, -1);
             }
@@ -142,22 +142,26 @@ namespace DotEntity
                 var tInstance = GetAppropriateInstance(_typeofT, prevRow, row, this, ref localObjectCache);
                 if (tInstance == null)
                     continue;
-                if(!tInstances.Contains(tInstance))
-                    tInstances.Add((T) tInstance);
+                if (!tInstances.Contains(tInstance))
+                    tInstances.Add((T)tInstance);
 
-                //then for all the child instances
-                foreach (var ds in deserializers)
+                if (relationActions != null)
                 {
-                    if (!relationActions.ContainsKey(ds.Key))
-                        continue;
+                    //then for all the child instances
+                    foreach (var ds in deserializers)
+                    {
+                        if (!relationActions.ContainsKey(ds.Key))
+                            continue;
 
-                    var childInstance = GetAppropriateInstance(ds.Key, prevRow, row, ds.Value, ref localObjectCache);
-                    if (childInstance == null)
-                        continue;
+                        var childInstance = GetAppropriateInstance(ds.Key, prevRow, row, ds.Value, ref localObjectCache);
+                        if (childInstance == null)
+                            continue;
 
-                    //invoke the relation to bind the instances if required
-                    relationActions[ds.Key].DynamicInvoke(tInstance, childInstance);
+                        //invoke the relation to bind the instances if required
+                        relationActions[ds.Key].DynamicInvoke(tInstance, childInstance);
+                    }
                 }
+
                 prevRow = row;
                 rowIndex++;
             }
@@ -218,7 +222,7 @@ namespace DotEntity
 
             //we can create instance
             newInstance = Instantiator.GetInstance(instanceType);
-            
+
             //assign properties
             GenericInvoker.Invoke(deserializer, "SetProperties", newInstance, currentDataRow, columns);
             localCache.Add(cacheKey, newInstance);

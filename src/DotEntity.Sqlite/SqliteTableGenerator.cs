@@ -22,7 +22,7 @@ namespace DotEntity.Sqlite
             return GetCreateTableScriptWithRelation(type);
         }
 
-        private string GetCreateTableScriptWithRelation(Type type, Relation relation = null)
+        private string GetCreateTableScriptWithRelation(Type type, Relation relation = null, bool withCascade = false)
         {
             var tableName = DotEntityDb.GetTableNameForType(type);
             var properties = type.GetDatabaseUsableProperties();
@@ -51,14 +51,17 @@ namespace DotEntity.Sqlite
             if (relation != null)
             {
                 var toTable = DotEntityDb.GetTableNameForType(relation.SourceType);
-                builder.Append($"FOREIGN KEY({relation.DestinationColumnName.ToEnclosed()}) REFERENCES {toTable.ToEnclosed()}({relation.SourceColumnName.ToEnclosed()}),");
+                builder.Append(
+                    $"FOREIGN KEY({relation.DestinationColumnName.ToEnclosed()}) REFERENCES {toTable.ToEnclosed()}({relation.SourceColumnName.ToEnclosed()})");
+                if (withCascade)
+                    builder.Append(" ON DELETE CASCADE");
                 builder.Append(Environment.NewLine);
             }
             var query = builder.ToString().TrimEnd(',', '\n', '\r') + ");";
             return query;
         }
 
-        public override string GetCreateConstraintScript(Relation relation)
+        public override string GetCreateConstraintScript(Relation relation, bool withCascade = false)
         {
             //sqlite doesn't support adding foreign key constraints to an existing table
             //we will have to create a new table with constraints, copy the data from old table, drop the old table, rename the new table huh :|
@@ -66,7 +69,7 @@ namespace DotEntity.Sqlite
             var toTable = DotEntityDb.GetTableNameForType(relation.DestinationType);
             var builder = new StringBuilder($"ALTER TABLE {toTable.ToEnclosed()} RENAME TO {(toTable + "_temporary").ToEnclosed()};");
             builder.Append(Environment.NewLine);
-            builder.Append(GetCreateTableScriptWithRelation(relation.DestinationType, relation));
+            builder.Append(GetCreateTableScriptWithRelation(relation.DestinationType, relation, withCascade));
             builder.Append(Environment.NewLine);
             builder.Append($"INSERT INTO {toTable.ToEnclosed()} SELECT * FROM {(toTable + "_temporary").ToEnclosed()};");
             builder.Append(Environment.NewLine);

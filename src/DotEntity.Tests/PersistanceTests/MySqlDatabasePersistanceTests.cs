@@ -13,6 +13,7 @@ using DotEntity.Enumerations;
 using DotEntity.MySql;
 using DotEntity.Tests.Data;
 using DotEntity.Versioning;
+using MySql.Data.MySqlClient;
 
 namespace DotEntity.Tests.PersistanceTests
 {
@@ -316,6 +317,38 @@ namespace DotEntity.Tests.PersistanceTests
 
             var deletedProduct = EntitySet<Product>.Where(x => x.Id == id).SelectSingle();
             Assert.AreEqual(null, deletedProduct);
+        }
+
+        [Test]
+        public void Cascaded_Delete_Tests_Succeed()
+        {
+            var product = new Product() {
+                ProductName = "Cascaded_Delete_Tests_Succeed",
+                ProductDescription = "Some descriptoin won't hurt",
+                DateCreated = DateTime.Now,
+                Price = 25
+            };
+            EntitySet<Product>.Insert(product);
+
+            var category = new Category() { CategoryName = "Cascaded_Delete_Tests_Succeed" };
+            EntitySet<Category>.Insert(category);
+            var categoryId = category.Id;
+
+            EntitySet<ProductCategory>.Insert(new ProductCategory() { CategoryId = category.Id, ProductId = product.Id });
+
+            //deleting product should create an exception because it doesn't support cascade delete
+            Assert.Throws<MySqlException>(() =>
+            {
+                EntitySet<Product>.Delete(product);
+            });
+
+            //deleting category should work fine
+            EntitySet<Category>.Delete(category);
+            var c = EntitySet<Category>.Where(x => x.Id == categoryId).SelectSingle();
+            Assert.IsNull(c);
+
+            var pc = EntitySet<ProductCategory>.Where(x => x.CategoryId == categoryId).SelectSingle();
+            Assert.IsNull(pc);
         }
     }
 }
