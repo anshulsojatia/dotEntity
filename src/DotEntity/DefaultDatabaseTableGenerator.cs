@@ -163,7 +163,9 @@ namespace DotEntity
             var tableName = DotEntityDb.GetTableNameForType(typeof(T));
             var dataTypeString = GetFormattedDbTypeForType(typeof(T1), propertyInfo);
             var builder = new StringBuilder($"ALTER TABLE {tableName.ToEnclosed()}{Environment.NewLine}");
-            builder.Append($"ADD {columnName.ToEnclosed()} {dataTypeString} DEFAULT {value}");
+            builder.Append($"ADD {columnName.ToEnclosed()} {dataTypeString}");
+            if (value != null)
+                builder.Append($" DEFAULT '{value}'");
             return builder.ToString();
         }
 
