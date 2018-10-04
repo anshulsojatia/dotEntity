@@ -39,6 +39,12 @@ namespace DotEntity
         {
             private static IDatabaseTableGenerator DatabaseTableGenerator => DotEntityDb.Provider.DatabaseTableGenerator;
             private static readonly IList<string> ProcessedTables = new List<string>();
+
+            internal static void ResetProcessedTables()
+            {
+                ProcessedTables.Clear();
+            }
+
             public static void CreateTable<T>(IDotEntityTransaction transaction) where T : class
             {
                 var tableName = GetTableName<T>();

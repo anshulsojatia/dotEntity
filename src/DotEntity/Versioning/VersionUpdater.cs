@@ -55,6 +55,7 @@ namespace DotEntity.Versioning
                 {
                     DotEntity.Database.CreateTable<DotEntityVersion>(transaction);
                     transaction.Commit();
+                    DotEntity.Database.ResetProcessedTables();
 
                     if (!transaction.Success)
                     {
@@ -84,6 +85,7 @@ namespace DotEntity.Versioning
                     EntitySet<DotEntityVersion>.Insert(newVersion, transaction);
                 }
                 (transaction as DotEntityTransaction)?.CommitInternal();
+                DotEntity.Database.ResetProcessedTables();
             }
             
         }
