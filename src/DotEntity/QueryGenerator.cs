@@ -198,7 +198,7 @@ namespace DotEntity
                 }
                 parameters = parser.QueryInfoList;
                 whereString = string.Join(" AND ", WrapWithBraces(whereStringBuilder)).Trim();
-            } 
+            }
 
             return $"SELECT COUNT(*) FROM {tableName.ToEnclosed()} WHERE {whereString};";
         }
@@ -383,16 +383,26 @@ namespace DotEntity
 
             var whereStringBuilder = new List<string>();
             var whereString = "";
-
+            var rootTypeWhereBuilder = new List<string>();
+            var rootTypeWhereString = "";
             if (where != null)
             {
                 var parser = new ExpressionTreeParser(typedAliases);
                 foreach (var wh in where)
                 {
-                    whereStringBuilder.Add(parser.GetWhereString(wh));
+                    var wStr = parser.GetWhereString(wh);
+                    if (wh.Parameters[0].Type == typeof(T))
+                    {
+                        rootTypeWhereBuilder.Add(wStr);
+                    }
+                    else
+                    {
+                        whereStringBuilder.Add(wStr);
+                    }
                 }
                 parameters = parser.QueryInfoList;
                 whereString = string.Join(" AND ", WrapWithBraces(whereStringBuilder)).Trim();
+                rootTypeWhereString = string.Join(" AND ", WrapWithBraces(rootTypeWhereBuilder)).Trim();
             }
 
             var orderByStringBuilder = new List<string>();
@@ -417,9 +427,23 @@ namespace DotEntity
             var allTypes = joinMetas.Select(x => x.OnType).Distinct().ToList();
             allTypes.Add(typeof(T));
             // make the query now
-            builder.Append($"SELECT {QueryParserUtilities.GetSelectColumnString(allTypes, typedAliases)}{paginatedSelect} FROM ");
+            builder.Append($"SELECT {QueryParserUtilities.GetSelectColumnString(allTypes, typedAliases)} FROM ");
 
-            builder.Append(tableName.ToEnclosed() + $" {parentAliasUsed} ");
+            //some nested queries are required, let's get the column names (raw) for root table
+            var columnNameString = QueryParserUtilities.GetSelectColumnString(new List<Type>() { typeof(T) });
+            //make the internal query that'll perform the pagination based on root table
+            builder.Append($"(SELECT {columnNameString} FROM (SELECT {columnNameString}{paginatedSelect} FROM ");
+            if (!string.IsNullOrEmpty(rootTypeWhereString))
+            {
+                rootTypeWhereString = $" WHERE {rootTypeWhereString} ";
+            }
+            if (!string.IsNullOrEmpty(newWhereString))
+            {
+                newWhereString = $" WHERE {newWhereString} ";
+            }
+            builder.Append(tableName.ToEnclosed() +
+                       $" {parentAliasUsed}{rootTypeWhereString}) AS __PAGINATEDRESULT__ {newWhereString}) AS {parentAliasUsed} ");
+
 
             //join
             builder.Append(joinBuilder);
@@ -434,11 +458,132 @@ namespace DotEntity
                 builder.Append(" ORDER BY " + orderByString);
             }
             var query = builder.ToString().Trim();
+            return query + ";";
+        }
+
+        public virtual string GenerateJoinWithTotalMatchingCount<T>(out IList<QueryInfo> parameters, List<IJoinMeta> joinMetas, List<LambdaExpression> @where = null,
+            Dictionary<LambdaExpression, RowOrder> orderBy = null, int page = 1, int count = Int32.MaxValue) where T : class
+        {
+            parameters = new List<QueryInfo>();
+            var typedAliases = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            var builder = new StringBuilder();
+            var tableName = DotEntityDb.GetTableNameForType<T>();
+            var parentAliasUsed = "t1";
+            var lastAliasUsed = parentAliasUsed;
+            typedAliases.Add(typeof(T).Name, lastAliasUsed);
+
+            var joinBuilder = new StringBuilder();
+            foreach (var joinMeta in joinMetas)
+            {
+                var joinedTableName = DotEntityDb.GetTableNameForType(joinMeta.OnType);
+                if (!typedAliases.TryGetValue(joinedTableName, out string newAlias))
+                {
+                    newAlias = $"t{typedAliases.Count + 1}";
+                }
+                typedAliases.Add($"{joinedTableName}", newAlias);
+                var sourceAlias = lastAliasUsed;
+                if (joinMeta.SourceColumn == SourceColumn.Parent)
+                {
+                    sourceAlias = parentAliasUsed;
+                }
+                joinBuilder.Append(
+                    $"{JoinMap[joinMeta.JoinType]} {joinedTableName.ToEnclosed()} {newAlias} ON {sourceAlias}.{joinMeta.SourceColumnName.ToEnclosed()} = {newAlias}.{joinMeta.DestinationColumnName.ToEnclosed()} ");
+
+                lastAliasUsed = newAlias;
+
+            }
+
+            var whereStringBuilder = new List<string>();
+            var whereString = "";
+            var rootTypeWhereBuilder = new List<string>();
+            var rootTypeWhereString = "";
+            if (where != null)
+            {
+                var parser = new ExpressionTreeParser(typedAliases);
+                foreach (var wh in where)
+                {
+                    var wStr = parser.GetWhereString(wh);
+                    if (wh.Parameters[0].Type == typeof(T))
+                    {
+                        rootTypeWhereBuilder.Add(wStr);
+                    }
+                    else
+                    {
+                        whereStringBuilder.Add(wStr);
+                    }
+                }
+                parameters = parser.QueryInfoList;
+                whereString = string.Join(" AND ", WrapWithBraces(whereStringBuilder)).Trim();
+                rootTypeWhereString = string.Join(" AND ", WrapWithBraces(rootTypeWhereBuilder)).Trim();
+            }
+
+            var orderByStringBuilder = new List<string>();
+            var orderByString = "";
+            if (orderBy != null)
+            {
+                var parser = new ExpressionTreeParser(typedAliases);
+                foreach (var ob in orderBy)
+                {
+                    orderByStringBuilder.Add(parser.GetOrderByString(ob.Key) + (ob.Value == RowOrder.Descending ? " DESC" : ""));
+                }
+
+                orderByString = string.Join(", ", orderByStringBuilder).Trim(',');
+            }
+
+            var paginatedSelect = PaginateOrderByString(orderByString, page, count, out string newWhereString);
             if (paginatedSelect != string.Empty)
             {
-                //wrap everything
-                query = $"SELECT * FROM ({query}) AS __PAGINATEDRESULT__ WHERE {newWhereString}";
+                paginatedSelect = "," + paginatedSelect;
+                orderByString = string.Empty;
             }
+            var allTypes = joinMetas.Select(x => x.OnType).Distinct().ToList();
+            allTypes.Add(typeof(T));
+            // make the query now
+            builder.Append($"SELECT {QueryParserUtilities.GetSelectColumnString(allTypes, typedAliases)} FROM ");
+
+            //some nested queries are required, let's get the column names (raw) for root table
+            var columnNameString = QueryParserUtilities.GetSelectColumnString(new List<Type>() { typeof(T) });
+            //make the internal query that'll perform the pagination based on root table
+            builder.Append($"(SELECT {columnNameString} FROM (SELECT {columnNameString}{paginatedSelect} FROM ");
+            if (!string.IsNullOrEmpty(rootTypeWhereString))
+            {
+                rootTypeWhereString = $" WHERE {rootTypeWhereString} ";
+            }
+            if (!string.IsNullOrEmpty(newWhereString))
+            {
+                newWhereString = $" WHERE {newWhereString} ";
+            }
+            builder.Append(tableName.ToEnclosed() +
+                           $" {parentAliasUsed}{rootTypeWhereString}) AS __PAGINATEDRESULT__ {newWhereString}) AS {parentAliasUsed} ");
+
+
+            //join
+            builder.Append(joinBuilder);
+
+            if (!string.IsNullOrEmpty(whereString))
+            {
+                builder.Append(" WHERE " + whereString);
+            }
+
+            if (!string.IsNullOrEmpty(orderByString))
+            {
+                builder.Append(" ORDER BY " + orderByString);
+            }
+            //now thecount query
+            builder.Append(";" + Environment.NewLine);
+            var rootIdColumnName = $"{parentAliasUsed}.{typeof(T).GetKeyColumnName().ToEnclosed()}";
+            builder.Append(
+                $"SELECT COUNT(DISTINCT {rootIdColumnName}) FROM (SELECT {columnNameString} FROM {tableName.ToEnclosed()} {parentAliasUsed} {rootTypeWhereString}) AS {parentAliasUsed} ");
+            //join
+            builder.Append(joinBuilder);
+
+            //and other wheres if any
+            if (!string.IsNullOrEmpty(whereString))
+            {
+                builder.Append(" WHERE " + whereString);
+            }
+
+            var query = builder.ToString().Trim();
             return query + ";";
         }
 

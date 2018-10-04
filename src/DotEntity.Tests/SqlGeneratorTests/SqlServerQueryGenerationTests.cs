@@ -585,7 +585,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
                 new JoinMeta<Category>("CategoryId", "Id")
             });
 
-            var expected = "SELECT * FROM [Product] t1 INNER JOIN [ProductCategory] t2 ON t1.[Id] = t2.[ProductId] INNER JOIN [Category] t3 ON t2.[CategoryId] = t3.[Id];";
+            var expected = "SELECT * FROM (SELECT * FROM (SELECT * FROM [Product] t1) AS __PAGINATEDRESULT__ ) AS t1 INNER JOIN [ProductCategory] t2 ON t1.[Id] = t2.[ProductId] INNER JOIN [Category] t3 ON t2.[CategoryId] = t3.[Id];";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(0, queryParameters.Count);
         }
@@ -599,7 +599,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
                 new JoinMeta<Category>("CategoryId", "Id", SourceColumn.Parent)
             });
 
-            var expected = "SELECT * FROM [Product] t1 INNER JOIN [ProductCategory] t2 ON t1.[Id] = t2.[ProductId] INNER JOIN [Category] t3 ON t1.[CategoryId] = t3.[Id];";
+            var expected = "SELECT * FROM (SELECT * FROM (SELECT * FROM [Product] t1) AS __PAGINATEDRESULT__ ) AS t1 INNER JOIN [ProductCategory] t2 ON t1.[Id] = t2.[ProductId] INNER JOIN [Category] t3 ON t1.[CategoryId] = t3.[Id];";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(0, queryParameters.Count);
         }
@@ -607,14 +607,14 @@ namespace DotEntity.Tests.SqlGeneratorTests
         [Test]
         public void JoinGenerator_Simple_Where_Valid()
         {
-            Expression<Func<Product, Category, bool>> expression = (product, category) => product.Id == category.Id;
+            Expression<Func<Category, Product, bool>> expression = (category, product) => product.Id == category.Id;
             var sql = generator.GenerateJoin<Product>(out IList<QueryInfo> queryParameters, new List<IJoinMeta>()
             {
                 new JoinMeta<ProductCategory>("Id", "ProductId"),
                 new JoinMeta<Category>("CategoryId", "Id")
             }, new List<LambdaExpression>(){ expression });
 
-            var expected = "SELECT * FROM [Product] t1 INNER JOIN [ProductCategory] t2 ON t1.[Id] = t2.[ProductId] INNER JOIN [Category] t3 ON t2.[CategoryId] = t3.[Id]  WHERE (t1.[Id] = t3.[Id]);";
+            var expected = "SELECT * FROM (SELECT * FROM (SELECT * FROM [Product] t1) AS __PAGINATEDRESULT__ ) AS t1 INNER JOIN [ProductCategory] t2 ON t1.[Id] = t2.[ProductId] INNER JOIN [Category] t3 ON t2.[CategoryId] = t3.[Id]  WHERE (t1.[Id] = t3.[Id]);";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(1, queryParameters.Count);
         }
@@ -622,7 +622,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
         [Test]
         public void JoinGenerator_Multiple_Where_Valid()
         {
-            Expression<Func<Product, Category, bool>> expression1 = (product, category) => product.Id == category.Id;
+            Expression<Func<Category, Product, bool>> expression1 = (category, product) => product.Id == category.Id;
             Expression<Func<ProductCategory, Category, bool>> expression2 = (productCategory, category) => productCategory.CategoryId > category.Id;
             var sql = generator.GenerateJoin<Product>(out IList<QueryInfo> queryParameters, new List<IJoinMeta>()
             {
@@ -630,7 +630,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
                 new JoinMeta<Category>("CategoryId", "Id")
             }, new List<LambdaExpression>() { expression1, expression2 });
 
-            var expected = "SELECT * FROM [Product] t1 LEFT OUTER JOIN [ProductCategory] t2 ON t1.[Id] = t2.[ProductId] INNER JOIN [Category] t3 ON t2.[CategoryId] = t3.[Id]  WHERE (t1.[Id] = t3.[Id]) AND (t2.[CategoryId] > t3.[Id]);";
+            var expected = "SELECT * FROM (SELECT * FROM (SELECT * FROM [Product] t1) AS __PAGINATEDRESULT__ ) AS t1 LEFT OUTER JOIN [ProductCategory] t2 ON t1.[Id] = t2.[ProductId] INNER JOIN [Category] t3 ON t2.[CategoryId] = t3.[Id]  WHERE (t1.[Id] = t3.[Id]) AND (t2.[CategoryId] > t3.[Id]);";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(2, queryParameters.Count);
         }

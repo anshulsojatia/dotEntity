@@ -66,7 +66,10 @@ namespace DotEntity
 
         string GenerateJoin<T>(out IList<QueryInfo> parameters, List<IJoinMeta> joinMetas, List<LambdaExpression> @where = null, Dictionary<LambdaExpression, RowOrder> orderBy = null,
             int page = 1, int count = int.MaxValue) where T : class;
-        
+
+        string GenerateJoinWithTotalMatchingCount<T>(out IList<QueryInfo> parameters, List<IJoinMeta> joinMetas, List<LambdaExpression> @where = null, Dictionary<LambdaExpression, RowOrder> orderBy = null,
+            int page = 1, int count = int.MaxValue) where T : class;
+
         string Query(string query, object inParameters, out IList<QueryInfo> parameters);
     }
 }

@@ -120,6 +120,15 @@ namespace DotEntity
         IEnumerable<T> SelectNested(int page = 1, int count = int.MaxValue);
 
         /// <summary>
+        /// Queries the database for the requested entities with join operation
+        /// </summary>
+        /// /// <param name="totalMatches">The total number of matching entities</param>
+        /// <param name="page">(optional) The page number of the result set. Default is 1</param>
+        /// <param name="count">(optional) The number of entities to return. Defaults to all entities</param>
+        /// <returns>An enumeration of <typeparamref name="T"/></returns>
+        IEnumerable<T> SelectNestedWithTotalMatches(out int totalMatches, int page = 1, int count = int.MaxValue);
+
+        /// <summary>
         /// Executes the provided <paramref name="query"/> against the data provider
         /// </summary>
         /// <param name="query">The query to be executed against the provider. The query parameters references should be named with '@' prefix</param>

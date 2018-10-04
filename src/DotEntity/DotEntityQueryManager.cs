@@ -382,6 +382,27 @@ namespace DotEntity
             return cmd.GetResultAs<IEnumerable<T>>();
         }
 
+        public virtual Tuple<int, IEnumerable<T>> DoJoinWithTotalMatches<T>(List<IJoinMeta> joinMetas, Dictionary<Type, Delegate> relationActions, List<LambdaExpression> where = null, Dictionary<LambdaExpression, RowOrder> orderBy = null, int page = 1, int count = int.MaxValue) where T : class
+        {
+            ThrowIfInvalidPage(orderBy, page, count);
+            var query = _queryCache?.CachedQuery;
+            var queryParameters = _queryCache?.QueryInfo;
+            query = query ?? _queryGenerator.GenerateJoinWithTotalMatchingCount<T>(out queryParameters, joinMetas, where, orderBy, page, count);
+
+            var cmd = new DotEntityDbCommand(DbOperationType.Select, query, queryParameters);
+            cmd.ProcessReader(reader =>
+            {
+                var ts = DataDeserializer<T>.Instance.DeserializeManyNested(reader, joinMetas, relationActions);
+                reader.NextResult();
+                reader.Read();
+                var fv = reader[0];
+                var total = fv as int? ?? Convert.ToInt32(fv);
+                return Tuple.Create(total, ts);
+            });
+            DotEntityDbConnector.ExecuteCommand(cmd);
+            return cmd.GetResultAs<Tuple<int, IEnumerable<T>>>();
+        }
+
         public virtual IEnumerable<T> DoQuery<T>(string query, object parameters = null, List<IJoinMeta> joinMetas = null, Dictionary<Type, Delegate> relationActions = null, bool isProcedure = false) where T : class
         {
             query = _queryGenerator.Query(query, parameters, out IList<QueryInfo> queryParameters);

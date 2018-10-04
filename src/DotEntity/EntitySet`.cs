@@ -398,6 +398,34 @@ namespace DotEntity
             }
         }
 
+        public IEnumerable<T> SelectNestedWithTotalMatches(out int totalMatches, int page = 1, int count = Int32.MaxValue)
+        {
+            using (var manager = new DotEntityQueryManager())
+            {
+                if (_joinWhereList == null)
+                    _joinWhereList = new List<LambdaExpression>();
+
+                if (_joinOrderBy == null)
+                    _joinOrderBy = new Dictionary<LambdaExpression, RowOrder>();
+
+                //move all order by and where to these list
+                foreach (var w in _whereList)
+                    _joinWhereList.Add(w);
+
+                foreach (var o in _orderBy)
+                    _joinOrderBy.Add(o.Key, o.Value);
+
+                //always use explicit select mode for joins
+                var selectMode = DotEntityDb.SelectQueryMode;
+                DotEntityDb.SelectQueryMode = SelectQueryMode.Explicit;
+                var selectWithCount = manager.DoJoinWithTotalMatches<T>(_joinList, _relationActions, _joinWhereList, _joinOrderBy, page, count);
+                //reset select mode
+                DotEntityDb.SelectQueryMode = selectMode;
+                totalMatches = selectWithCount.Item1;
+                return selectWithCount.Item2;
+            }
+        }
+
         int IEntitySet<T>.Count(IDotEntityTransaction transaction)
         {
             if (transaction != null)
