@@ -348,6 +348,31 @@ namespace DotEntity
             return cmd.GetResultAs<IEnumerable<T>>();
         }
 
+        public virtual IList<object[]> DoCustomSelect<T>(string rawSelection, List<Expression<Func<T, bool>>> where = null, Dictionary<Expression<Func<T, object>>, RowOrder> orderBy = null, int page = 1, int count = int.MaxValue) where T : class
+        {
+            ThrowIfInvalidPage(orderBy, page, count);
+            TryGetFromCache(out string query, out IList<QueryInfo> queryParameters);
+            query = query ?? _queryGenerator.GenerateSelectWithCustomSelection(out queryParameters, rawSelection, where, orderBy, page, count);
+            TrySetCache(query, queryParameters);
+
+            var cmd = new DotEntityDbCommand(DbOperationType.Select, query, queryParameters);
+            cmd.ProcessReader(reader =>
+            {
+                var objectList = new List<object[]>();
+                while (reader.Read())
+                {
+                    var arr = new object[reader.FieldCount];
+                    for (var i = 0; i < arr.Length; i++)
+                        arr[i] = reader[i];
+                    objectList.Add(arr);
+                }
+                return objectList;
+            });
+            DotEntityDbConnector.ExecuteCommand(cmd);
+
+            return cmd.GetResultAs<IList<object[]>>();
+        }
+
         public virtual Tuple<int, IEnumerable<T>> DoSelectWithTotalMatches<T>(List<Expression<Func<T, bool>>> where = null, Dictionary<Expression<Func<T, object>>, RowOrder> orderBy = null, int page = 1, int count = int.MaxValue) where T : class
         {
             ThrowIfInvalidPage(orderBy, page, count);
@@ -380,6 +405,30 @@ namespace DotEntity
             cmd.ProcessReader(reader => DataDeserializer<T>.Instance.DeserializeManyNested(reader, joinMetas, relationActions));
             DotEntityDbConnector.ExecuteCommand(cmd);
             return cmd.GetResultAs<IEnumerable<T>>();
+        }
+
+        public virtual IList<object[]> DoCustomSelect<T>(string rawSelection, List<IJoinMeta> joinMetas, Dictionary<Type, Delegate> relationActions, List<LambdaExpression> where = null, Dictionary<LambdaExpression, RowOrder> orderBy = null, int page = 1, int count = int.MaxValue) where T : class
+        {
+            ThrowIfInvalidPage(orderBy, page, count);
+            var query = _queryCache?.CachedQuery;
+            var queryParameters = _queryCache?.QueryInfo;
+            query = query ?? _queryGenerator.GenerateJoinWithCustomSelection<T>(out queryParameters, rawSelection, joinMetas, where, orderBy, page, count);
+
+            var cmd = new DotEntityDbCommand(DbOperationType.Select, query, queryParameters);
+            cmd.ProcessReader(reader =>
+            {
+                var objectList = new List<object[]>();
+                while (reader.Read())
+                {
+                    var arr = new object[reader.FieldCount];
+                    for (var i = 0; i < arr.Length; i++)
+                        arr[i] = reader[i];
+                    objectList.Add(arr);
+                }
+                return objectList;
+            });
+            DotEntityDbConnector.ExecuteCommand(cmd);
+            return cmd.GetResultAs<IList<object[]>>();
         }
 
         public virtual Tuple<int, IEnumerable<T>> DoJoinWithTotalMatches<T>(List<IJoinMeta> joinMetas, Dictionary<Type, Delegate> relationActions, List<LambdaExpression> where = null, Dictionary<LambdaExpression, RowOrder> orderBy = null, int page = 1, int count = int.MaxValue) where T : class

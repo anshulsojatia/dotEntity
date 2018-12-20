@@ -158,5 +158,23 @@ namespace DotEntity
         /// <param name="parameterValues">The parameter values to be replaced in the cached query</param>
         /// <returns>An implementation object of type <see cref="IEntitySet{T}"/></returns>
         IEntitySet<T> WithQueryCache(QueryCache cache, params object[] parameterValues);
+
+        /// <summary>
+        /// Queries the database with current where conditions but raw selection columns.
+        /// </summary>
+        /// <param name="rawSelection">A custom column selection for the database e.g. FirstName, LastName or *</param>
+        /// <param name="page">(optional) The page number of the result set. Default is 1</param>
+        /// <param name="count">(optional) The number of entities to return. Defaults to all entities</param>
+        /// <returns>A list of object arrays each item of which represent columns of individual rows in the result set</returns>
+        IList<object[]> CustomSelect(string rawSelection, int page = 1, int count = int.MaxValue);
+
+        /// <summary>
+        /// Queries the database with current where conditions but raw selection columns.
+        /// </summary>
+        /// <param name="rawSelection">A custom column selection for the database e.g. FirstName, LastName or *</param>
+        /// <param name="page">(optional) The page number of the result set. Default is 1</param>
+        /// <param name="count">(optional) The number of entities to return. Defaults to all entities</param>
+        /// <returns>A list of object arrays each item of which represent columns of individual rows in the result set</returns>
+        IList<object[]> CustomSelectNested(string rawSelection, int page = 1, int count = int.MaxValue);
     }
 }

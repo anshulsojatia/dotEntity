@@ -316,6 +316,41 @@ namespace DotEntity
             return Instance.WithQueryCache(cache, parameterValues);
         }
 
+        public IList<object[]> CustomSelect(string rawSelection, int page = 1, int count = Int32.MaxValue)
+        {
+            using (var manager = new DotEntityQueryManager(_cache))
+            {
+                return manager.DoCustomSelect(rawSelection, _whereList, _orderBy, page, count);
+            }
+        }
+
+        public IList<object[]> CustomSelectNested(string rawSelection, int page = 1, int count = Int32.MaxValue)
+        {
+            using (var manager = new DotEntityQueryManager())
+            {
+                if (_joinWhereList == null)
+                    _joinWhereList = new List<LambdaExpression>();
+
+                if (_joinOrderBy == null)
+                    _joinOrderBy = new Dictionary<LambdaExpression, RowOrder>();
+
+                //move all order by and where to these list
+                foreach (var w in _whereList)
+                    _joinWhereList.Add(w);
+
+                foreach (var o in _orderBy)
+                    _joinOrderBy.Add(o.Key, o.Value);
+
+                //always use explicit select mode for joins
+                var selectMode = DotEntityDb.SelectQueryMode;
+                DotEntityDb.SelectQueryMode = SelectQueryMode.Explicit;
+                var entities = manager.DoCustomSelect<T>(rawSelection, _joinList, _relationActions, _joinWhereList, _joinOrderBy, page, count);
+                //reset select mode
+                DotEntityDb.SelectQueryMode = selectMode;
+                return entities;
+            }
+        }
+
         public static IEntitySet<T> Just()
         {
             return Instance;
@@ -511,6 +546,7 @@ namespace DotEntity
             }
         }
 
+       
         #endregion
 
         internal static IEntitySet<T> Instance => new EntitySet<T>();

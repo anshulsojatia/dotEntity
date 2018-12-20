@@ -61,6 +61,9 @@ namespace DotEntity
         string GenerateSelect<T>(out IList<QueryInfo> parameters, List<Expression<Func<T, bool>>> where = null,
             Dictionary<Expression<Func<T, object>>, RowOrder> orderBy = null, int page = 1, int count = int.MaxValue) where T : class;
 
+        string GenerateSelectWithCustomSelection<T>(out IList<QueryInfo> parameters, string rawSelection, List<Expression<Func<T, bool>>> where = null,
+            Dictionary<Expression<Func<T, object>>, RowOrder> orderBy = null, int page = 1, int count = int.MaxValue) where T : class;
+
         string GenerateSelectWithTotalMatchingCount<T>(out IList<QueryInfo> parameters, List<Expression<Func<T, bool>>> where = null,
             Dictionary<Expression<Func<T, object>>, RowOrder> orderBy = null, int page = 1, int count = int.MaxValue) where T : class;
 
@@ -68,6 +71,9 @@ namespace DotEntity
             int page = 1, int count = int.MaxValue) where T : class;
 
         string GenerateJoinWithTotalMatchingCount<T>(out IList<QueryInfo> parameters, List<IJoinMeta> joinMetas, List<LambdaExpression> @where = null, Dictionary<LambdaExpression, RowOrder> orderBy = null,
+            int page = 1, int count = int.MaxValue) where T : class;
+
+        string GenerateJoinWithCustomSelection<T>(out IList<QueryInfo> parameters, string rawSelection, List<IJoinMeta> joinMetas, List<LambdaExpression> @where = null, Dictionary<LambdaExpression, RowOrder> orderBy = null,
             int page = 1, int count = int.MaxValue) where T : class;
 
         string Query(string query, object inParameters, out IList<QueryInfo> parameters);
