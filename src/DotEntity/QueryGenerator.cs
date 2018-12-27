@@ -730,6 +730,7 @@ namespace DotEntity
             allTypes.Add(typeof(T));
             // make the query now
             builder.Append($"SELECT {rawSelection} FROM ");
+            builder.Append($"(SELECT {QueryParserUtilities.GetSelectColumnString(allTypes, typedAliases)} FROM ");
 
             //some nested queries are required, let's get the column names (raw) for root table
             var columnNameString = QueryParserUtilities.GetSelectColumnString(new List<Type>() { typeof(T) });
@@ -759,6 +760,7 @@ namespace DotEntity
             {
                 builder.Append(" ORDER BY " + orderByString);
             }
+            builder.Append(") AS WrappedResult");
             var query = builder.ToString().Trim();
             return query + ";";
         }
