@@ -117,7 +117,7 @@ namespace DotEntity
                 var left = expression.Left as MemberExpression;
                 var propertyName = left != null ? GetAliasedPropertyName(left, _aliases) : Visit(expression.Left, out bool isProperty) as string;
                 var propertyValue = Visit(expression.Right, out bool isValueProperty);
-                var opr = GetOperator(expression.NodeType, this);
+                var opr = GetOperator(expression.NodeType, this, propertyValue);
                 AddQueryParameter("", propertyName, propertyValue, opr, propertyName, isValueProperty);
                 _isBinaryOperation = false;
             }
@@ -133,7 +133,7 @@ namespace DotEntity
                     DecrementNotCount();
                 }
                 _queryInfo.Add(new QueryInfo(true, Markers.Close));
-                _queryInfo.Add(new QueryInfo(true, GetOperator(expression.NodeType, this)));
+                _queryInfo.Add(new QueryInfo(true, GetOperator(expression.NodeType, this, true)));
                 
                 _queryInfo.Add(new QueryInfo(true, Markers.Open));
                 p = Visit(expression.Right, out isProperty);
@@ -257,7 +257,7 @@ namespace DotEntity
                 if (expression.Type == typeof(bool))
                 {
                     //we have a unary type of expression where the column itself is boolean
-                    var qOperator = GetOperator(ExpressionType.Equal, this);
+                    var qOperator = GetOperator(ExpressionType.Equal, this, true);
                     AddQueryParameter(qOperator, propertyName, true, qOperator, propertyName);
                     isProperty = false;
                     return null;
@@ -314,11 +314,11 @@ namespace DotEntity
                     var opr = "";
                     if ((bool)propertyValue)
                     {
-                        opr = GetOperator(ExpressionType.Equal, this);
+                        opr = GetOperator(ExpressionType.Equal, this, propertyValue);
                     }
                     else
                     {
-                        opr = GetOperator(ExpressionType.NotEqual, this);
+                        opr = GetOperator(ExpressionType.NotEqual, this, propertyValue);
                     }
                     AddQueryParameter("", "1", "1", opr, "1", true);
                 }
@@ -338,7 +338,7 @@ namespace DotEntity
             return queryInfo;
         }
 
-        private static string GetOperator(ExpressionType type, ExpressionTreeParser parser)
+        private static string GetOperator(ExpressionType type, ExpressionTreeParser parser, object propertyValue)
         {
             var typeToCheck = type;
             if (parser._notCount > 0)
@@ -376,9 +376,9 @@ namespace DotEntity
             switch (typeToCheck)
             {
                 case ExpressionType.Equal:
-                    return "=";
+                    return propertyValue == null ? "IS" : "=";
                 case ExpressionType.NotEqual:
-                    return "!=";
+                    return propertyValue == null ? "IS NOT" : "!=";
                 case ExpressionType.LessThan:
                     return "<";
                 case ExpressionType.LessThanOrEqual:
@@ -485,7 +485,7 @@ namespace DotEntity
                                     item.PropertyValue = $"%{item.PropertyValue}";
                                     break;
                                 default:
-                                    builder.Append($"@{item.ParameterName}");
+                                    builder.Append(item.PropertyValue == null ? "NULL" : $"@{item.ParameterName}");
                                     break;
                             }
                         }
