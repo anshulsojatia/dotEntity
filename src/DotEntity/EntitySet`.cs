@@ -374,6 +374,15 @@ namespace DotEntity
             return this;
         }
 
+        public IEntitySet<T> Join<T1>(string sourceColumnName, string destinationColumnName, Type sourceColumnType, JoinType joinType = JoinType.Inner) where T1 : class
+        {
+            if (_joinList == null)
+                _joinList = new List<IJoinMeta>();
+
+            _joinList.Add(new JoinMeta<T1>(sourceColumnName, destinationColumnName, sourceColumnType, joinType));
+            return this;
+        }
+
         IEntitySet<T> IEntitySet<T>.OrderBy(Expression<Func<T, object>> orderBy, RowOrder rowOrder)
         {
             _orderBy.Add(orderBy, rowOrder);

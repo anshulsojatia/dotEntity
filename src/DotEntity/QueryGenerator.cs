@@ -438,6 +438,14 @@ namespace DotEntity
                 {
                     sourceAlias = parentAliasUsed;
                 }
+                else if (joinMeta.SourceColumn == SourceColumn.Implicit)
+                {
+                    var sourceTableName = DotEntityDb.GetTableNameForType(joinMeta.SourceColumnType);
+                    if (!typedAliases.TryGetValue(sourceTableName, out sourceAlias))
+                    {
+                        sourceAlias = lastAliasUsed;
+                    }
+                }
                 joinBuilder.Append(
                     $"{JoinMap[joinMeta.JoinType]} {joinedTableName.ToEnclosed()} {newAlias} ON {sourceAlias}.{joinMeta.SourceColumnName.ToEnclosed()} = {newAlias}.{joinMeta.DestinationColumnName.ToEnclosed()} ");
 
@@ -550,6 +558,15 @@ namespace DotEntity
                 {
                     sourceAlias = parentAliasUsed;
                 }
+                else if (joinMeta.SourceColumn == SourceColumn.Implicit)
+                {
+                    var sourceTableName = DotEntityDb.GetTableNameForType(joinMeta.SourceColumnType);
+                    if (!typedAliases.TryGetValue(sourceTableName, out sourceAlias))
+                    {
+                        sourceAlias = lastAliasUsed;
+                    }
+                }
+
                 joinBuilder.Append(
                     $"{JoinMap[joinMeta.JoinType]} {joinedTableName.ToEnclosed()} {newAlias} ON {sourceAlias}.{joinMeta.SourceColumnName.ToEnclosed()} = {newAlias}.{joinMeta.DestinationColumnName.ToEnclosed()} ");
 
@@ -675,6 +692,14 @@ namespace DotEntity
                 if (joinMeta.SourceColumn == SourceColumn.Parent)
                 {
                     sourceAlias = parentAliasUsed;
+                }
+                else if (joinMeta.SourceColumn == SourceColumn.Implicit)
+                {
+                    var sourceTableName = DotEntityDb.GetTableNameForType(joinMeta.SourceColumnType);
+                    if (!typedAliases.TryGetValue(sourceTableName, out sourceAlias))
+                    {
+                        sourceAlias = lastAliasUsed;
+                    }
                 }
                 joinBuilder.Append(
                     $"{JoinMap[joinMeta.JoinType]} {joinedTableName.ToEnclosed()} {newAlias} ON {sourceAlias}.{joinMeta.SourceColumnName.ToEnclosed()} = {newAlias}.{joinMeta.DestinationColumnName.ToEnclosed()} ");

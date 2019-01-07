@@ -43,7 +43,11 @@ namespace DotEntity
         /// <summary>
         /// The source column in context belongs to the previous repository in chained operation
         /// </summary>
-        Chained
+        Chained,
+        /// <summary>
+        /// The source column in context has been defined implicitly
+        /// </summary>
+        Implicit
     }
 
     /// <summary>
@@ -60,6 +64,8 @@ namespace DotEntity
         SourceColumn SourceColumn { get; set; }
 
         JoinType JoinType { get; set; }
+
+        Type SourceColumnType { get; set; }
     }
 
     /// <summary>
@@ -83,11 +89,28 @@ namespace DotEntity
             JoinType = joinType;
         }
 
+        /// <summary>
+        /// Creates a new instance of <see cref="JoinMeta{T}"/>
+        /// </summary>
+        /// <param name="sourceColumnName">The column name of the source table</param>
+        /// <param name="destinationColumnName">The column name of the destination table</param>
+        /// <param name="sourceColumnType">The type of source column. This must be another type that has been joind previously</param>
+        /// <param name="joinType">(optional) The <see cref="JoinType"/> of this join. Default is <see cref="JoinType.Inner"/></param>
+        public JoinMeta(string sourceColumnName, string destinationColumnName, Type sourceColumnType, JoinType joinType = JoinType.Inner)
+        {
+            SourceColumnName = sourceColumnName;
+            DestinationColumnName = destinationColumnName;
+            SourceColumn = SourceColumn.Implicit;
+            JoinType = joinType;
+            SourceColumnType = sourceColumnType;
+        }
+
         public string SourceColumnName { get; set; }
         public string DestinationColumnName { get; set; }
         public Type OnType => typeof(T);
         public SourceColumn SourceColumn { get; set; }
         public JoinType JoinType { get; set; }
+        public Type SourceColumnType { get; set; }
     }
 
 }
