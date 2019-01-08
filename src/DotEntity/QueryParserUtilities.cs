@@ -76,7 +76,7 @@ namespace DotEntity
             return dict;
         }
 
-        public static string GetSelectColumnString(IList<Type> types, Dictionary<string, string> typedAliases = null, params string[] exclude)
+        public static string GetSelectColumnString(IList<Type> types, Dictionary<string, List<string>> typedAliases = null, params string[] exclude)
         {
             Throw.IfArgumentNull(types, nameof(types));
             
@@ -86,15 +86,24 @@ namespace DotEntity
             return string.Join(",", types.Select(type =>
             {
                 var props = type.GetDatabaseUsableProperties();
-                var columns = props.Select(p => p.Name).Where(s => !exclude.Contains(s));
+                var columns = props.Select(p => p.Name).Where(s => !exclude.Contains(s)).ToList();
                 if (typedAliases == null)
                     return string.Join(",", columns);
                 var tableName = type.Name;
-                string prefix = "";
-                typedAliases.TryGetValue(tableName, out prefix);
-                if (!string.IsNullOrEmpty(prefix))
-                    prefix = prefix + ".";
-                return string.Join(",", columns.Select(x => prefix + x.ToEnclosed() + " AS " + GetColumnAliasName(tableName, x)));
+                typedAliases.TryGetValue(tableName, out List<string> prefixes);
+                if(prefixes == null)
+                    return string.Join(",", columns);
+                var builder = new List<string>();
+                foreach (var p in prefixes)
+                {
+                    if (!string.IsNullOrEmpty(p))
+                    {
+                        var prefix = p + ".";
+                        builder.Add(string.Join(",",
+                            columns.Select(x => prefix + x.ToEnclosed() + " AS " + GetColumnAliasName(tableName, x))));
+                    }
+                }
+                return string.Join(",", builder);
             }));
         }
 

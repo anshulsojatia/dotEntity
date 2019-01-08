@@ -160,5 +160,10 @@ namespace DotEntity
             var ex = (TException)Activator.CreateInstance(typeof(TException), messageInfo.Parameters);
             throw ex;
         }
+
+        public static void IfInvalidValue(bool invalidValue, string parameterName)
+        {
+            It<NotSupportedException>(invalidValue, () => new ThrowInfo($"The value for parameter {parameterName} is not valid"));
+        }
     } 
 }

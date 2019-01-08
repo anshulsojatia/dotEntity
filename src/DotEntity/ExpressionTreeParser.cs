@@ -61,10 +61,10 @@ namespace DotEntity
 
         public IList<QueryInfo> QueryInfoList => _queryInfo;
 
-        private Dictionary<string, string> _aliases = null;
+        private Dictionary<string, List<string>> _aliases = null;
 
         private IList<QueryInfo> _previousQueryInfo;
-        public ExpressionTreeParser(Dictionary<string, string> aliases = null, IList<QueryInfo> queryInfo = null)
+        public ExpressionTreeParser(Dictionary<string, List<string>> aliases = null, IList<QueryInfo> queryInfo = null)
         {
             _aliases = aliases;
             _queryInfo = new List<QueryInfo>();
@@ -538,7 +538,7 @@ namespace DotEntity
             return parameterName;
         }
 
-        private static string GetAliasedPropertyName(MemberExpression memberExpression, Dictionary<string, string> aliases)
+        private static string GetAliasedPropertyName(MemberExpression memberExpression, Dictionary<string, List<string>> aliases)
         {
             var propertyName = memberExpression.Member.Name;
             if (aliases == null)
@@ -547,8 +547,10 @@ namespace DotEntity
             var tableName = DotEntityDb.GetTableNameForType(memberExpression.Expression.Type);
             propertyName = memberExpression.Member.Name;
             var prefix = tableName;
-            aliases?.TryGetValue(tableName, out prefix);
-
+            if (aliases.TryGetValue(tableName, out List<string> prefixes))
+            {
+                prefix = prefixes.FirstOrDefault() ?? tableName;
+            }
             return $"{prefix}.{propertyName}";
         }
 

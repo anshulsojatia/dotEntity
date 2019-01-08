@@ -42,14 +42,14 @@ namespace DotEntity
 
         public string[] Columns => RowInformation.Keys.ToArray();
 
-        public object this[string columnName]
+        public object this[string columnName, int instanceIndex = 0]
         {
             get
             {
-                RowInformation.TryGetValue(columnName, out object value);
+                RowInformation.TryGetValue($"{instanceIndex}:{columnName}", out object value);
                 return value;
             }
-            set => RowInformation[columnName] = value;
+            set => RowInformation[$"{instanceIndex}:{columnName}"] = value;
         }
 
         public object this[int columnIndex] => RowInformation[Columns[columnIndex]];

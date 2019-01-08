@@ -141,26 +141,39 @@ namespace DotEntity.Sqlite
             int page = 1, int count = int.MaxValue)
         {
             parameters = new List<QueryInfo>();
-            var typedAliases = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            var typedAliases = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
             var builder = new StringBuilder();
             var tableName = DotEntityDb.GetTableNameForType<T>();
             var parentAliasUsed = "t1";
             var lastAliasUsed = parentAliasUsed;
-            typedAliases.Add(typeof(T).Name, lastAliasUsed);
+            typedAliases.Add(typeof(T).Name, new List<string>() { lastAliasUsed });
 
             var joinBuilder = new StringBuilder();
             foreach (var joinMeta in joinMetas)
             {
                 var joinedTableName = DotEntityDb.GetTableNameForType(joinMeta.OnType);
-                if (!typedAliases.TryGetValue(joinedTableName, out string newAlias))
+                var newAlias = $"t{typedAliases.SelectMany(x => x.Value).Count() + 1}";
+                if (typedAliases.ContainsKey(joinedTableName))
+                    typedAliases[joinedTableName].Add(newAlias);
+                else
                 {
-                    newAlias = $"t{typedAliases.Count + 1}";
+                    typedAliases.Add($"{joinedTableName}", new List<string>() { newAlias });
                 }
-                typedAliases.Add($"{joinedTableName}", newAlias);
+
                 var sourceAlias = lastAliasUsed;
                 if (joinMeta.SourceColumn == SourceColumn.Parent)
                 {
                     sourceAlias = parentAliasUsed;
+                }
+                else if (joinMeta.SourceColumn == SourceColumn.Implicit)
+                {
+                    var sourceTableName = DotEntityDb.GetTableNameForType(joinMeta.SourceColumnType);
+                    if (!typedAliases.TryGetValue(sourceTableName, out List<string> availableAliases))
+                    {
+                        sourceAlias = lastAliasUsed;
+                    }
+                    else
+                        sourceAlias = availableAliases?[joinMeta.SourceColumnAppearanceOrder] ?? lastAliasUsed;
                 }
                 joinBuilder.Append(
                     $"{JoinMap[joinMeta.JoinType]} {joinedTableName.ToEnclosed()} {newAlias} ON {sourceAlias}.{joinMeta.SourceColumnName.ToEnclosed()} = {newAlias}.{joinMeta.DestinationColumnName.ToEnclosed()} ");

@@ -76,8 +76,9 @@ namespace DotEntity
         /// <param name="destinationColumnName">The column name of the destination table</param>
         /// <param name="sourceColumnType">The type of source column. This must be another type that has been joind previously</param>
         /// <param name="joinType">(optional) The <see cref="JoinType"/> of this join. Default is <see cref="JoinType.Inner"/></param>
+        /// <param name="sourceColumnAppearanceOrder">(optional) The order of source column in the query if the source column type has been used multiple times. Default is first appearance.</param>
         /// <returns>An implementation object of type <see cref="IEntitySet{T}"/></returns>
-        IEntitySet<T> Join<T1>(string sourceColumnName, string destinationColumnName, Type sourceColumnType, JoinType joinType = JoinType.Inner) where T1 : class;
+        IEntitySet<T> Join<T1>(string sourceColumnName, string destinationColumnName, Type sourceColumnType, JoinType joinType = JoinType.Inner, int sourceColumnAppearanceOrder = 0) where T1 : class;
 
         /// <summary>
         /// Joins the current <see cref="IEntitySet{T}" /> with another entity of <typeparamref name="T1"/> to produce a nested result

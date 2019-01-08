@@ -80,13 +80,13 @@ namespace DotEntity
             return tArray;
         }
 
-        public void SetProperties(T instance, DataReaderRow row, string[] columnNames)
+        public void SetProperties(T instance, DataReaderRow row, string[] columnNames, int instanceIndex = 0)
         {
             for (var i = 0; i < columnNames.Length; i++)
             {
                 var fieldName = columnNames[i];
                 //if (!_setterMap.ContainsKey(fieldName)) continue;
-                var fieldValue = row[_typeofT.Name + "." + fieldName];
+                var fieldValue = row[_typeofT.Name + "." + fieldName, instanceIndex];
                 _setter.Set(instance, fieldName, fieldValue);
             }
         }
@@ -111,35 +111,22 @@ namespace DotEntity
             var tInstances = new List<T>();
             //make deserializers for each of relation types
             var deserializers = new Dictionary<Type, IDataDeserializer>();
-            var columnsToSkip = new Dictionary<Type, int> { { _typeofT, -1 } };
+            
             var localObjectCache = new Dictionary<string, object>();
-
-            foreach (var jm in relationActions)
-            {
-                var serializerObject = (IDataDeserializer)GenericInvoker.InvokeProperty(null, typeof(DataDeserializer<>), jm.Key, "Instance");
-                deserializers.Add(jm.Key, serializerObject);
-                columnsToSkip.Add(jm.Key, -1);
-            }
+            if (relationActions != null)
+                foreach (var jm in relationActions)
+                {
+                    var serializerObject = (IDataDeserializer)GenericInvoker.InvokeProperty(null, typeof(DataDeserializer<>), jm.Key, "Instance");
+                    deserializers.Add(jm.Key, serializerObject);
+                }
 
             var rowIndex = 0;
-            DataReaderRow prevRow = null;
-            var rows = reader.GetDataReaderRows(columnsToSkip); //all rows
-            var lastProcessedObjects = new Dictionary<Type, object>();
-
-            void AddOrUpdateLastProcessObject(Type type, object obj)
-            {
-                if (lastProcessedObjects.ContainsKey(type))
-                    lastProcessedObjects[type] = obj;
-                else
-                {
-                    lastProcessedObjects.Add(type, obj);
-                }
-            }
+            var rows = reader.GetDataReaderRows(); //all rows
 
             while (rowIndex < rows.Count)
             {
                 var row = rows[rowIndex];
-                var tInstance = GetAppropriateInstance(_typeofT, prevRow, row, this, ref localObjectCache);
+                var tInstance = GetAppropriateInstance(_typeofT, row, this, ref localObjectCache);
                 if (tInstance == null)
                     continue;
                 if (!tInstances.Contains(tInstance))
@@ -150,26 +137,27 @@ namespace DotEntity
                     //then for all the child instances
                     foreach (var ds in deserializers)
                     {
-                        var childInstance = GetAppropriateInstance(ds.Key, prevRow, row, ds.Value, ref localObjectCache);
-                        if (childInstance == null)
-                            continue;
+                        var instanceCount = joinMetas.Count(x => x.OnType == ds.Key);
+                        for (var i = 0; i < instanceCount; i++)
+                        {
+                            var childInstance = GetAppropriateInstance(ds.Key, row, ds.Value, ref localObjectCache, i);
+                            if (childInstance == null)
+                                continue;
 
-                        //invoke the relation to bind the instances if required
-                        relationActions[ds.Key].DynamicInvoke(tInstance, childInstance);
+                            //invoke the relation to bind the instances if required
+                            relationActions[ds.Key].DynamicInvoke(tInstance, childInstance);
+                        }
                     }
                 }
-
-                prevRow = row;
                 rowIndex++;
             }
 
             return tInstances.AsEnumerable();
         }
 
-        private object GetAppropriateInstance(Type instanceType, DataReaderRow prevDataRow,
-            DataReaderRow currentDataRow, IDataDeserializer deserializer, ref Dictionary<string, object> localCache)
+        private object GetAppropriateInstance(Type instanceType, DataReaderRow currentDataRow, IDataDeserializer deserializer, ref Dictionary<string, object> localCache, int instanceIndex = 0)
         {
-            const string localObjectKey = "{0}.{1}.{2}"; //<Type>.<Key>.<NUM>
+            const string localObjectKey = "{0}.{1}.{2}"; //<Type>.<Key>.<ID>
 
             var columns = deserializer.GetColumns();
             var typedColumns = deserializer.GetTypedColumnNames(columns, instanceType);
@@ -181,7 +169,7 @@ namespace DotEntity
             //let's check if have this object in cache
             var keyColumn = deserializer.GetKeyColumn();
             var cacheKey = string.Format(localObjectKey, instanceType.Name, keyColumn,
-                currentDataRow[instanceType.Name + "." + keyColumn]);
+                currentDataRow[instanceType.Name + "." + keyColumn, instanceIndex]);
 
             if (!localCache.TryGetValue(cacheKey, out object newInstance))
             {
@@ -189,41 +177,10 @@ namespace DotEntity
                 newInstance = Instantiator.GetInstance(instanceType);
 
                 //assign properties
-                GenericInvoker.Invoke(deserializer, "SetProperties", newInstance, currentDataRow, columns);
+                GenericInvoker.Invoke(deserializer, "SetProperties", newInstance, currentDataRow, columns, instanceIndex);
                 localCache.Add(cacheKey, newInstance);
             }
             return newInstance;
-        }
-
-        private bool CreateInstanceIfRequired(Type instanceType, DataReaderRow prevDataRow, DataReaderRow currentDataRow, IDataDeserializer deserializer, int skipColumns, out object newInstance, ref Dictionary<string, object> localCache)
-        {
-            const string localObjectKey = "{0}.{1}.{2}"; //<Type>.<Key>.<NUM>
-
-            newInstance = null;
-            var columns = deserializer.GetColumns();
-            var typedColumns = deserializer.GetTypedColumnNames(columns, instanceType);
-            if (DataReaderRow.AreSameRowsForColumns(prevDataRow, currentDataRow, typedColumns, skipColumns))
-                return false;
-
-            //are all columns of current row null
-            if (DataReaderRow.AreAllColumnsNull(currentDataRow, typedColumns, skipColumns))
-                return false;
-
-            //let's check if have this object in cache
-            var keyColumn = deserializer.GetKeyColumn();
-            var cacheKey = string.Format(localObjectKey, instanceType.Name, keyColumn,
-                currentDataRow[_typeofT.Name + "." + keyColumn]);
-
-            if (localCache.TryGetValue(cacheKey, out newInstance))
-                return true;
-
-            //we can create instance
-            newInstance = Instantiator.GetInstance(instanceType);
-
-            //assign properties
-            GenericInvoker.Invoke(deserializer, "SetProperties", newInstance, currentDataRow, columns);
-            localCache.Add(cacheKey, newInstance);
-            return true;
         }
 
         internal void SetPropertyAs<TType>(T instance, string fieldName, object value)

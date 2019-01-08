@@ -65,30 +65,32 @@ namespace DotEntity.Extensions
             return dataReaderRows;
         }
 
-        internal static List<DataReaderRow> GetDataReaderRows(this IDataReader dataReader, Dictionary<Type, int> columnsWithSkipCount)
+        internal static List<DataReaderRow> GetDataReaderRows(this IDataReader dataReader)
         {
             var dataReaderRows = new List<DataReaderRow>();
-            var columnNames = new List<string>();
+            var columnNames = new Dictionary<string, List<int>>(); //stores column name and the indexes at which they appear
 
             for (var i = 0; i < dataReader.FieldCount; i++)
             {
                 var fieldName = dataReader.GetName(i).ReplaceFirst("_", ".");
-                columnNames.Add(fieldName);
-            }
-            while (columnsWithSkipCount.Any(x => x.Value == -1))
-            {
-                var item = columnsWithSkipCount.First(x => x.Value == -1);
-                columnsWithSkipCount[item.Key] = columnNames.FindIndex(x => x.StartsWith(item.Key.Name + "."));
+                if (columnNames.ContainsKey(fieldName))
+                    columnNames[fieldName].Add(i);
+                else
+                {
+                    columnNames.Add(fieldName, new List<int>() {i});
+                }
             }
 
             while (dataReader.Read())
             {
                 var row = new DataReaderRow();
-
-                for (var i = 0; i < columnNames.Count; i++)
+                foreach (var cDetails in columnNames)
                 {
-                    var c = columnNames[i];
-                    row[c] = dataReader[i] ?? DBNull.Value;
+                    var columnName = cDetails.Key;
+                    for (var instanceIndex = 0; instanceIndex < cDetails.Value.Count; instanceIndex++)
+                    {
+                        row[columnName, instanceIndex] = dataReader[cDetails.Value[instanceIndex]] ?? DBNull.Value;
+                    }
                 }
                 dataReaderRows.Add(row);
             }

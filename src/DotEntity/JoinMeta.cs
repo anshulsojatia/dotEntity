@@ -66,6 +66,8 @@ namespace DotEntity
         JoinType JoinType { get; set; }
 
         Type SourceColumnType { get; set; }
+
+        int SourceColumnAppearanceOrder { get; set; }
     }
 
     /// <summary>
@@ -96,13 +98,16 @@ namespace DotEntity
         /// <param name="destinationColumnName">The column name of the destination table</param>
         /// <param name="sourceColumnType">The type of source column. This must be another type that has been joind previously</param>
         /// <param name="joinType">(optional) The <see cref="JoinType"/> of this join. Default is <see cref="JoinType.Inner"/></param>
-        public JoinMeta(string sourceColumnName, string destinationColumnName, Type sourceColumnType, JoinType joinType = JoinType.Inner)
+        /// <param name="sourceColumnAppearanceOrder">(optional) The source column which is being used in case same source column type is used multiple times in the query</param>
+        public JoinMeta(string sourceColumnName, string destinationColumnName, Type sourceColumnType, JoinType joinType = JoinType.Inner, int sourceColumnAppearanceOrder = 0)
         {
+            Throw.IfInvalidValue(sourceColumnAppearanceOrder < 0, nameof(sourceColumnAppearanceOrder));
             SourceColumnName = sourceColumnName;
             DestinationColumnName = destinationColumnName;
             SourceColumn = SourceColumn.Implicit;
             JoinType = joinType;
             SourceColumnType = sourceColumnType;
+            SourceColumnAppearanceOrder = sourceColumnAppearanceOrder;
         }
 
         public string SourceColumnName { get; set; }
@@ -111,6 +116,7 @@ namespace DotEntity
         public SourceColumn SourceColumn { get; set; }
         public JoinType JoinType { get; set; }
         public Type SourceColumnType { get; set; }
+        public int SourceColumnAppearanceOrder { get; set; }
     }
 
 }
