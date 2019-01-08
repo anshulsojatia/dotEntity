@@ -114,11 +114,11 @@ namespace DotEntity
             var columnsToSkip = new Dictionary<Type, int> { { _typeofT, -1 } };
             var localObjectCache = new Dictionary<string, object>();
 
-            foreach (var jm in joinMetas)
+            foreach (var jm in relationActions)
             {
-                var serializerObject = (IDataDeserializer)GenericInvoker.InvokeProperty(null, typeof(DataDeserializer<>), jm.OnType, "Instance");
-                deserializers.Add(jm.OnType, serializerObject);
-                columnsToSkip.Add(jm.OnType, -1);
+                var serializerObject = (IDataDeserializer)GenericInvoker.InvokeProperty(null, typeof(DataDeserializer<>), jm.Key, "Instance");
+                deserializers.Add(jm.Key, serializerObject);
+                columnsToSkip.Add(jm.Key, -1);
             }
 
             var rowIndex = 0;
@@ -150,9 +150,6 @@ namespace DotEntity
                     //then for all the child instances
                     foreach (var ds in deserializers)
                     {
-                        if (!relationActions.ContainsKey(ds.Key))
-                            continue;
-
                         var childInstance = GetAppropriateInstance(ds.Key, prevRow, row, ds.Value, ref localObjectCache);
                         if (childInstance == null)
                             continue;
