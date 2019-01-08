@@ -46,10 +46,20 @@ namespace DotEntity
         {
             get
             {
-                RowInformation.TryGetValue($"{instanceIndex}:{columnName}", out object value);
+                object value = null;
+                if (instanceIndex == 0)
+                    RowInformation.TryGetValue($"{columnName}", out value);
+                else
+                    RowInformation.TryGetValue($"{instanceIndex}:{columnName}", out value);
                 return value;
             }
-            set => RowInformation[$"{instanceIndex}:{columnName}"] = value;
+            set
+            {
+                if (instanceIndex == 0)
+                    RowInformation[$"{columnName}"] = value;
+                else
+                    RowInformation[$"{instanceIndex}:{columnName}"] = value;
+            }
         }
 
         public object this[int columnIndex] => RowInformation[Columns[columnIndex]];
