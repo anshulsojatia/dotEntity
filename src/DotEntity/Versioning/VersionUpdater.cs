@@ -118,7 +118,7 @@ namespace DotEntity.Versioning
 
                     availableVersion.Downgrade(transaction);
                     //remove the version
-                    EntitySet<DotEntityVersion>.Delete(x => x.VersionKey == vKey, transaction);
+                    EntitySet<DotEntityVersion>.Delete(x => x.VersionKey == vKey && x.ContextName == _callingContextName, transaction);
                 }
                 (transaction as DotEntityTransaction)?.CommitInternal();
             }
