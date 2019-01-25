@@ -26,6 +26,7 @@
  * visit http://dotentity.net/licensing
  */
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -33,9 +34,9 @@ namespace DotEntity.Reflection
 {
     public class GenericInvoker
     {
-        private static readonly Dictionary<Type, MethodInfo> InvokeMethods = new Dictionary<Type, MethodInfo>();
-        private static readonly Dictionary<Type, PropertyInfo> InvokeProperties = new Dictionary<Type, PropertyInfo>();
-        private static readonly Dictionary<Type, FieldInfo> InvokeFields = new Dictionary<Type, FieldInfo>();
+        private static readonly ConcurrentDictionary<Type, MethodInfo> InvokeMethods = new ConcurrentDictionary<Type, MethodInfo>();
+        private static readonly ConcurrentDictionary<Type, PropertyInfo> InvokeProperties = new ConcurrentDictionary<Type, PropertyInfo>();
+        private static readonly ConcurrentDictionary<Type, FieldInfo> InvokeFields = new ConcurrentDictionary<Type, FieldInfo>();
 
         public static object Invoke(object instance, Type baseType,  Type genericType, string methodName, params object[] parameters)
         {
@@ -44,7 +45,7 @@ namespace DotEntity.Reflection
 
             var genericTypeInstance = baseType.MakeGenericType(genericType);
             method = genericTypeInstance.GetMethod(methodName);
-            InvokeMethods.Add(genericType, method);
+            InvokeMethods.TryAdd(genericType, method);
             return method.Invoke(instance, parameters);
         }
 
@@ -64,7 +65,7 @@ namespace DotEntity.Reflection
 
             Throw.IfObjectNull(property, propertyName);
 
-            InvokeProperties.Add(genericType, property);
+            InvokeProperties.TryAdd(genericType, property);
             return property.GetValue(instance, index);
         }
 
@@ -78,7 +79,7 @@ namespace DotEntity.Reflection
 
             Throw.IfObjectNull(fieldInfo, fieldName);
 
-            InvokeFields.Add(genericType, fieldInfo);
+            InvokeFields.TryAdd(genericType, fieldInfo);
             return fieldInfo.GetValue(instance);
         }
 
