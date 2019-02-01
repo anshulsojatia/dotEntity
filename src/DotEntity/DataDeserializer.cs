@@ -138,6 +138,11 @@ namespace DotEntity
                     foreach (var ds in deserializers)
                     {
                         var instanceCount = joinMetas.Count(x => x.OnType == ds.Key);
+                        //in case a table is joined with it self, the first index will have to be skipped,
+                        //otherwise the root table's instance will be returned instead of joined table.
+                        if (instanceCount > 0 && ds.Key == _typeofT)
+                            instanceCount++;
+
                         for (var i = 0; i < instanceCount; i++)
                         {
                             var childInstance = GetAppropriateInstance(ds.Key, row, ds.Value, ref localObjectCache, i);
