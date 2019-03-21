@@ -31,7 +31,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
                            "\t [ProductName] NVARCHAR(MAX) NOT NULL," + Environment.NewLine +
                            "\t [ProductDescription] NVARCHAR(MAX) NULL," + Environment.NewLine +
                            "\t [DateCreated] DATETIME NOT NULL," + Environment.NewLine +
-                           "\t [Price] NUMERIC(18,2) NOT NULL," + Environment.NewLine +
+                           "\t [Price] NUMERIC(18,5) NOT NULL," + Environment.NewLine +
                            "\t [IsActive] BIT NOT NULL," + Environment.NewLine +
                            "PRIMARY KEY CLUSTERED ([Id] ASC));";
             Assert.AreEqual(expected, sql);
@@ -48,7 +48,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
                            "\t [ProductName] NVARCHAR(MAX) NOT NULL," + Environment.NewLine +
                            "\t [ProductDescription] NVARCHAR(MAX) NULL," + Environment.NewLine +
                            "\t [DateCreated] DATETIME NOT NULL," + Environment.NewLine +
-                           "\t [Price] NUMERIC(18,2) NOT NULL," + Environment.NewLine +
+                           "\t [Price] NUMERIC(18,5) NOT NULL," + Environment.NewLine +
                            "\t [IsActive] BIT NOT NULL," + Environment.NewLine +
                            "PRIMARY KEY CLUSTERED ([Id] ASC));";
             Assert.AreEqual(expected, sql);
