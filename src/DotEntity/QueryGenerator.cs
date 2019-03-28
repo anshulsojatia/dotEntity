@@ -498,7 +498,6 @@ namespace DotEntity
             if (paginatedSelect != string.Empty)
             {
                 paginatedSelect = "," + paginatedSelect;
-                orderByString = string.Empty;
             }
             var allTypes = joinMetas.Select(x => x.OnType).Distinct().ToList();
             allTypes.Add(typeof(T));
@@ -624,7 +623,6 @@ namespace DotEntity
             if (paginatedSelect != string.Empty)
             {
                 paginatedSelect = "," + paginatedSelect;
-                orderByString = string.Empty;
             }
             var allTypes = joinMetas.Select(x => x.OnType).Distinct().ToList();
             allTypes.Add(typeof(T));
