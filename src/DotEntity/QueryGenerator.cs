@@ -494,7 +494,7 @@ namespace DotEntity
                 orderByString = string.Join(", ", orderByStringBuilder).Trim(',');
             }
 
-            var paginatedSelect = PaginateOrderByString(orderByString, page, count, out string newWhereString);
+            var paginatedSelect = PaginateOrderByString(orderByString, page, count, out string newWhereString, true);
             if (paginatedSelect != string.Empty)
             {
                 paginatedSelect = "," + paginatedSelect;
@@ -502,12 +502,13 @@ namespace DotEntity
             var allTypes = joinMetas.Select(x => x.OnType).Distinct().ToList();
             allTypes.Add(typeof(T));
             // make the query now
-            builder.Append($"SELECT {QueryParserUtilities.GetSelectColumnString(allTypes, typedAliases)} FROM ");
+            builder.Append($"SELECT * FROM ");
+            builder.Append($"(SELECT {QueryParserUtilities.GetSelectColumnString(allTypes, typedAliases)}{paginatedSelect} FROM ");
 
             //some nested queries are required, let's get the column names (raw) for root table
             var columnNameString = QueryParserUtilities.GetSelectColumnString(new List<Type>() { typeof(T) });
             //make the internal query that'll perform the pagination based on root table
-            builder.Append($"(SELECT {columnNameString} FROM (SELECT {columnNameString}{paginatedSelect} FROM ");
+            builder.Append($"(SELECT {columnNameString} FROM ");
             if (!string.IsNullOrEmpty(rootTypeWhereString))
             {
                 rootTypeWhereString = $" WHERE {rootTypeWhereString} ";
@@ -517,7 +518,7 @@ namespace DotEntity
                 newWhereString = $" WHERE {newWhereString} ";
             }
             builder.Append(tableName.ToEnclosed() +
-                       $" {parentAliasUsed}{rootTypeWhereString}) AS __PAGINATEDRESULT__ {newWhereString}) AS {parentAliasUsed} ");
+                       $" {parentAliasUsed}{rootTypeWhereString}) AS {parentAliasUsed} ");
 
 
             //join
@@ -528,10 +529,7 @@ namespace DotEntity
                 builder.Append(" WHERE " + whereString);
             }
 
-            if (!string.IsNullOrEmpty(orderByString))
-            {
-                builder.Append(" ORDER BY " + orderByString);
-            }
+            builder.Append($") AS {parentAliasUsed}{newWhereString}");
             var query = builder.ToString().Trim();
             return query + ";";
         }
@@ -619,7 +617,7 @@ namespace DotEntity
                 orderByString = string.Join(", ", orderByStringBuilder).Trim(',');
             }
 
-            var paginatedSelect = PaginateOrderByString(orderByString, page, count, out string newWhereString);
+            var paginatedSelect = PaginateOrderByString(orderByString, page, count, out string newWhereString, true);
             if (paginatedSelect != string.Empty)
             {
                 paginatedSelect = "," + paginatedSelect;
@@ -627,12 +625,13 @@ namespace DotEntity
             var allTypes = joinMetas.Select(x => x.OnType).Distinct().ToList();
             allTypes.Add(typeof(T));
             // make the query now
-            builder.Append($"SELECT {QueryParserUtilities.GetSelectColumnString(allTypes, typedAliases)} FROM ");
+            builder.Append($"SELECT * FROM ");
+            builder.Append($"(SELECT {QueryParserUtilities.GetSelectColumnString(allTypes, typedAliases)}{paginatedSelect} FROM ");
 
             //some nested queries are required, let's get the column names (raw) for root table
             var columnNameString = QueryParserUtilities.GetSelectColumnString(new List<Type>() { typeof(T) });
             //make the internal query that'll perform the pagination based on root table
-            builder.Append($"(SELECT {columnNameString} FROM (SELECT {columnNameString}{paginatedSelect} FROM ");
+            builder.Append($"(SELECT {columnNameString} FROM ");
             if (!string.IsNullOrEmpty(rootTypeWhereString))
             {
                 rootTypeWhereString = $" WHERE {rootTypeWhereString} ";
@@ -642,7 +641,7 @@ namespace DotEntity
                 newWhereString = $" WHERE {newWhereString} ";
             }
             builder.Append(tableName.ToEnclosed() +
-                           $" {parentAliasUsed}{rootTypeWhereString}) AS __PAGINATEDRESULT__ {newWhereString}) AS {parentAliasUsed} ");
+                           $" {parentAliasUsed}{rootTypeWhereString}) AS {parentAliasUsed} ");
 
 
             //join
@@ -653,10 +652,7 @@ namespace DotEntity
                 builder.Append(" WHERE " + whereString);
             }
 
-            if (!string.IsNullOrEmpty(orderByString))
-            {
-                builder.Append(" ORDER BY " + orderByString);
-            }
+            builder.Append($") AS {parentAliasUsed}{newWhereString}");
             //now thecount query
             builder.Append(";" + Environment.NewLine);
             var rootIdColumnName = $"{parentAliasUsed}.{typeof(T).GetKeyColumnName().ToEnclosed()}";
@@ -854,7 +850,7 @@ namespace DotEntity
             return queryParameters;
         }
 
-        private static string PaginateOrderByString(string orderByString, int page, int count, out string newWhereString)
+        private static string PaginateOrderByString(string orderByString, int page, int count, out string newWhereString, bool useDenseRank = false)
         {
             if (page > 1 || count < int.MaxValue)
             {
@@ -863,7 +859,7 @@ namespace DotEntity
                 var start = (page - 1) * count; //0
                 var end = start + count + 1; //16
                 newWhereString = $"{rowNumVariable} > {start} AND {rowNumVariable} < {end}"; //1-15
-                return $"ROW_NUMBER() OVER (ORDER BY {orderByString}) AS {rowNumVariable}";
+                return (useDenseRank ? "DENSE_RANK()" : "ROW_NUMBER()") + $" OVER (ORDER BY {orderByString}) AS {rowNumVariable}";
             }
             return newWhereString = string.Empty;
         }
