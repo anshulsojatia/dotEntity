@@ -501,9 +501,14 @@ namespace DotEntity
             }
             var allTypes = joinMetas.Select(x => x.OnType).Distinct().ToList();
             allTypes.Add(typeof(T));
-            // make the query now
-            builder.Append($"SELECT * FROM ");
-            builder.Append($"(SELECT {QueryParserUtilities.GetSelectColumnString(allTypes, typedAliases)}{paginatedSelect} FROM ");
+
+            if (paginatedSelect != string.Empty)
+            {
+                // make the query now
+                builder.Append($"SELECT * FROM (");
+            }
+           
+            builder.Append($"SELECT {QueryParserUtilities.GetSelectColumnString(allTypes, typedAliases)}{paginatedSelect} FROM ");
 
             //some nested queries are required, let's get the column names (raw) for root table
             var columnNameString = QueryParserUtilities.GetSelectColumnString(new List<Type>() { typeof(T) });
@@ -529,7 +534,15 @@ namespace DotEntity
                 builder.Append(" WHERE " + whereString);
             }
 
-            builder.Append($") AS {parentAliasUsed}{newWhereString}");
+            if (paginatedSelect != string.Empty)
+                builder.Append($") AS {parentAliasUsed}{newWhereString}");
+            else
+            {
+                if (!string.IsNullOrEmpty(orderByString))
+                {
+                    builder.Append(" ORDER BY " + orderByString);
+                }
+            }
             var query = builder.ToString().Trim();
             return query + ";";
         }
@@ -625,8 +638,13 @@ namespace DotEntity
             var allTypes = joinMetas.Select(x => x.OnType).Distinct().ToList();
             allTypes.Add(typeof(T));
             // make the query now
-            builder.Append($"SELECT * FROM ");
-            builder.Append($"(SELECT {QueryParserUtilities.GetSelectColumnString(allTypes, typedAliases)}{paginatedSelect} FROM ");
+            if (paginatedSelect != string.Empty)
+            {
+                // make the query now
+                builder.Append($"SELECT * FROM (");
+            }
+
+            builder.Append($"SELECT {QueryParserUtilities.GetSelectColumnString(allTypes, typedAliases)}{paginatedSelect} FROM ");
 
             //some nested queries are required, let's get the column names (raw) for root table
             var columnNameString = QueryParserUtilities.GetSelectColumnString(new List<Type>() { typeof(T) });
@@ -652,7 +670,15 @@ namespace DotEntity
                 builder.Append(" WHERE " + whereString);
             }
 
-            builder.Append($") AS {parentAliasUsed}{newWhereString}");
+            if (paginatedSelect != string.Empty)
+                builder.Append($") AS {parentAliasUsed}{newWhereString}");
+            else
+            {
+                if (!string.IsNullOrEmpty(orderByString))
+                {
+                    builder.Append(" ORDER BY " + orderByString);
+                }
+            }
             //now thecount query
             builder.Append(";" + Environment.NewLine);
             var rootIdColumnName = $"{parentAliasUsed}.{typeof(T).GetKeyColumnName().ToEnclosed()}";
