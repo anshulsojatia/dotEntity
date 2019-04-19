@@ -168,7 +168,7 @@ namespace DotEntity
             var typedColumns = deserializer.GetTypedColumnNames(columns, instanceType);
 
             //are all columns of current row null
-            if (DataReaderRow.AreAllColumnsNull(currentDataRow, typedColumns, 0))
+            if (DataReaderRow.AreAllColumnsNull(currentDataRow, typedColumns, instanceIndex, 0))
                 return null;
 
             //let's check if have this object in cache

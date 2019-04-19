@@ -84,10 +84,10 @@ namespace DotEntity
             return true;
         }
 
-        public static bool AreAllColumnsNull(DataReaderRow row, string[] columnNames, int skipColumns)
+        public static bool AreAllColumnsNull(DataReaderRow row, string[] columnNames, int instanceIndex, int skipColumns)
         {
             foreach (var columnName in columnNames)
-                if (row[columnName] != DBNull.Value)
+                if (row[columnName, instanceIndex] != DBNull.Value)
                     return false;
 
             return true;
