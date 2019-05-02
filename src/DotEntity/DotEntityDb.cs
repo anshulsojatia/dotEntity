@@ -91,7 +91,7 @@ namespace DotEntity
 
         public static string GetTableNameForType(Type type)
         {
-            return GlobalTableNamePrefix + (EntityTableNames.ContainsKey(type) ? EntityTableNames[type] : type.Name);
+            return EntityTableNames.ContainsKey(type) ? EntityTableNames[type] : (GlobalTableNamePrefix + type.Name);
         }
 
         private static ConcurrentDictionary<string, Queue<IDatabaseVersion>> _databaseVersions;
