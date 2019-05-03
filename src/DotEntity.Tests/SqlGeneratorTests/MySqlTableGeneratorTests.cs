@@ -32,7 +32,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
                            "\t `ProductName` TEXT NOT NULL," + Environment.NewLine +
                            "\t `ProductDescription` TEXT NULL," + Environment.NewLine +
                            "\t `DateCreated` DATETIME NOT NULL," + Environment.NewLine +
-                           "\t `Price` NUMERIC(18,0) NOT NULL," + Environment.NewLine +
+                           "\t `Price` NUMERIC(18,5) NOT NULL," + Environment.NewLine +
                            "\t `IsActive` TINYINT(1) NOT NULL," + Environment.NewLine +
                            "PRIMARY KEY (`Id`));";
             Assert.AreEqual(expected, sql);

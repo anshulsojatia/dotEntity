@@ -282,7 +282,7 @@ namespace DotEntity
             return query;
         }
 
-        public string GenerateSelectWithCustomSelection<T>(out IList<QueryInfo> parameters, string rawSelection, List<Expression<Func<T, bool>>> @where = null,
+        public virtual string GenerateSelectWithCustomSelection<T>(out IList<QueryInfo> parameters, string rawSelection, List<Expression<Func<T, bool>>> @where = null,
             Dictionary<Expression<Func<T, object>>, RowOrder> orderBy = null, int page = 1, int count = Int32.MaxValue) where T : class
         {
             parameters = new List<QueryInfo>();
@@ -697,7 +697,7 @@ namespace DotEntity
             return query + ";";
         }
 
-        public string GenerateJoinWithCustomSelection<T>(out IList<QueryInfo> parameters, string rawSelection, List<IJoinMeta> joinMetas, List<LambdaExpression> @where = null,
+        public virtual string GenerateJoinWithCustomSelection<T>(out IList<QueryInfo> parameters, string rawSelection, List<IJoinMeta> joinMetas, List<LambdaExpression> @where = null,
             Dictionary<LambdaExpression, RowOrder> orderBy = null, int page = 1, int count = Int32.MaxValue) where T : class
         {
             parameters = new List<QueryInfo>();

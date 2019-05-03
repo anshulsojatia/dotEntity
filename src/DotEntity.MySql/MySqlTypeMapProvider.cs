@@ -31,14 +31,15 @@ namespace DotEntity.MySql
                     { typeof(DateTime?), "DATETIME" },
                     { typeof(double), "FLOAT" },
                     { typeof(double?), "FLOAT" },
-                    { typeof(decimal), "NUMERIC(18,0)" },
-                    { typeof(decimal?), "NUMERIC(18,0)" },
+                    { typeof(decimal), "NUMERIC(18,5)" },
+                    { typeof(decimal?), "NUMERIC(18,5)" },
                     { typeof(bool), "TINYINT(1)" },
                     { typeof(bool?), "TINYINT(1)" },
                     { typeof(byte[]), "VARBINARY" },
                     { typeof(char), "VARCHAR(1)"},
                     { typeof(char?), "VARCHAR(1)"},
-                    { typeof(Enum), "INT" }
+                    { typeof(Enum), "INT" },
+                    { typeof(Guid), "CHAR(36)" }
                 };
                 return _typeMap;
             }

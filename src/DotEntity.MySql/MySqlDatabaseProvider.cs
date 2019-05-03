@@ -14,6 +14,10 @@ namespace DotEntity.MySql
 
         public string DatabaseName { get; }
 
+        public MySqlDatabaseProvider() : this("")
+        {
+            
+        }
         public MySqlDatabaseProvider(string databaseName)
         {
             DatabaseName = databaseName;
@@ -25,9 +29,13 @@ namespace DotEntity.MySql
 
         public bool IsDatabaseVersioned(string versionTableName)
         {
+            var databaseName = DatabaseName;
+            if (string.IsNullOrEmpty(databaseName))
+                databaseName = Connection.Database;
+
             versionTableName = versionTableName.ToLower();
             var t = EntitySet<InformationSchema.Tables>
-                .Where(x => x.TABLE_NAME == versionTableName && x.TABLE_SCHEMA == DatabaseName)
+                .Where(x => x.TABLE_NAME == versionTableName && x.TABLE_SCHEMA == databaseName)
                 .Select();
             return t.Any();
         }
