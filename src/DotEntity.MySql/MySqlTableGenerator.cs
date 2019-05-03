@@ -56,6 +56,10 @@ namespace DotEntity.MySql
             var toTable = DotEntityDb.GetTableNameForType(relation.DestinationType);
             var constraintName = GetForeignKeyConstraintName(fromTable, toTable, relation.SourceColumnName,
                 relation.DestinationColumnName);
+            //mysql restricts constraint names to 64 chars
+            if (constraintName.Length > 64)
+                constraintName = constraintName.Substring(0, 64);
+
             var builder = new StringBuilder($"ALTER TABLE {toTable.ToEnclosed()}{Environment.NewLine}");
             builder.Append($"DROP FOREIGN KEY {constraintName.ToEnclosed()};");
             return builder.ToString();
@@ -65,5 +69,27 @@ namespace DotEntity.MySql
         {
             return $"DROP TABLE IF EXISTS {tableName.ToEnclosed()};";
         }
+
+        public override string GetCreateConstraintScript(Relation relation, bool withCascade = false)
+        {
+            var fromTable = DotEntityDb.GetTableNameForType(relation.SourceType);
+            var toTable = DotEntityDb.GetTableNameForType(relation.DestinationType);
+            var constraintName = GetForeignKeyConstraintName(fromTable, toTable, relation.SourceColumnName,
+                relation.DestinationColumnName);
+
+            //mysql restricts constraint names to 64 chars
+            if (constraintName.Length > 64)
+                constraintName = constraintName.Substring(0, 64);
+            var builder = new StringBuilder($"ALTER TABLE {toTable.ToEnclosed()}{Environment.NewLine}");
+            builder.Append($"ADD CONSTRAINT {constraintName.ToEnclosed()}{Environment.NewLine}");
+            builder.Append($"FOREIGN KEY ({relation.DestinationColumnName.ToEnclosed()}) REFERENCES {fromTable.ToEnclosed()}({relation.SourceColumnName.ToEnclosed()})");
+            if (withCascade)
+            {
+                builder.Append($" ON DELETE CASCADE");
+            }
+            builder.Append(";");
+            return builder.ToString();
+        }
+      
     }
 }
