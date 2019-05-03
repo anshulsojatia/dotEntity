@@ -88,11 +88,11 @@ namespace DotEntity
                 var props = type.GetDatabaseUsableProperties();
                 var columns = props.Select(p => p.Name).Where(s => !exclude.Contains(s)).ToList();
                 if (typedAliases == null)
-                    return string.Join(",", columns);
+                    return string.Join(",", columns.Select(x => x.ToEnclosed()));
                 var tableName = type.Name;
                 typedAliases.TryGetValue(tableName, out List<string> prefixes);
                 if(prefixes == null)
-                    return string.Join(",", columns);
+                    return string.Join(",", columns.Select(x => x.ToEnclosed()));
                 var builder = new List<string>();
                 foreach (var p in prefixes)
                 {
