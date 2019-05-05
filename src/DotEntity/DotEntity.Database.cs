@@ -110,6 +110,8 @@ namespace DotEntity
 
             public static void DropColumn<T>(string columnName, IDotEntityTransaction transaction)
             {
+                if (WasTableCreated<T>())
+                    return; //don't do anything, as table was already created by some previous version
                 var tableType = typeof(T);
                 var script = DatabaseTableGenerator.GetDropColumnScript(tableType, columnName);
                 transaction.Manager.AsDotEntityQueryManager().Do(script, null);
