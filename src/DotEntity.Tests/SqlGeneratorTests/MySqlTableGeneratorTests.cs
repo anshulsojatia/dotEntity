@@ -58,8 +58,8 @@ namespace DotEntity.Tests.SqlGeneratorTests
             };
             var sql = generator.GetCreateConstraintScript(relation);
             var expected = @"ALTER TABLE `ProductCategory`" + Environment.NewLine +
-                           "ADD CONSTRAINT `FK_Product_Id_ProductCategory_ProductId`" + Environment.NewLine +
-                           "FOREIGN KEY (`ProductId`) REFERENCES `Product`(`Id`);";
+                           "ADD CONSTRAINT `cFK_Product_Id_ProductCategory_ProductId`" + Environment.NewLine +
+                           "FOREIGN KEY `FK_Product_Id_ProductCategory_ProductId`(`ProductId`) REFERENCES `Product`(`Id`);";
 
             Assert.AreEqual(expected, sql);
         }
@@ -75,7 +75,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
                 DestinationColumnName = "ProductId"
             };
             var sql = generator.GetDropConstraintScript(relation);
-            var expected = @"ALTER TABLE `ProductCategory`" + Environment.NewLine + "DROP FOREIGN KEY `FK_Product_Id_ProductCategory_ProductId`;";
+            var expected = @"ALTER TABLE `ProductCategory`" + Environment.NewLine + "DROP FOREIGN KEY `cFK_Product_Id_ProductCategory_ProductId`;";
             Assert.AreEqual(expected, sql);
         }
     }
