@@ -54,7 +54,7 @@ namespace DotEntity.MySql
         {
             var fromTable = DotEntityDb.GetTableNameForType(relation.SourceType);
             var toTable = DotEntityDb.GetTableNameForType(relation.DestinationType);
-            var constraintName = GetForeignKeyConstraintName(fromTable, toTable, relation.SourceColumnName,
+            var constraintName = "c" + GetForeignKeyConstraintName(fromTable, toTable, relation.SourceColumnName,
                 relation.DestinationColumnName);
             //mysql restricts constraint names to 64 chars
             if (constraintName.Length > 64)
@@ -79,10 +79,10 @@ namespace DotEntity.MySql
 
             //mysql restricts constraint names to 64 chars
             if (constraintName.Length > 64)
-                constraintName = constraintName.Substring(0, 64);
+                constraintName = constraintName.Substring(0, 63);
             var builder = new StringBuilder($"ALTER TABLE {toTable.ToEnclosed()}{Environment.NewLine}");
-            builder.Append($"ADD CONSTRAINT {constraintName.ToEnclosed()}{Environment.NewLine}");
-            builder.Append($"FOREIGN KEY ({relation.DestinationColumnName.ToEnclosed()}) REFERENCES {fromTable.ToEnclosed()}({relation.SourceColumnName.ToEnclosed()})");
+            builder.Append($"ADD CONSTRAINT {("c" + constraintName).ToEnclosed()}{Environment.NewLine}");
+            builder.Append($"FOREIGN KEY {constraintName.ToEnclosed()}({relation.DestinationColumnName.ToEnclosed()}) REFERENCES {fromTable.ToEnclosed()}({relation.SourceColumnName.ToEnclosed()})");
             if (withCascade)
             {
                 builder.Append($" ON DELETE CASCADE");
