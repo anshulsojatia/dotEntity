@@ -74,6 +74,28 @@ namespace DotEntity.Tests.SqlGeneratorTests
         }
 
         [Test]
+        public void SelectGenerator_WithWhere_Null_Succeeds()
+        {
+            var sql = generator.GenerateSelect(out IList<QueryInfo> queryParameters, new List<Expression<Func<Product, bool>>>
+            {
+                product => product.ProductName == null
+            });
+            var expected = "SELECT * FROM `Product` WHERE (`ProductName` IS NULL);";
+            Assert.AreEqual(expected, sql);
+        }
+
+        [Test]
+        public void SelectGenerator_WithWhere_Null_Or_Value_Succeeds()
+        {
+            var sql = generator.GenerateSelect(out IList<QueryInfo> queryParameters, new List<Expression<Func<Product, bool>>>
+            {
+                product => product.ProductName == null || product.ProductName == "Ice Candy"
+            });
+            var expected = "SELECT * FROM `Product` WHERE ((`ProductName` IS NULL) OR (`ProductName` = @ProductName));";
+            Assert.AreEqual(expected, sql);
+        }
+
+        [Test]
         public void SelectGenerator_WithWhereAndTotalRecords_Valid()
         {
             var sql = generator.GenerateSelectWithTotalMatchingCount(out IList<QueryInfo> queryParameters, new List<Expression<Func<Product, bool>>>

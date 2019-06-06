@@ -529,7 +529,7 @@ namespace DotEntity
             qp = qp ?? previousQueryParameters?.FirstOrDefault(x => x.PropertyName == propertyName);
             if (qp != null)
             {
-                if (!qp.PropertyValue.Equals(propertyValue))
+                if (qp.PropertyValue != null && !qp.PropertyValue.Equals(propertyValue))
                 {
                     //change propertyName to something else
                     //but first check if propertyname is aliased?
