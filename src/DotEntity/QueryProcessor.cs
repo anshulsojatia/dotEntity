@@ -43,7 +43,7 @@ namespace DotEntity
             command.CommandType = commandType;
             if (parameters != null)
             {
-                foreach (var parameter in parameters.Where(x => !x.SupportOperator && !x.IsPropertyValueAlsoProperty))
+                foreach (var parameter in parameters.Where(x => !x.SupportOperator && !x.IncludeInQueryOnly && !x.IsPropertyValueAlsoProperty))
                 {
                     if (parameter.PropertyValue is ICollection)
                         continue; //because we'll be having the parameters in the subsequent iterations. adding this to parameter list will cause invalid mapping

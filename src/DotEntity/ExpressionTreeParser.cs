@@ -336,7 +336,7 @@ namespace DotEntity
         private QueryInfo AddQueryParameter(string linkingOperator, string propertyName, object propertyValue, string queryOperator, string parameterName, bool isPropertyValueAlsoAProperty = false)
         {
             parameterName = GetSafeParameterName(_queryInfo, propertyName, propertyValue, _previousQueryInfo);
-            var queryInfo = new QueryInfo(linkingOperator, propertyName, propertyValue, queryOperator, parameterName, isPropertyValueAlsoAProperty);
+            var queryInfo = new QueryInfo(linkingOperator, propertyName, propertyValue, queryOperator, parameterName, isPropertyValueAlsoAProperty, (propertyValue == null && queryOperator.StartsWith("IS")));
             _queryInfo.Add(queryInfo);
             return queryInfo;
         }

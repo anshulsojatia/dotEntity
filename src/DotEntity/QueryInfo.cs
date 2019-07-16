@@ -25,6 +25,9 @@
  * To know more about our commercial license email us at support@roastedbytes.com or
  * visit http://dotentity.net/licensing
  */
+
+using System;
+
 namespace DotEntity
 {
     public class QueryInfo
@@ -37,6 +40,7 @@ namespace DotEntity
         public bool IsPropertyValueAlsoProperty { get; set; }
         public bool SupportOperator { get; set; }
         public bool Processed { get; set; }
+        public bool IncludeInQueryOnly { get; set; }
         /// <summary>
         /// Initializes a new instance of the <see cref="QueryInfo" /> class.
         /// </summary>
@@ -44,7 +48,7 @@ namespace DotEntity
         /// <param name="propertyName">Name of the property.</param>
         /// <param name="propertyValue">The property value.</param>
         /// <param name="queryOperator">The query operator.</param>
-        internal QueryInfo(string linkingOperator, string propertyName, object propertyValue, string queryOperator, string parameterName, bool isPropertyValueAlsoAProperty = false)
+        internal QueryInfo(string linkingOperator, string propertyName, object propertyValue, string queryOperator, string parameterName, bool isPropertyValueAlsoAProperty = false, bool includeInQueryOnly = false)
         {
             LinkingOperator = linkingOperator;
             PropertyName = propertyName;
@@ -52,6 +56,7 @@ namespace DotEntity
             QueryOperator = queryOperator;
             ParameterName = parameterName;
             IsPropertyValueAlsoProperty = isPropertyValueAlsoAProperty;
+            IncludeInQueryOnly = includeInQueryOnly;
         }
 
         internal QueryInfo(bool supportOperator, string linkingOperator)
@@ -63,13 +68,14 @@ namespace DotEntity
         public override string ToString()
         {
             return $@"Query Info:
-                        Linking Operator: {LinkingOperator}
-                        Query Operator: {QueryOperator}
-                        Property Name: {PropertyName}
-                        Property Value: {PropertyValue}
-                        Parameter Name: {ParameterName}
-                        Is Property: {IsPropertyValueAlsoProperty}
-                        Support: {SupportOperator}";
+                        Linking Operator: {LinkingOperator}{Environment.NewLine}
+                        Query Operator: {QueryOperator}{Environment.NewLine}
+                        Property Name: {PropertyName}{Environment.NewLine}
+                        Property Value: {PropertyValue}{Environment.NewLine}
+                        Parameter Name: {ParameterName}{Environment.NewLine}
+                        Is Property: {IsPropertyValueAlsoProperty}{Environment.NewLine}
+                        Support: {SupportOperator}{Environment.NewLine}
+                        Include In Query Only:{IncludeInQueryOnly}";
         }
     }
 }
