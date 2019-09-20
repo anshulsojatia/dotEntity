@@ -90,6 +90,13 @@ namespace DotEntity.MySql
             builder.Append(";");
             return builder.ToString();
         }
-      
+
+        public override string GetDropIndexScript(string tableName, string[] columnNames)
+        {
+            var indexName = GetIndexName(tableName, columnNames);
+            var builder = new StringBuilder($"ALTER TABLE {tableName.ToEnclosed()}{Environment.NewLine}");
+            builder.Append($"DROP INDEX {indexName};");
+            return builder.ToString();
+        }
     }
 }

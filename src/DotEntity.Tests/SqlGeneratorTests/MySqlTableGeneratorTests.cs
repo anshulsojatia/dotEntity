@@ -78,5 +78,25 @@ namespace DotEntity.Tests.SqlGeneratorTests
             var expected = @"ALTER TABLE `ProductCategory`" + Environment.NewLine + "DROP FOREIGN KEY `cFK_Product_Id_ProductCategory_ProductId`;";
             Assert.AreEqual(expected, sql);
         }
+
+        [Test]
+        public void CreateIndex_Succeeds()
+        {
+            var sql = generator.GetCreateIndexScript<Product>(new[] { nameof(Product.DateCreated) });
+            var expected = "CREATE INDEX Idx_DateCreated ON `Product` (`DateCreated`)";
+            Assert.AreEqual(expected, sql);
+            sql = generator.GetCreateIndexScript<Product>(new[] { nameof(Product.DateCreated) }, true);
+            expected = "CREATE UNIQUE INDEX Idx_DateCreated ON `Product` (`DateCreated`)";
+            Assert.AreEqual(expected, sql);
+        }
+
+        [Test]
+        public void DropIndex_Succeeds()
+        {
+            var sql = generator.GetDropIndexScript<Product>(new[] { nameof(Product.DateCreated) });
+            var expected = $"ALTER TABLE `Product`{Environment.NewLine}DROP INDEX Idx_DateCreated;";
+            Assert.AreEqual(expected, sql);
+
+        }
     }
 }

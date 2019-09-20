@@ -186,6 +186,45 @@ namespace DotEntity
             return builder.ToString();
         }
 
+        public virtual string GetCreateIndexScript<T>(string[] columnNames, bool unique = false)
+        {
+            return GetCreateIndexScript(typeof(T), columnNames, unique);
+        }
+
+        public virtual string GetCreateIndexScript(Type type, string[] columnNames, bool unique = false)
+        {
+            var tableName = DotEntityDb.GetTableNameForType(type);
+            var indexName = GetIndexName(tableName, columnNames);
+            var columnStr = string.Join(",", columnNames.Select(x => x.ToEnclosed()));
+            var uniqueStr = unique ? "UNIQUE " : "";
+            var builder = new StringBuilder($"CREATE {uniqueStr}INDEX {indexName} ON {tableName.ToEnclosed()} ({columnStr})");
+            return builder.ToString();
+        }
+
+        public virtual string GetDropIndexScript<T>(string[] columnNames)
+        {
+            return GetDropIndexScript(typeof(T), columnNames);
+        }
+
+        public virtual string GetDropIndexScript(Type type, string[] columnNames)
+        {
+            var tableName = DotEntityDb.GetTableNameForType(type);
+            return GetDropIndexScript(tableName, columnNames);
+        }
+
+        public virtual string GetDropIndexScript(string tableName, string[] columnNames)
+        {
+            var indexName = GetIndexName(tableName, columnNames);
+            var builder = new StringBuilder($"DROP INDEX {tableName.ToEnclosed()}.{indexName}");
+            return builder.ToString();
+        }
+
+        protected static string GetIndexName(string tableName, string[] columnNames)
+        {
+            const string indexKey = "Idx_{0}";
+            return string.Format(indexKey, string.Join("_", columnNames));
+        }
+
         protected static string GetForeignKeyConstraintName(string fromTable, string toTable, string fromId, string toId)
         {
             const string constraintKey = "FK_{0}_{1}_{2}_{3}";

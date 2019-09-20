@@ -135,6 +135,31 @@ namespace DotEntity
                     manager.Do(query, parameters);
             }
 
+            public static void CreateIndex<T>(string[] columnNames, IDotEntityTransaction transaction, bool unique = false) where T : class
+            {
+                var script = DatabaseTableGenerator.GetCreateIndexScript<T>(columnNames, unique);
+                transaction.Manager.AsDotEntityQueryManager().Do(script, null);
+            }
+
+            public static void DropIndex<T>(string[] columnNames, IDotEntityTransaction transaction) where T : class
+            {
+                var script = DatabaseTableGenerator.GetDropIndexScript<T>(columnNames);
+                transaction.Manager.AsDotEntityQueryManager().Do(script, null);
+            }
+
+            public static void DropIndex(Type type, string[] columnNames, IDotEntityTransaction transaction)
+            {
+                var script = DatabaseTableGenerator.GetDropIndexScript(type, columnNames);
+                transaction.Manager.AsDotEntityQueryManager().Do(script, null);
+            }
+
+            public static void DropIndex(string tableName, string[] columns, IDotEntityTransaction transaction)
+            {
+                var script =
+                    DatabaseTableGenerator.GetDropIndexScript(DotEntityDb.GlobalTableNamePrefix + tableName, columns);
+                transaction.Manager.AsDotEntityQueryManager().Do(script, null);
+            }
+
             #region Helpers
             private static bool WasTableCreated<T>()
             {

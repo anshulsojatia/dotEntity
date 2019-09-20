@@ -102,5 +102,28 @@ namespace DotEntity.Tests.SqlGeneratorTests
                            "DROP CONSTRAINT [FK_Product_Id_ProductCategory_ProductId];";
             Assert.AreEqual(expected, sql);
         }
+
+        [Test]
+        public void CreateIndex_Succeeds()
+        {
+            var generator = new DefaultDatabaseTableGenerator();
+            var sql = generator.GetCreateIndexScript<Product>(new[] {nameof(Product.DateCreated)});
+            var expected = "CREATE INDEX Idx_DateCreated ON [Product] ([DateCreated])";
+            Assert.AreEqual(expected, sql);
+
+            sql = generator.GetCreateIndexScript<Product>(new[] { nameof(Product.DateCreated) }, true);
+            expected = "CREATE UNIQUE INDEX Idx_DateCreated ON [Product] ([DateCreated])";
+            Assert.AreEqual(expected, sql);
+        }
+
+        [Test]
+        public void DropIndex_Succeeds()
+        {
+            var generator = new DefaultDatabaseTableGenerator();
+            var sql = generator.GetDropIndexScript<Product>(new[] { nameof(Product.DateCreated) });
+            var expected = "DROP INDEX [Product].Idx_DateCreated";
+            Assert.AreEqual(expected, sql);
+
+        }
     }
 }
