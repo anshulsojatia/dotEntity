@@ -131,6 +131,18 @@ namespace DotEntity
             versionRunner.RunDowngrade(versionKey);
         }
 
+        public static IList<string> GetAppliedVersions(string callingContextName)
+        {
+            Throw.IfNoDatabaseVersions(_databaseVersions[callingContextName]);
+            var versionRunner = new VersionUpdater(callingContextName);
+            return versionRunner.GetAppliedVersions();
+        }
+
+        public static IDictionary<string, List<string>> GetAllAppliedVersions()
+        {
+            return VersionUpdater.GetAllAppliedVersions();
+        }
+
         private static ConcurrentDictionary<Type, string[]> ExcludedColumns { get; }
 
         public static void IgnoreColumns<T>(params string[] columnNames)

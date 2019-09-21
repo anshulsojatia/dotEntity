@@ -26,6 +26,8 @@
  * visit http://dotentity.net/licensing
  */
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using DotEntity.Constants;
 using DotEntity.Reflection;
@@ -41,6 +43,16 @@ namespace DotEntity.Versioning
         {
             _callingContextName = callingContextName;
             _databaseVersions = databaseVersions;
+        }
+
+        public VersionUpdater(string callingContextName) : this(callingContextName, null)
+        {
+            
+        }
+
+        public VersionUpdater()
+        {
+
         }
 
         public void RunUpgrade()
@@ -123,6 +135,20 @@ namespace DotEntity.Versioning
                 (transaction as DotEntityTransaction)?.CommitInternal();
             }
 
+        }
+
+        public IList<string> GetAppliedVersions()
+        {
+            //first get all the versions from database
+            var appliedDatabaseVersions =
+                EntitySet<DotEntityVersion>.Where(x => x.ContextName == _callingContextName).Select();
+            return appliedDatabaseVersions.Select(x => x.VersionKey).ToList();
+        }
+
+        public static IDictionary<string, List<string>> GetAllAppliedVersions()
+        {
+            return EntitySet<DotEntityVersion>.Where(x => true).Select().GroupBy(x => x.ContextName)
+                .ToDictionary(x => x.Key, x => x.Select(y => y.VersionKey).ToList());
         }
     }
 }

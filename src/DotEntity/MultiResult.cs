@@ -82,7 +82,15 @@ namespace DotEntity
             }
             catch
             {
-                return (TType) Convert.ChangeType(value, typeof(TType));
+                try
+                {
+                    return (TType) Convert.ChangeType(value, typeof(TType));
+                }
+                catch
+                {
+                    return default(TType);
+                }
+                
             }
             finally
             {
