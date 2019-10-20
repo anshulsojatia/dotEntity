@@ -263,7 +263,7 @@ namespace DotEntity
                     if (_notCount > 0)
                         DecrementNotCount();
                     isProperty = false;
-                    return null;
+                    return propertyName;
                 }
                 return propertyName;
             }
@@ -442,7 +442,7 @@ namespace DotEntity
                     {
                         builder.Append($"{item.PropertyName.ToEnclosed()} {item.QueryOperator} (");
                         var itemCollection = (IList)item.PropertyValue;
-                        
+                        var currentCollectionProperties = new List<QueryInfo>();
                         for (var itemIndex = 0; itemIndex < itemCollection.Count; itemIndex++)
                         {
                             var iterator = 1;
@@ -456,8 +456,9 @@ namespace DotEntity
                             var innerParam = new QueryInfo("", "inner_" + item.PropertyName, inItemValue, "",
                                 paramName) {Processed = true};
                             extraQueryProperties.Add(innerParam);
+                            currentCollectionProperties.Add(innerParam);
                         }
-                        var inParameterString = "@" + string.Join(",@", extraQueryProperties.Select(x => x.ParameterName));
+                        var inParameterString = "@" + string.Join(",@", currentCollectionProperties.Select(x => x.ParameterName));
                         builder.Append(inParameterString);
                         builder.Append(") ");
                     }
