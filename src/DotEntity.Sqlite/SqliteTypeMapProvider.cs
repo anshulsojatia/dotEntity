@@ -37,7 +37,8 @@ namespace DotEntity.Sqlite
                     { typeof(byte[]), "BLOB" },
                     { typeof(char), "TEXT"},
                     { typeof(char?), "TEXT"},
-                    { typeof(Enum), "INT" }
+                    { typeof(Enum), "INT" },
+                    { typeof(Guid), "TEXT" }
                 };
                 return _typeMap;
             }
