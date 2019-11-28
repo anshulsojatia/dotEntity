@@ -110,6 +110,10 @@ namespace DotEntity.Caching
                         setter = property.CreateSetter(_type, propertyType);
                     else if (propertyType == typeof(Guid))
                         setter = property.CreateSetter<Guid>(_type);
+                    else if (propertyType == typeof(byte))
+                        setter = property.CreateSetter<byte>(_type);
+                    else if (propertyType == typeof(byte[]))
+                        setter = property.CreateSetter<byte[]>(_type);
                     _setter.TryAdd(property.Name, setter);
                 }
             }
@@ -151,6 +155,10 @@ namespace DotEntity.Caching
                         getter = property.CreateGetter(_type, propertyType);
                     else if (propertyType == typeof(Guid))
                         getter = property.CreateGetter<Guid>(_type);
+                    else if (propertyType == typeof(byte))
+                        getter = property.CreateGetter<byte>(_type);
+                    else if (propertyType == typeof(byte[]))
+                        getter = property.CreateGetter<byte[]>(_type);
                     _getter.TryAdd(property.Name, getter);
                 }
 

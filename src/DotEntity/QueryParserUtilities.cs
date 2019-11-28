@@ -76,7 +76,7 @@ namespace DotEntity
             return dict;
         }
 
-        public static string GetSelectColumnString(IList<Type> types, Dictionary<string, List<string>> typedAliases = null, params string[] exclude)
+        public static string GetSelectColumnString(IList<Type> types, Dictionary<string, List<string>> typedAliases = null, Dictionary<Type, IList<string>> excludeColumns = null)
         {
             Throw.IfArgumentNull(types, nameof(types));
             
@@ -86,7 +86,9 @@ namespace DotEntity
             return string.Join(",", types.Select(type =>
             {
                 var props = type.GetDatabaseUsableProperties();
-                var columns = props.Select(p => p.Name).Where(s => !exclude.Contains(s)).ToList();
+                IList<string> exclude = null;
+                excludeColumns?.TryGetValue(type, out exclude);
+                var columns = props.Select(p => p.Name).Where(s => exclude == null || !exclude.Contains(s)).ToList();
                 if (typedAliases == null)
                     return string.Join(",", columns.Select(x => x.ToEnclosed()));
                 var tableName = type.Name;

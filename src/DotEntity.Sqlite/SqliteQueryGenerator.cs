@@ -21,7 +21,7 @@ namespace DotEntity.Sqlite
             return $"INSERT INTO {tableName.ToEnclosed()} ({joinInsertString}) VALUES ({joinValueString});SELECT last_insert_rowid() AS { "Id".ToEnclosed() };";
         }
 
-        public override string GenerateSelect<T>(out IList<QueryInfo> parameters, List<Expression<Func<T, bool>>> where = null, Dictionary<Expression<Func<T, object>>, RowOrder> orderBy = null, int page = 1, int count = int.MaxValue)
+        public override string GenerateSelect<T>(out IList<QueryInfo> parameters, List<Expression<Func<T, bool>>> where = null, Dictionary<Expression<Func<T, object>>, RowOrder> orderBy = null, int page = 1, int count = int.MaxValue, Dictionary<Type, IList<string>> excludeColumns = null)
         {
             parameters = new List<QueryInfo>();
             var builder = new StringBuilder();
@@ -55,7 +55,7 @@ namespace DotEntity.Sqlite
             }
 
             // make the query now
-            builder.Append($"SELECT {QueryParserUtilities.GetSelectColumnString(new List<Type>() { typeof(T) })} FROM ");
+            builder.Append($"SELECT {QueryParserUtilities.GetSelectColumnString(new List<Type>() { typeof(T) }, null, excludeColumns)} FROM ");
             builder.Append(tableName.ToEnclosed());
 
             if (!string.IsNullOrEmpty(whereString))
@@ -77,7 +77,7 @@ namespace DotEntity.Sqlite
         }
 
         public override string GenerateSelectWithTotalMatchingCount<T>(out IList<QueryInfo> parameters, List<Expression<Func<T, bool>>> @where = null, Dictionary<Expression<Func<T, object>>, RowOrder> orderBy = null,
-            int page = 1, int count = Int32.MaxValue)
+            int page = 1, int count = Int32.MaxValue, Dictionary<Type, IList<string>> excludeColumns = null)
         {
             parameters = new List<QueryInfo>();
             var builder = new StringBuilder();
@@ -111,7 +111,7 @@ namespace DotEntity.Sqlite
             }
 
             // make the query now
-            builder.Append($"SELECT {QueryParserUtilities.GetSelectColumnString(new List<Type>() { typeof(T) })} FROM ");
+            builder.Append($"SELECT {QueryParserUtilities.GetSelectColumnString(new List<Type>() { typeof(T) }, null, excludeColumns)} FROM ");
             builder.Append(tableName.ToEnclosed());
 
             if (!string.IsNullOrEmpty(whereString))
@@ -138,7 +138,7 @@ namespace DotEntity.Sqlite
         }
 
         public override string GenerateJoin<T>(out IList<QueryInfo> parameters, List<IJoinMeta> joinMetas, List<LambdaExpression> @where = null, Dictionary<LambdaExpression, RowOrder> orderBy = null,
-            int page = 1, int count = int.MaxValue)
+            int page = 1, int count = int.MaxValue, Dictionary<Type, IList<string>> excludeColumns = null)
         {
             parameters = new List<QueryInfo>();
             var typedAliases = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
@@ -212,7 +212,7 @@ namespace DotEntity.Sqlite
             var allTypes = joinMetas.Select(x => x.OnType).Distinct().ToList();
             allTypes.Add(typeof(T));
             // make the query now
-            builder.Append($"SELECT {QueryParserUtilities.GetSelectColumnString(allTypes, typedAliases)} FROM ");
+            builder.Append($"SELECT {QueryParserUtilities.GetSelectColumnString(allTypes, typedAliases, excludeColumns)} FROM ");
 
             builder.Append(tableName.ToEnclosed() + $" {parentAliasUsed} ");
 

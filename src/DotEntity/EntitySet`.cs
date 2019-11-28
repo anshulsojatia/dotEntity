@@ -46,6 +46,7 @@ namespace DotEntity
         private List<IJoinMeta> _joinList;
         private List<LambdaExpression> _joinWhereList;
         private Dictionary<LambdaExpression, RowOrder> _joinOrderBy;
+        private Dictionary<Type, IList<string>> _skip;
 
         internal EntitySet()
         {
@@ -349,6 +350,24 @@ namespace DotEntity
                 DotEntityDb.SelectQueryMode = selectMode;
                 return entities;
             }
+        }
+
+        public IEntitySet<T> SkipColumns<T1>(params string[] columns)
+        {
+            _skip = _skip ?? new Dictionary<Type, IList<string>>();
+            if (!_skip.TryGetValue(typeof(T1), out var columnsList))
+            {
+                columnsList = new List<string>();
+                _skip.Add(typeof(T1), columnsList);
+            }
+
+            foreach (var column in columns)
+            {
+                if (!columnsList.Contains(column))
+                    columnsList.Add(column);
+            }
+
+            return this;
         }
 
         public static IEntitySet<T> Just()

@@ -62,7 +62,7 @@ namespace DotEntity
                     { typeof(decimal?), "NUMERIC(18,5)" },
                     { typeof(bool), "BIT" },
                     { typeof(bool?), "BIT" },
-                    { typeof(byte[]), "VARBINARY" },
+                    { typeof(byte[]), "VARBINARY(MAX)" },
                     { typeof(char), "NVARCHAR(1)"},
                     { typeof(char?), "NVARCHAR(1)"},
                     { typeof(Guid), "UNIQUEIDENTIFIER" },

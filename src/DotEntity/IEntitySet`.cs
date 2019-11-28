@@ -95,7 +95,7 @@ namespace DotEntity
         /// Specifies a placeholder join to be used when a manually written join query or stored procedure returns data from tables not related to temporary tables
         /// </summary>
         /// <typeparam name="T1">The entity class that maps to a specific database table</typeparam>
-        /// <returns></returns>
+        /// <returns>An implementation object of type <see cref="IEntitySet{T}"/></returns>
         IEntitySet<T> PlaceholderJoin<T1>();
 
             /// <summary>
@@ -188,5 +188,13 @@ namespace DotEntity
         /// <param name="count">(optional) The number of entities to return. Defaults to all entities</param>
         /// <returns>A list of object arrays each item of which represent columns of individual rows in the result set</returns>
         IList<object[]> CustomSelectNested(string rawSelection, int page = 1, int count = int.MaxValue);
+
+        /// <summary>
+        /// Skips the columns from the select query
+        /// </summary>
+        /// <typeparam name="T1">The type of entity whose column needs to be skipped</typeparam>
+        /// <param name="columns">The columns to be excluded from the query</param>
+        /// <returns>An implementation object of type <see cref="IEntitySet{T}"/></returns>
+        IEntitySet<T> SkipColumns<T1>(params string[] columns);
     }
 }

@@ -45,7 +45,7 @@ namespace DotEntity
             {
                 foreach (var parameter in parameters.Where(x => !x.SupportOperator && !x.IncludeInQueryOnly && !x.IsPropertyValueAlsoProperty))
                 {
-                    if (parameter.PropertyValue is ICollection)
+                    if (parameter.PropertyValue is ICollection && !(parameter.PropertyValue is byte[]))
                         continue; //because we'll be having the parameters in the subsequent iterations. adding this to parameter list will cause invalid mapping
                     //because a collection won't have appropriate mapping in ado.net
                     //only add new parameter if there is no existing one

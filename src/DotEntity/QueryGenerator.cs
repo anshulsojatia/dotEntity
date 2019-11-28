@@ -219,7 +219,7 @@ namespace DotEntity
             return $"SELECT COUNT(*) FROM {tableName.ToEnclosed()} WHERE {whereString};";
         }
 
-        public virtual string GenerateSelect<T>(out IList<QueryInfo> parameters, List<Expression<Func<T, bool>>> where = null, Dictionary<Expression<Func<T, object>>, RowOrder> orderBy = null, int page = 1, int count = int.MaxValue) where T : class
+        public virtual string GenerateSelect<T>(out IList<QueryInfo> parameters, List<Expression<Func<T, bool>>> where = null, Dictionary<Expression<Func<T, object>>, RowOrder> orderBy = null, int page = 1, int count = int.MaxValue, Dictionary<Type, IList<string>> excludeColumns = null) where T : class
         {
             parameters = new List<QueryInfo>();
             var builder = new StringBuilder();
@@ -347,7 +347,7 @@ namespace DotEntity
         }
 
         public virtual string GenerateSelectWithTotalMatchingCount<T>(out IList<QueryInfo> parameters, List<Expression<Func<T, bool>>> @where = null, Dictionary<Expression<Func<T, object>>, RowOrder> orderBy = null,
-            int page = 1, int count = Int32.MaxValue) where T : class
+            int page = 1, int count = Int32.MaxValue, Dictionary<Type, IList<string>> excludeColumns = null) where T : class
         {
             parameters = new List<QueryInfo>();
             var builder = new StringBuilder();
@@ -387,7 +387,7 @@ namespace DotEntity
                 orderByString = string.Empty;
             }
             // make the query now
-            builder.Append($"SELECT {QueryParserUtilities.GetSelectColumnString(new List<Type>() { typeof(T) })}{paginatedSelect} FROM ");
+            builder.Append($"SELECT {QueryParserUtilities.GetSelectColumnString(new List<Type>() { typeof(T) }, null, excludeColumns)}{paginatedSelect} FROM ");
             builder.Append(tableName.ToEnclosed());
 
             if (!string.IsNullOrEmpty(whereString))
@@ -414,7 +414,7 @@ namespace DotEntity
         }
 
         public virtual string GenerateJoin<T>(out IList<QueryInfo> parameters, List<IJoinMeta> joinMetas, List<LambdaExpression> @where = null, Dictionary<LambdaExpression, RowOrder> orderBy = null,
-            int page = 1, int count = int.MaxValue) where T : class
+            int page = 1, int count = int.MaxValue, Dictionary<Type, IList<string>> excludeColumns = null) where T : class
         {
             parameters = new List<QueryInfo>();
             var typedAliases = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
@@ -508,10 +508,10 @@ namespace DotEntity
                 builder.Append($"SELECT * FROM (");
             }
            
-            builder.Append($"SELECT {QueryParserUtilities.GetSelectColumnString(allTypes, typedAliases)}{paginatedSelect} FROM ");
+            builder.Append($"SELECT {QueryParserUtilities.GetSelectColumnString(allTypes, typedAliases, excludeColumns)}{paginatedSelect} FROM ");
 
             //some nested queries are required, let's get the column names (raw) for root table
-            var columnNameString = QueryParserUtilities.GetSelectColumnString(new List<Type>() { typeof(T) });
+            var columnNameString = QueryParserUtilities.GetSelectColumnString(new List<Type>() { typeof(T) }, null, excludeColumns);
             //make the internal query that'll perform the pagination based on root table
             builder.Append($"(SELECT {columnNameString} FROM ");
             if (!string.IsNullOrEmpty(rootTypeWhereString))
@@ -548,7 +548,7 @@ namespace DotEntity
         }
 
         public virtual string GenerateJoinWithTotalMatchingCount<T>(out IList<QueryInfo> parameters, List<IJoinMeta> joinMetas, List<LambdaExpression> @where = null,
-            Dictionary<LambdaExpression, RowOrder> orderBy = null, int page = 1, int count = Int32.MaxValue) where T : class
+            Dictionary<LambdaExpression, RowOrder> orderBy = null, int page = 1, int count = Int32.MaxValue, Dictionary<Type, IList<string>> excludeColumns = null) where T : class
         {
             parameters = new List<QueryInfo>();
             var typedAliases = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
@@ -644,10 +644,10 @@ namespace DotEntity
                 builder.Append($"SELECT * FROM (");
             }
 
-            builder.Append($"SELECT {QueryParserUtilities.GetSelectColumnString(allTypes, typedAliases)}{paginatedSelect} FROM ");
+            builder.Append($"SELECT {QueryParserUtilities.GetSelectColumnString(allTypes, typedAliases, excludeColumns)}{paginatedSelect} FROM ");
 
             //some nested queries are required, let's get the column names (raw) for root table
-            var columnNameString = QueryParserUtilities.GetSelectColumnString(new List<Type>() { typeof(T) });
+            var columnNameString = QueryParserUtilities.GetSelectColumnString(new List<Type>() { typeof(T) }, null, excludeColumns);
             //make the internal query that'll perform the pagination based on root table
             builder.Append($"(SELECT {columnNameString} FROM ");
             if (!string.IsNullOrEmpty(rootTypeWhereString))
