@@ -165,7 +165,9 @@ namespace DotEntity
             var builder = new StringBuilder($"ALTER TABLE {tableName.ToEnclosed()}{Environment.NewLine}");
             builder.Append($"ADD {columnName.ToEnclosed()} {dataTypeString}");
             if (value != null)
-                builder.Append($" DEFAULT '{value}'");
+            {
+                builder.Append($" DEFAULT '{GetValueInTargetType<T1>(value)}'");
+            }
             return builder.ToString();
         }
 
@@ -234,6 +236,18 @@ namespace DotEntity
         protected void ThrowIfInvalidDataTypeMapping(Type type, out string dbTypeString)
         {
             Throw.IfInvalidDataTypeMapping(!TypeMap.TryGetValue(type.GetTypeInfo().IsEnum ? typeof(Enum) : type, out dbTypeString), type);
+        }
+
+        protected static string GetValueInTargetType<T1>(object value)
+        {
+#if NETSTANDARD15
+        var isEnum = typeof(T1).GetTypeInfo().IsEnum;
+#else
+            var isEnum = typeof(T1).IsEnum;
+#endif
+            if (isEnum)
+                return ((int) value).ToString();
+            return value.ToString();
         }
     }
 }
