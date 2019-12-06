@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net451;net45;netstandard1.5;</TargetFrameworks>
+    <TargetFrameworks>net451;netstandard1.5;</TargetFrameworks>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <Authors>Team Roasted Bytes</Authors>
     <Company>Apexol Technologies</Company>
