@@ -7,14 +7,14 @@
     <Company>Apexol Technologies</Company>
     <Title>dotEntity ORM</Title>
     <Description>Yet another simple and powerful micro ORM for .NET</Description>
-    <Copyright>(C) 2017 Apexol Technologies</Copyright>
+    <Copyright>(C) 2019 Sojatia Infocrafts</Copyright>
     <PackageLicenseUrl>http://dotentity.net/licensing</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/RoastedBytes/dotEntity</PackageProjectUrl>
     <RepositoryUrl>https://github.com/RoastedBytes/dotEntity.git</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
     <PackageTags>Micro-ORM, Database, .NET Framework, POCO</PackageTags>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>1.1.0</Version>
+    <Version>2.0.0</Version>
     <PackageId>DotEntity</PackageId>
     <AssemblyName>DotEntity</AssemblyName>
   </PropertyGroup>
