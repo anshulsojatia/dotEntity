@@ -35,7 +35,7 @@ namespace DotEntity.MySql
                     { typeof(decimal?), "NUMERIC(18,5)" },
                     { typeof(bool), "TINYINT(1)" },
                     { typeof(bool?), "TINYINT(1)" },
-                    { typeof(byte[]), "VARBINARY" },
+                    { typeof(byte[]), "BLOB" },
                     { typeof(char), "VARCHAR(1)"},
                     { typeof(char?), "VARCHAR(1)"},
                     { typeof(Enum), "INT" },
