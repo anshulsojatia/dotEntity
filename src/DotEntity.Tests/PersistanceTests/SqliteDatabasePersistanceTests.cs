@@ -36,7 +36,7 @@ namespace DotEntity.Tests.PersistanceTests
         public void Sqlite_Direct_Count_Succeeds()
         {
             var count = EntitySet<Product>.Count();
-            Assert.AreEqual(0, count);
+            Assert.AreNotEqual(-1, count);
         }
 
         [Test]
