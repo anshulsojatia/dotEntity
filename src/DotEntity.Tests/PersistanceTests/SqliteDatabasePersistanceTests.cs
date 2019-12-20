@@ -33,6 +33,13 @@ namespace DotEntity.Tests.PersistanceTests
         }
 
         [Test]
+        public void Sqlite_Direct_Count_Succeeds()
+        {
+            var count = EntitySet<Product>.Count();
+            Assert.AreEqual(0, count);
+        }
+
+        [Test]
         public void SqliteInsert_Succeeds()
         {
             var product = new Product()

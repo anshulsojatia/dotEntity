@@ -188,7 +188,7 @@ namespace DotEntity
             var tableName = DotEntityDb.GetTableNameForType<T>();
             var whereString = "";
 
-            if (where != null)
+            if (where != null && where.Any())
             {
                 var parser = new ExpressionTreeParser();
                 var whereStringBuilder = new List<string>();
@@ -197,10 +197,10 @@ namespace DotEntity
                     whereStringBuilder.Add(parser.GetWhereString(wh));
                 }
                 parameters = parser.QueryInfoList;
-                whereString = string.Join(" AND ", WrapWithBraces(whereStringBuilder)).Trim();
+                whereString = " WHERE " + string.Join(" AND ", WrapWithBraces(whereStringBuilder)).Trim();
             }
 
-            return $"SELECT COUNT(*) FROM {tableName.ToEnclosed()} WHERE {whereString};";
+            return $"SELECT COUNT(*) FROM {tableName.ToEnclosed()}{whereString};";
         }
 
 

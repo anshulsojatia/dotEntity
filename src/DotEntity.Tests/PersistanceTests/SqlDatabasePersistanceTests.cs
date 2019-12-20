@@ -35,6 +35,13 @@ namespace DotEntity.Tests.PersistanceTests
         }
 
         [Test]
+        public void SqlServer_Direct_Count_Succeeds()
+        {
+            var count = EntitySet<Product>.Count();
+            Assert.AreEqual(0, count);
+        }
+
+        [Test]
         public void SqlServerInsert_Succeeds()
         {
             var product = new Product()
