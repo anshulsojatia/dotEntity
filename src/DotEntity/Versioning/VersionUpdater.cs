@@ -108,7 +108,7 @@ namespace DotEntity.Versioning
             Throw.IfDbNotVersioned(!DotEntityDb.Provider.IsDatabaseVersioned(Configuration.VersionTableName));
            
             //first get all the versions from database
-            var appliedDatabaseVersions = EntitySet<DotEntityVersion>.Where(x => x.ContextName == _callingContextName).Select().ToList();
+            var appliedDatabaseVersions = EntitySet<DotEntityVersion>.Where(x => x.ContextName == _callingContextName).Select().Reverse().ToList();
 
             if (versionKey != null)
             {
