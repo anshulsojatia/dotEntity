@@ -108,7 +108,7 @@ namespace DotEntity.Versioning
             Throw.IfDbNotVersioned(!DotEntityDb.Provider.IsDatabaseVersioned(Configuration.VersionTableName));
            
             //first get all the versions from database
-            var appliedDatabaseVersions = EntitySet<DotEntityVersion>.Where(x => x.ContextName == _callingContextName).Select().Reverse().ToList();
+            var appliedDatabaseVersions = EntitySet<DotEntityVersion>.Where(x => x.ContextName == _callingContextName).Select().ToList();
 
             if (versionKey != null)
             {
@@ -120,7 +120,7 @@ namespace DotEntity.Versioning
 
             using (var transaction = EntitySet.BeginInternalTransaction())
             {
-                foreach (var availableVersion in _databaseVersions)
+                foreach (var availableVersion in _databaseVersions.Reverse())
                 {
                     if (versionKey == availableVersion.VersionKey)
                         break; //stop here. everything done
