@@ -29,3 +29,12 @@ The documentation of the library is available at http://dotentity.net/docs.
 
 ## Report Issues
 Please check if the problem you are facing is already listed in [issues](https://github.com/RoastedBytes/dotEntity/issues). If not, create a new issue and provide steps to reproduce the issue. Sharing images would be good if that helps to reproduce the issue quickly.
+
+## Showcase
+
+* [EvenCart](https://www.evencart.com) - eCommerce software built on top of ASP.NET Core and Liquid.
+* [ZeroAM](https://www.roastedbytes.com/zeroam) - Daily Journal and Notes application for Windows.
+* [Roasted Email Templates](https://www.roastedbytes.com/roasted-email-templates-for-nopcommerce) - Email templates plugin for nopCommerce.
+* Invoice Manager - Invoicing app for Windows.
+
+ 
