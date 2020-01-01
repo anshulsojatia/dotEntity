@@ -501,7 +501,7 @@ namespace DotEntity.MySql
             allTypes.Add(typeof(T));
             // make the query now
             builder.Append($"SELECT {rawSelection} FROM ");
-
+            builder.Append($"(SELECT {QueryParserUtilities.GetSelectColumnString(allTypes, typedAliases)} FROM ");
             builder.Append(tableName.ToEnclosed() + $" {parentAliasUsed} ");
 
             //join
@@ -521,6 +521,8 @@ namespace DotEntity.MySql
                 var offset = (page - 1) * count;
                 builder.Append($" LIMIT {offset},{count}");
             }
+
+            builder.Append($") AS WrappedResult");
             var query = builder.ToString().Trim() + ";";
             return query;
         }

@@ -630,6 +630,21 @@ namespace DotEntity.Tests.SqlGeneratorTests
         }
 
         [Test]
+        public void JoinGenerator_Custom_Selection_Valid()
+        {
+            Expression<Func<Product, Category, bool>> expression = (product, category) => product.Id == category.Id;
+            var sql = generator.GenerateJoinWithCustomSelection<Product>(out IList<QueryInfo> queryParameters, "Product_Id", new List<IJoinMeta>()
+            {
+                new JoinMeta<ProductCategory>("Id", "ProductId"),
+                new JoinMeta<Category>("CategoryId", "Id")
+            }, new List<LambdaExpression>() { expression });
+
+            var expected = "SELECT Product_Id FROM (SELECT * FROM `Product` t1 INNER JOIN `ProductCategory` t2 ON t1.`Id` = t2.`ProductId` INNER JOIN `Category` t3 ON t2.`CategoryId` = t3.`Id`  WHERE (t1.`Id` = t3.`Id`)) AS WrappedResult;";
+            Assert.AreEqual(expected, sql);
+            Assert.AreEqual(1, queryParameters.Count);
+        }
+
+        [Test]
         public void JoinGenerator_Multiple_Where_Valid()
         {
             Expression<Func<Product, Category, bool>> expression1 = (product, category) => product.Id == category.Id;
