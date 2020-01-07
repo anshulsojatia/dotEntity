@@ -78,7 +78,7 @@ namespace DotEntity
         /// <param name="joinType">(optional) The <see cref="JoinType"/> of this join. Default is <see cref="JoinType.Inner"/></param>
         /// <param name="sourceColumnAppearanceOrder">(optional) The order of source column in the query if the source column type has been used multiple times. Default is first appearance.</param>
         /// <returns>An implementation object of type <see cref="IEntitySet{T}"/></returns>
-        IEntitySet<T> Join<T1>(string sourceColumnName, string destinationColumnName, Type sourceColumnType, JoinType joinType = JoinType.Inner, int sourceColumnAppearanceOrder = 0) where T1 : class;
+        IEntitySet<T> Join<T1>(string sourceColumnName, string destinationColumnName, Type sourceColumnType, JoinType joinType = JoinType.Inner, int sourceColumnAppearanceOrder = 0, Expression<Func<T, T1, bool>> additionalExpression = null) where T1 : class;
 
         /// <summary>
         /// Joins the current <see cref="IEntitySet{T}" /> with another entity of <typeparamref name="T1"/> to produce a nested result
@@ -89,7 +89,7 @@ namespace DotEntity
         /// <param name="sourceColumnType">(optional) The <see cref="SourceColumn"/> type in this join. Default is <see cref="SourceColumn.Chained"/></param>
         /// <param name="joinType">(optional) The <see cref="JoinType"/> of this join. Default is <see cref="JoinType.Inner"/></param>
         /// <returns>An implementation object of type <see cref="IEntitySet{T}"/></returns>
-        IEntitySet<T> Join<T1>(string sourceColumnName, string destinationColumnName, SourceColumn sourceColumnType = SourceColumn.Chained, JoinType joinType = JoinType.Inner) where T1 : class;
+        IEntitySet<T> Join<T1>(string sourceColumnName, string destinationColumnName, SourceColumn sourceColumnType = SourceColumn.Chained, JoinType joinType = JoinType.Inner, Expression<Func<T, T1, bool>> additionalExpression = null) where T1 : class;
 
         /// <summary>
         /// Specifies a placeholder join to be used when a manually written join query or stored procedure returns data from tables not related to temporary tables
