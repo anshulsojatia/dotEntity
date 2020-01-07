@@ -47,6 +47,13 @@ namespace DotEntity
             }
         }
 
+        public static void QueryTransaction(string query, object parameters)
+        {
+            using (var manager = new DotEntityQueryManager())
+            {
+                manager.Do(query, parameters);
+            }
+        }
         public static QueryCache GetQueryCache()
         {
             return new QueryCache();

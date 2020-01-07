@@ -150,7 +150,7 @@ namespace DotEntity
                 _transactionCommands.Add(cmd);
                 return;
             }
-            DotEntityDbConnector.ExecuteCommand(cmd);
+            DotEntityDbConnector.ExecuteCommand(cmd, true);
         }
 
         public virtual void DoProcedure(string query, object parameters)
