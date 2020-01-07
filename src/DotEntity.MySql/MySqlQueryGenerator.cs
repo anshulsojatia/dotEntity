@@ -233,7 +233,13 @@ namespace DotEntity.MySql
                 }
                 joinBuilder.Append(
                     $"{JoinMap[joinMeta.JoinType]} {joinedTableName.ToEnclosed()} {newAlias} ON {sourceAlias}.{joinMeta.SourceColumnName.ToEnclosed()} = {newAlias}.{joinMeta.DestinationColumnName.ToEnclosed()} ");
-
+                if (joinMeta.AdditionalJoinExpression != null)
+                {
+                    var parser = new ExpressionTreeParser(typedAliases);
+                    var joinExpression = parser.GetWhereString(joinMeta.AdditionalJoinExpression);
+                    joinBuilder.Append($"AND {joinExpression} ");
+                    parameters = parser.QueryInfoList;
+                }
                 lastAliasUsed = newAlias;
 
             }
@@ -248,7 +254,7 @@ namespace DotEntity.MySql
                 {
                     whereStringBuilder.Add(parser.GetWhereString(wh));
                 }
-                parameters = parser.QueryInfoList;
+                parameters = parameters?.Concat(parser.QueryInfoList).ToList() ?? parser.QueryInfoList;
                 whereString = string.Join(" AND ", WrapWithBraces(whereStringBuilder)).Trim();
             }
 
@@ -334,7 +340,13 @@ namespace DotEntity.MySql
 
                 joinBuilder.Append(
                     $"{JoinMap[joinMeta.JoinType]} {joinedTableName.ToEnclosed()} {newAlias} ON {sourceAlias}.{joinMeta.SourceColumnName.ToEnclosed()} = {newAlias}.{joinMeta.DestinationColumnName.ToEnclosed()} ");
-
+                if (joinMeta.AdditionalJoinExpression != null)
+                {
+                    var parser = new ExpressionTreeParser(typedAliases);
+                    var joinExpression = parser.GetWhereString(joinMeta.AdditionalJoinExpression);
+                    joinBuilder.Append($"AND {joinExpression} ");
+                    parameters = parser.QueryInfoList;
+                }
                 lastAliasUsed = newAlias;
 
             }
@@ -358,7 +370,7 @@ namespace DotEntity.MySql
                         whereStringBuilder.Add(wStr);
                     }
                 }
-                parameters = parser.QueryInfoList;
+                parameters = parameters?.Concat(parser.QueryInfoList).ToList() ?? parser.QueryInfoList;
                 whereString = string.Join(" AND ", WrapWithBraces(whereStringBuilder)).Trim();
                 rootTypeWhereString = string.Join(" AND ", WrapWithBraces(rootTypeWhereBuilder)).Trim();
             }
@@ -465,7 +477,13 @@ namespace DotEntity.MySql
                 }
                 joinBuilder.Append(
                     $"{JoinMap[joinMeta.JoinType]} {joinedTableName.ToEnclosed()} {newAlias} ON {sourceAlias}.{joinMeta.SourceColumnName.ToEnclosed()} = {newAlias}.{joinMeta.DestinationColumnName.ToEnclosed()} ");
-
+                if (joinMeta.AdditionalJoinExpression != null)
+                {
+                    var parser = new ExpressionTreeParser(typedAliases);
+                    var joinExpression = parser.GetWhereString(joinMeta.AdditionalJoinExpression);
+                    joinBuilder.Append($"AND {joinExpression} ");
+                    parameters = parser.QueryInfoList;
+                }
                 lastAliasUsed = newAlias;
 
             }
@@ -480,7 +498,7 @@ namespace DotEntity.MySql
                 {
                     whereStringBuilder.Add(parser.GetWhereString(wh));
                 }
-                parameters = parser.QueryInfoList;
+                parameters = parameters?.Concat(parser.QueryInfoList).ToList() ?? parser.QueryInfoList;
                 whereString = string.Join(" AND ", WrapWithBraces(whereStringBuilder)).Trim();
             }
 

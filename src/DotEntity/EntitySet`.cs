@@ -393,12 +393,12 @@ namespace DotEntity
             return this;
         }
 
-        public IEntitySet<T> Join<T1>(string sourceColumnName, string destinationColumnName, Type sourceColumnType, JoinType joinType = JoinType.Inner, int sourceColumnAppearanceOrder = 0) where T1 : class
+        public IEntitySet<T> Join<T1>(string sourceColumnName, string destinationColumnName, Type sourceColumnType, JoinType joinType = JoinType.Inner, int sourceColumnAppearanceOrder = 0, Expression<Func<T, T1, bool>> additionalExpression = null) where T1 : class
         {
             if (_joinList == null)
                 _joinList = new List<IJoinMeta>();
 
-            _joinList.Add(new JoinMeta<T1>(sourceColumnName, destinationColumnName, sourceColumnType, joinType, sourceColumnAppearanceOrder));
+            _joinList.Add(new JoinMeta<T1>(sourceColumnName, destinationColumnName, sourceColumnType, joinType, sourceColumnAppearanceOrder, additionalExpression));
             return this;
         }
 
@@ -506,12 +506,12 @@ namespace DotEntity
 
         }
 
-        IEntitySet<T> IEntitySet<T>.Join<T1>(string sourceColumnName, string destinationColumnName, SourceColumn sourceColumn, JoinType joinType)
+        IEntitySet<T> IEntitySet<T>.Join<T1>(string sourceColumnName, string destinationColumnName, SourceColumn sourceColumn, JoinType joinType, Expression<Func<T, T1, bool>> additionalExpression = null)
         {
             if (_joinList == null)
                 _joinList = new List<IJoinMeta>();
 
-            _joinList.Add(new JoinMeta<T1>(sourceColumnName, destinationColumnName, sourceColumn, joinType));
+            _joinList.Add(new JoinMeta<T1>(sourceColumnName, destinationColumnName, sourceColumn, joinType, additionalExpression));
             return this;
         }
 

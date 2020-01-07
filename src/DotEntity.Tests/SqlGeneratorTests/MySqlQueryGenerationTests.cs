@@ -601,6 +601,21 @@ namespace DotEntity.Tests.SqlGeneratorTests
         }
 
         [Test]
+        public void JoinGenerator_Simple_With_Additional_Join_Expression_Valid()
+        {
+            Expression<Func<Category, bool>> additionalExpression = category => category.CategoryName == "nice";
+            var sql = generator.GenerateJoin<Product>(out IList<QueryInfo> queryParameters, new List<IJoinMeta>()
+            {
+                new JoinMeta<ProductCategory>("Id", "ProductId"),
+                new JoinMeta<Category>("CategoryId", "Id", additionalExpression: additionalExpression)
+            });
+
+            var expected = "SELECT * FROM `Product` t1 INNER JOIN `ProductCategory` t2 ON t1.`Id` = t2.`ProductId` INNER JOIN `Category` t3 ON t2.`CategoryId` = t3.`Id` AND t3.`CategoryName` = @t3_CategoryName;";
+            Assert.AreEqual(expected, sql);
+            Assert.AreEqual(1, queryParameters.Count);
+        }
+
+        [Test]
         public void JoinGenerator_Simple_WithParentSource_Valid()
         {
             var sql = generator.GenerateJoin<Product>(out IList<QueryInfo> queryParameters, new List<IJoinMeta>()
