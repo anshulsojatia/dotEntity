@@ -14,7 +14,7 @@
     <RepositoryType>Git</RepositoryType>
     <PackageTags>Micro-ORM, Database, .NET Framework, POCO, MySql</PackageTags>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>2.0.2</Version>
+    <Version>2.1.0</Version>
     <PackageId>DotEntity.MySql</PackageId>
     <AssemblyName>DotEntity.MySql</AssemblyName>
   </PropertyGroup>

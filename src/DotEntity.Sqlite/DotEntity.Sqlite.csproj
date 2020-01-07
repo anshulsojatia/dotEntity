@@ -14,7 +14,7 @@
     <RepositoryType>Git</RepositoryType>
     <PackageTags>Micro-ORM, Database, .NET Framework, POCO, Sqlite</PackageTags>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>2.0.0</Version>
+    <Version>2.1.0</Version>
     <PackageId>DotEntity.Sqlite</PackageId>
     <AssemblyName>DotEntity.Sqlite</AssemblyName>
   </PropertyGroup>
