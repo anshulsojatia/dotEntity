@@ -463,6 +463,36 @@ namespace DotEntity.Tests.SqlGeneratorTests
             Assert.AreEqual(DateTime.Now.Date, ((DateTime)queryParameters.First(x => x.ParameterName == "DateCreated").PropertyValue).Date);
         }
 
+        [Test]
+        public void SelectGenerator_With_Multiple_Nots_Valid()
+        {
+            var list = new List<int>()
+            {
+                1, 2, 3
+            };
+            var where = new List<Expression<Func<Product, bool>>>
+            {
+                product => !list.Contains(product.Id),
+                product => product.ProductName == GetName(),
+                product => product.IsActive
+            };
+            var sql = generator.GenerateSelect(out IList<QueryInfo> queryParameters, where);
+            var expected = "SELECT * FROM [Product] WHERE ([Id] NOT IN (@Id_InParam_1,@Id_InParam_2,@Id_InParam_3) ) AND ([ProductName] = @ProductName) AND ([IsActive] = @IsActive);";
+            Assert.AreEqual(expected, sql);
+        }
+
+        [Test]
+        public void SelectGenerator_With_NULL_Valid()
+        {
+            var where = new List<Expression<Func<Product, bool>>>
+            {
+                product => product.ProductName == null,
+            };
+            var sql = generator.GenerateSelect(out IList<QueryInfo> queryParameters, where);
+            var expected = "SELECT * FROM [Product] WHERE ([ProductName] IS NULL);";
+            Assert.AreEqual(expected, sql);
+        }
+
         private string GetName()
         {
             return "Ice Candy";

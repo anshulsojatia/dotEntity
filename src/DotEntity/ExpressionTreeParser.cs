@@ -154,7 +154,7 @@ namespace DotEntity
             if (expression.Value is bool)
             {
                 EvaluateAndAdd(expression);
-                return null;
+                return expression.Value;
             }
 
             return expression.Value;
@@ -180,6 +180,8 @@ namespace DotEntity
                             operatorName = _notCount > 0 ? "NOT IN" : "IN";
                         }
 
+                        if (_notCount > 0)
+                            DecrementNotCount();
                         AddQueryParameter(Markers.Contains, propertyName, propertyValue, operatorName, propertyName, isProperty);
                         return null;
                     }
