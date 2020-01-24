@@ -238,7 +238,7 @@ namespace DotEntity.MySql
                     var parser = new ExpressionTreeParser(typedAliases);
                     var joinExpression = parser.GetWhereString(joinMeta.AdditionalJoinExpression);
                     joinBuilder.Append($"AND {joinExpression} ");
-                    parameters = parser.QueryInfoList;
+                    parameters = parameters.Concat(parser.QueryInfoList).ToList();
                 }
                 lastAliasUsed = newAlias;
 
@@ -345,7 +345,7 @@ namespace DotEntity.MySql
                     var parser = new ExpressionTreeParser(typedAliases);
                     var joinExpression = parser.GetWhereString(joinMeta.AdditionalJoinExpression);
                     joinBuilder.Append($"AND {joinExpression} ");
-                    parameters = parser.QueryInfoList;
+                    parameters = parameters.Concat(parser.QueryInfoList).ToList();
                 }
                 lastAliasUsed = newAlias;
 
@@ -482,7 +482,7 @@ namespace DotEntity.MySql
                     var parser = new ExpressionTreeParser(typedAliases);
                     var joinExpression = parser.GetWhereString(joinMeta.AdditionalJoinExpression);
                     joinBuilder.Append($"AND {joinExpression} ");
-                    parameters = parser.QueryInfoList;
+                    parameters = parameters.Concat(parser.QueryInfoList).ToList();
                 }
                 lastAliasUsed = newAlias;
 
