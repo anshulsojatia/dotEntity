@@ -26,6 +26,8 @@
  * visit http://dotentity.net/licensing
  */
 using System;
+using System.Collections.Generic;
+using DotEntity.Versioning;
 
 namespace DotEntity
 {
@@ -38,5 +40,7 @@ namespace DotEntity
         bool Success { get; set; }
 
         bool IsInternalTransaction { get; }
+
+        IList<IDatabaseVersion> CurrentlyRanVersions { get; set; }
     }
 }

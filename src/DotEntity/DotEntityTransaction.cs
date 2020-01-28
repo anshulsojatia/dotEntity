@@ -25,7 +25,10 @@
  * To know more about our commercial license email us at support@roastedbytes.com or
  * visit http://dotentity.net/licensing
  */
+
+using System.Collections.Generic;
 using DotEntity.Extensions;
+using DotEntity.Versioning;
 
 namespace DotEntity
 {
@@ -60,11 +63,14 @@ namespace DotEntity
         {
             Manager = new DotEntityQueryManager(true);
             IsInternalTransaction = internalTransaction;
+            CurrentlyRanVersions = new List<IDatabaseVersion>();
         }
 
         public IDotEntityQueryManager Manager { get; }
 
         public bool Success { get; set; }
         public bool IsInternalTransaction { get; }
+
+        public IList<IDatabaseVersion> CurrentlyRanVersions { get; set; }
     }
 }

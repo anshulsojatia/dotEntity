@@ -88,6 +88,8 @@ namespace DotEntity.Versioning
 
                     //upgrade this
                     availableVersion.Upgrade(transaction);
+                    transaction.CurrentlyRanVersions.Add(availableVersion);
+
                     var newVersion = new DotEntityVersion()
                     {
                         VersionKey = availableVersion.VersionKey,
@@ -129,6 +131,8 @@ namespace DotEntity.Versioning
                         continue;
 
                     availableVersion.Downgrade(transaction);
+                    transaction.CurrentlyRanVersions.Add(availableVersion);
+
                     //remove the version
                     EntitySet<DotEntityVersion>.Delete(x => x.VersionKey == vKey && x.ContextName == _callingContextName, transaction);
                 }
