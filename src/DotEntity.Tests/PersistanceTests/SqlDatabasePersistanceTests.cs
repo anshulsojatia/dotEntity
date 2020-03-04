@@ -381,5 +381,24 @@ namespace DotEntity.Tests.PersistanceTests
             var pc = EntitySet<ProductCategory>.Where(x => x.CategoryId == categoryId).SelectSingle();
             Assert.IsNull(pc);
         }
+
+        [Test]
+        public void Unavailable_Column_Set_To_Default_Succeeds()
+        {
+            var product = new Product()
+            {
+                ProductName = "Unavailable_Column_Set_To_Default_Succeeds",
+                ProductDescription = "Some description won't hurt",
+                DateCreated = DateTime.Now,
+                Price = 25
+            };
+            EntitySet<Product>.Insert(product);
+
+            var retrieved = EntitySet<Product>.Query("SELECT Id FROM Product WHERE Id=@Id", new { Id = product.Id }).FirstOrDefault();
+            Assert.IsNotNull(retrieved);
+            Assert.AreEqual(product.Id, retrieved.Id);
+            Assert.AreEqual(null, retrieved.ProductName);
+
+        }
     }
 }

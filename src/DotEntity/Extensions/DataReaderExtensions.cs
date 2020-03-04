@@ -50,7 +50,15 @@ namespace DotEntity.Extensions
                     var doLower = typeName == "SqliteMaster" && dataReader.GetType().FullName == "Microsoft.Data.Sqlite.SqliteDataReader";
                     foreach (var c in columnNames)
                     {
-                        columnOrdinals.Add(typeName + "." + c, dataReader.GetOrdinal(doLower ? c.ToLowerInvariant() : c));
+                        try
+                        {
+                            columnOrdinals.Add(typeName + "." + c, dataReader.GetOrdinal(doLower ? c.ToLowerInvariant() : c));
+                        }
+                        catch(IndexOutOfRangeException ex)
+                        {
+                            //may be the column name doesn't exist in the result. skip it
+                            continue;
+                        }
                     }
                     ProcessedQueryCache.TrySet(command.Query, columnOrdinals);
                 }
