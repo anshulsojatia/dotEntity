@@ -161,13 +161,17 @@ namespace DotEntity
         public virtual string GetAddColumnScript<T, T1>(string columnName, T1 value, PropertyInfo propertyInfo = null)
         {
             var tableName = DotEntityDb.GetTableNameForType(typeof(T));
+            var constraintName = $"CONSTRAINT DF_{tableName}_{columnName}";
             var dataTypeString = GetFormattedDbTypeForType(typeof(T1), propertyInfo);
             var builder = new StringBuilder($"ALTER TABLE {tableName.ToEnclosed()}{Environment.NewLine}");
-            builder.Append($"ADD {columnName.ToEnclosed()} {dataTypeString}");
+            builder.Append($"ADD {columnName.ToEnclosed()} {dataTypeString} NOT NULL CONSTRAINT {constraintName.ToEnclosed()}");
             if (value != null)
             {
-                builder.Append($" DEFAULT '{GetValueInTargetType<T1>(value)}'");
+                builder.Append($" DEFAULT '{GetValueInTargetType<T1>(value)}'{Environment.NewLine}");
             }
+            //drop the constraint
+            builder.Append($"ALTER TABLE {tableName.ToEnclosed()}{Environment.NewLine}");
+            builder.Append($"DROP CONSTRAINT {constraintName.ToEnclosed()}");
             return builder.ToString();
         }
 
