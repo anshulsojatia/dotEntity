@@ -135,9 +135,9 @@ namespace DotEntity
                     manager.Do(query, parameters);
             }
 
-            public static void CreateIndex<T>(string[] columnNames, IDotEntityTransaction transaction, bool unique = false) where T : class
+            public static void CreateIndex<T>(string[] columnNames, string[] additionalColumns, IDotEntityTransaction transaction, bool unique = false) where T : class
             {
-                var script = DatabaseTableGenerator.GetCreateIndexScript<T>(columnNames, unique);
+                var script = DatabaseTableGenerator.GetCreateIndexScript<T>(columnNames, additionalColumns, unique);
                 transaction.Manager.AsDotEntityQueryManager().Do(script, null);
             }
 

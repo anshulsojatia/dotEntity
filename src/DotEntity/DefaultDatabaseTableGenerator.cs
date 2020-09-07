@@ -192,18 +192,23 @@ namespace DotEntity
             return builder.ToString();
         }
 
-        public virtual string GetCreateIndexScript<T>(string[] columnNames, bool unique = false)
+        public virtual string GetCreateIndexScript<T>(string[] columnNames, string[] additionalColumns = null, bool unique = false)
         {
-            return GetCreateIndexScript(typeof(T), columnNames, unique);
+            return GetCreateIndexScript(typeof(T), columnNames, additionalColumns, unique);
         }
 
-        public virtual string GetCreateIndexScript(Type type, string[] columnNames, bool unique = false)
+        public virtual string GetCreateIndexScript(Type type, string[] columnNames, string[] additionalColumns = null, bool unique = false)
         {
             var tableName = DotEntityDb.GetTableNameForType(type);
             var indexName = GetIndexName(tableName, columnNames);
             var columnStr = string.Join(",", columnNames.Select(x => x.ToEnclosed()));
             var uniqueStr = unique ? "UNIQUE " : "";
             var builder = new StringBuilder($"CREATE {uniqueStr}INDEX {indexName} ON {tableName.ToEnclosed()} ({columnStr})");
+            if (additionalColumns != null && additionalColumns.Any())
+            {
+                var moreColumnStr = string.Join(",", additionalColumns.Select(x => x.ToEnclosed()));
+                builder.Append($" INCLUDE ({moreColumnStr})");
+            }
             return builder.ToString();
         }
 

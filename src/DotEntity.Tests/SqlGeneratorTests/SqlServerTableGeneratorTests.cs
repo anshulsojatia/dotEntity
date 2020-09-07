@@ -111,8 +111,12 @@ namespace DotEntity.Tests.SqlGeneratorTests
             var expected = "CREATE INDEX Idx_DateCreated ON [Product] ([DateCreated])";
             Assert.AreEqual(expected, sql);
 
-            sql = generator.GetCreateIndexScript<Product>(new[] { nameof(Product.DateCreated) }, true);
+            sql = generator.GetCreateIndexScript<Product>(new[] { nameof(Product.DateCreated) }, null, true);
             expected = "CREATE UNIQUE INDEX Idx_DateCreated ON [Product] ([DateCreated])";
+            Assert.AreEqual(expected, sql);
+
+            sql = generator.GetCreateIndexScript<Product>(new[] { nameof(Product.DateCreated) }, new[] { nameof(Product.ProductName) }, true);
+            expected = "CREATE UNIQUE INDEX Idx_DateCreated ON [Product] ([DateCreated]) INCLUDE ([ProductName])";
             Assert.AreEqual(expected, sql);
         }
 

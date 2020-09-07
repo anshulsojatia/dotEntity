@@ -98,5 +98,11 @@ namespace DotEntity.MySql
             builder.Append($"DROP INDEX {indexName};");
             return builder.ToString();
         }
+
+        public override string GetCreateIndexScript(Type type, string[] columnNames, string[] additionalColumns = null, bool unique = false)
+        {
+            //ignore additional columns for mysql
+            return base.GetCreateIndexScript(type, columnNames, null, unique);
+        }
     }
 }

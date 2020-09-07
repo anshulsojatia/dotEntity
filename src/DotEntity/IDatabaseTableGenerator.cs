@@ -54,9 +54,9 @@ namespace DotEntity
 
         string GetAlterColumnScript(Type type, string columnName, Type columnType, PropertyInfo propertyInfo = null);
 
-        string GetCreateIndexScript<T>(string[] columnNames, bool unique = false);
+        string GetCreateIndexScript<T>(string[] columnNames, string[] additionalColumns = null, bool unique = false);
 
-        string GetCreateIndexScript(Type type, string[] columnNames, bool unique = false);
+        string GetCreateIndexScript(Type type, string[] columnNames, string[] additionalColumns = null, bool unique = false);
 
         string GetDropIndexScript<T>(string[] columnNames);
 
