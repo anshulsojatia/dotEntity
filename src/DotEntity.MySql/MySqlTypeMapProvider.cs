@@ -33,6 +33,8 @@ namespace DotEntity.MySql
                     { typeof(double?), "FLOAT" },
                     { typeof(decimal), "NUMERIC(18,5)" },
                     { typeof(decimal?), "NUMERIC(18,5)" },
+                    { typeof(float), "FLOAT" },
+                    { typeof(float?), "FLOAT" },
                     { typeof(bool), "TINYINT(1)" },
                     { typeof(bool?), "TINYINT(1)" },
                     { typeof(byte[]), "BLOB" },

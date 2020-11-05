@@ -32,6 +32,8 @@ namespace DotEntity.Sqlite
                     { typeof(double?), "REAL" },
                     { typeof(decimal), "NUMERIC" },
                     { typeof(decimal?), "NUMERIC" },
+                    { typeof(float), "REAL" },
+                    { typeof(float?), "REAL" },
                     { typeof(bool), "NUMERIC" },
                     { typeof(bool?), "NUMERIC" },
                     { typeof(byte[]), "BLOB" },
