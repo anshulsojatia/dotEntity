@@ -91,10 +91,11 @@ namespace DotEntity
                 var columns = props.Select(p => p.Name).Where(s => exclude == null || !exclude.Contains(s)).ToList();
                 if (typedAliases == null)
                     return string.Join(",", columns.Select(x => x.ToEnclosed()));
-                var tableName = type.Name;
+                var tableName = DotEntityDb.GetTableNameForType(type);                
                 typedAliases.TryGetValue(tableName, out List<string> prefixes);
                 if(prefixes == null)
                     return string.Join(",", columns.Select(x => x.ToEnclosed()));
+                var tableNameWithoutSchema = DotEntityDb.GetTableNameForType(type, true);
                 var builder = new List<string>();
                 foreach (var p in prefixes)
                 {
@@ -102,7 +103,7 @@ namespace DotEntity
                     {
                         var prefix = p + ".";
                         builder.Add(string.Join(",",
-                            columns.Select(x => prefix + x.ToEnclosed() + " AS " + GetColumnAliasName(tableName, x))));
+                            columns.Select(x => prefix + x.ToEnclosed() + " AS " + GetColumnAliasName(tableNameWithoutSchema, x))));
                     }
                 }
                 return string.Join(",", builder);

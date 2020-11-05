@@ -44,7 +44,7 @@ namespace DotEntity
     {
         public static string ConnectionString { get; set; }
 
-        private static ConcurrentDictionary<Type, string> EntityTableNames { get; set; }
+        private static ConcurrentDictionary<Type, Tuple<string, string>> EntityTableNames { get; set; }
 
         public static SelectQueryMode SelectQueryMode { get; set; }
 
@@ -52,7 +52,7 @@ namespace DotEntity
 
         static DotEntityDb()
         {
-            EntityTableNames = new ConcurrentDictionary<Type, string>();
+            EntityTableNames = new ConcurrentDictionary<Type, Tuple<string, string>>();
             QueryProcessor = new QueryProcessor();
             SelectQueryMode = SelectQueryMode.Explicit;
             ExcludedColumns = new ConcurrentDictionary<Type, string[]>();
@@ -73,9 +73,9 @@ namespace DotEntity
 
         internal static QueryProcessor QueryProcessor { get; set; }
 
-        public static void MapTableNameForType<T>(string tableName)
+        public static void MapTableNameForType<T>(string tableName, string schema = "")
         {
-            EntityTableNames.AddOrUpdate(typeof(T), tableName, (type, s) => tableName);
+            EntityTableNames.AddOrUpdate(typeof(T), Tuple.Create(schema, tableName), (type, s) => Tuple.Create(schema, tableName));
         }
 
         public static void Relate<TSource, TTarget>(string sourceColumnName, string destinationColumnName)
@@ -83,15 +83,30 @@ namespace DotEntity
             RelationMapper.Relate<TSource, TTarget>(sourceColumnName, destinationColumnName);
         }
 
-        public static string GetTableNameForType<T>()
+        public static string GetTableNameForType<T>(bool withoutSchema = false)
         {
             var tType = typeof(T);
-            return GetTableNameForType(tType);
+            return GetTableNameForType(tType, withoutSchema);
         }
 
-        public static string GetTableNameForType(Type type)
+        public static string GetTableNameForType(Type type, bool withoutSchema = false)
         {
-            return EntityTableNames.ContainsKey(type) ? EntityTableNames[type] : (GlobalTableNamePrefix + type.Name);
+            if (EntityTableNames.ContainsKey(type))
+            {
+                if (withoutSchema)
+                {
+                    return EntityTableNames[type].Item2;
+                }
+                else
+                {
+                    if (EntityTableNames[type].Item1 == "")
+                    {
+                        return EntityTableNames[type].Item2;
+                    }
+                }
+                return EntityTableNames[type].Item1 + "." + EntityTableNames[type].Item2;
+            }
+            return (GlobalTableNamePrefix + type.Name);
         }
 
         private static ConcurrentDictionary<string, Queue<IDatabaseVersion>> _databaseVersions;

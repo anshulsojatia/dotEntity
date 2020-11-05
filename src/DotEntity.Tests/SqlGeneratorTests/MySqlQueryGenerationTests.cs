@@ -19,6 +19,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
         {
             DotEntityDb.Initialize(MySqlConnectionString, new MySqlDatabaseProvider("mytest"), SelectQueryMode.Wildcard);
             generator = DotEntityDb.Provider.QueryGenerator;
+            DotEntityDb.MapTableNameForType<Customer>(nameof(Customer), "xyz");
         }
 
         [Test]
@@ -498,10 +499,21 @@ namespace DotEntity.Tests.SqlGeneratorTests
         }
 
         [Test]
+        public void InsertGenerator_EntityType_WithSchema_Valid()
+        {
+            var p = new Customer();
+            var sql = generator.GenerateInsert(p, out IList<QueryInfo> queryParameters);
+            var expected = "INSERT INTO `xyz`.`Customer` (`Name`) VALUES (@Name);SELECT last_insert_id() AS `CustomerId`;";
+
+            Assert.AreEqual(expected, sql);
+            Assert.AreEqual(1, queryParameters.Count);
+        }
+
+        [Test]
         public void InsertGenerator_DynamicType_Valid()
         {
             var sql = generator.GenerateInsert("User", new { UserName = "JohnSmith", FirstName = "John", DateOfBirth = DateTime.Now}, out IList<QueryInfo> queryParameters);
-            var expected = "INSERT INTO `User` (`UserName`,`FirstName`,`DateOfBirth`) VALUES (@UserName,@FirstName,@DateOfBirth);SELECT last_insert_id() AS `Id`;";
+            var expected = "INSERT INTO `User` (`UserName`,`FirstName`,`DateOfBirth`) VALUES (@UserName,@FirstName,@DateOfBirth);";
 
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(3, queryParameters.Count);

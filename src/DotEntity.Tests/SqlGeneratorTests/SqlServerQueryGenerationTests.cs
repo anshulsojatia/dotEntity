@@ -19,6 +19,7 @@ namespace DotEntity.Tests.SqlGeneratorTests
         {
             DotEntityDb.Initialize(MsSqlConnectionString, new SqlServerDatabaseProvider(), SelectQueryMode.Wildcard);
             generator = DotEntityDb.Provider.QueryGenerator;
+            DotEntityDb.MapTableNameForType<Customer>(nameof(Customer), "xyz");
         }
 
         [Test]
@@ -503,17 +504,28 @@ namespace DotEntity.Tests.SqlGeneratorTests
         {
             var p = new Product();
             var sql = generator.GenerateInsert(p, out IList<QueryInfo> queryParameters);
-            var expected = "INSERT INTO [Product] ([ProductName],[ProductDescription],[DateCreated],[Price],[IsActive]) OUTPUT inserted.Id VALUES (@ProductName,@ProductDescription,@DateCreated,@Price,@IsActive);";
+            var expected = "INSERT INTO [Product] ([ProductName],[ProductDescription],[DateCreated],[Price],[IsActive]) OUTPUT inserted.[Id] VALUES (@ProductName,@ProductDescription,@DateCreated,@Price,@IsActive);";
 
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(5, queryParameters.Count);
         }
 
         [Test]
+        public void InsertGenerator_EntityType_WithSchema_Valid()
+        {
+            var p = new Customer();
+            var sql = generator.GenerateInsert(p, out IList<QueryInfo> queryParameters);
+            var expected = "INSERT INTO [xyz].[Customer] ([Name]) OUTPUT inserted.[CustomerId] VALUES (@Name);";
+
+            Assert.AreEqual(expected, sql);
+            Assert.AreEqual(1, queryParameters.Count);
+        }
+
+        [Test]
         public void InsertGenerator_DynamicType_Valid()
         {
             var sql = generator.GenerateInsert("User", new { UserName = "JohnSmith", FirstName = "John", DateOfBirth = DateTime.Now}, out IList<QueryInfo> queryParameters);
-            var expected = "INSERT INTO [User] ([UserName],[FirstName],[DateOfBirth]) OUTPUT inserted.Id VALUES (@UserName,@FirstName,@DateOfBirth);";
+            var expected = "INSERT INTO [User] ([UserName],[FirstName],[DateOfBirth]) VALUES (@UserName,@FirstName,@DateOfBirth);";
 
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(3, queryParameters.Count);

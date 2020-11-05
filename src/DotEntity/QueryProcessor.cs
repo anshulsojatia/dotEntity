@@ -58,7 +58,7 @@ namespace DotEntity
                 }
             }
             
-            if (loadIdOfAffectedRow)
+            if (loadIdOfAffectedRow && !command.Parameters.Contains(idParameterName))
             {
                 try
                 {

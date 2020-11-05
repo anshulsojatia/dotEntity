@@ -185,8 +185,7 @@ namespace DotEntity
             var cmd = new DotEntityDbCommand(DbOperationType.Insert, query, queryParameters, keyColumn);
             cmd.ProcessResult(result =>
             {
-                var id = result as int? ?? Convert.ToInt32(result);
-                DataDeserializer<T>.Instance.SetPropertyAs<int>(entity, keyColumn, id);
+                DataDeserializer<T>.Instance.SetPropertyAs(entity, keyColumn, result);
                 if (_withTransaction)
                     //has somebody called for a rollback?
                     cmd.ContinueNextCommand = !resultAction?.Invoke(entity) ?? true;
@@ -210,8 +209,7 @@ namespace DotEntity
                 var cmd = new DotEntityDbCommand(DbOperationType.Insert, query, queryParameters, keyColumn);
                 cmd.ProcessResult(result =>
                 {
-                    var id = result as int? ?? Convert.ToInt32(result);
-                    DataDeserializer<T>.Instance.SetPropertyAs<int>(t, keyColumn, id);
+                    DataDeserializer<T>.Instance.SetPropertyAs(t, keyColumn, result);
                     if (_withTransaction)
                         //has somebody called for a rollback?
                         cmd.ContinueNextCommand = !resultAction?.Invoke(t) ?? true;
@@ -228,45 +226,6 @@ namespace DotEntity
 
             DotEntityDbConnector.ExecuteCommands(commands.ToArray());
             return 1;
-        }
-
-        [Obsolete("Doesn't give good performance", true)]
-        public virtual int DoInsert2<T>(T[] entities, Func<T, bool> resultAction = null) where T : class
-        {
-            /*In batch inserts, the parameters may exceed the maximum number of command parameters supported by the server.
-             e.g. SqlServer supports 2100 command parameters at max. We'll therefore check if the parameter counts don't exceed that limit*/
-            var usablePropertiesCount = typeof(T).GetDatabaseUsableProperties().Count();
-            var parameterCount = usablePropertiesCount * entities.Length;
-            if (parameterCount > DotEntityDb.Provider.MaximumParametersPerQuery)
-                throw new Exception(
-                    "The batch insert can't continue because the resultant query will have more parameters that allowed by the provider");
-
-            //safe to proceed
-            var keyColumn = DataDeserializer<T>.Instance.GetKeyColumn();
-            var query = _queryGenerator.GenerateBatchInsert(entities, out IList<QueryInfo> queryParameters);
-            var cmd = new DotEntityDbCommand(DbOperationType.MultiQuery, query, queryParameters, keyColumn);
-
-            cmd.ProcessReader(reader =>
-            {
-                var entityIndex = 0;
-                var multiResultRows = reader.GetRawDataReaderRows();
-                foreach (var rowList in multiResultRows)
-                {
-                    var id = (int)rowList[0][0];
-                    DataDeserializer<T>.Instance.SetPropertyAs<int>(entities[entityIndex++], keyColumn, id);
-                }
-                return multiResultRows.Count;
-            });
-            if (_withTransaction)
-            {
-                _transactionCommands.Add(cmd);
-            }
-
-            if (_withTransaction)
-                return default(int);
-
-            DotEntityDbConnector.ExecuteCommand(cmd, useTransaction: true);
-            return cmd.GetResultAs<int>();
         }
 
         public virtual int DoUpdate<T>(T entity, Func<T, bool> resultAction = null) where T : class
