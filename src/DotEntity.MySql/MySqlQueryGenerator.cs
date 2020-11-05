@@ -12,13 +12,26 @@ namespace DotEntity.MySql
     {
         public override string GenerateInsert(string tableName, object entity, out IList<QueryInfo> parameters)
         {
-            Dictionary<string, object> columnValueMap = QueryParserUtilities.ParseObjectKeyValues(entity, exclude: "Id");
+            var type = entity.GetType();
+            string keyColumn = null;
+            try
+            {
+                keyColumn = type.GetKeyColumnName();
+            }
+            catch
+            {
+                keyColumn = null;
+            }
+
+            Dictionary<string, object> columnValueMap = QueryParserUtilities.ParseObjectKeyValues(entity, exclude: keyColumn);
             var insertColumns = columnValueMap.Keys.ToArray();
             var joinInsertString = string.Join(",", insertColumns.Select(x => x.ToEnclosed()));
             var joinValueString = "@" + string.Join(",@", insertColumns); ;
             parameters = ToQueryInfos(columnValueMap);
-
-            return $"INSERT INTO {tableName.ToEnclosed()} ({joinInsertString}) VALUES ({joinValueString});SELECT last_insert_id() AS { "Id".ToEnclosed()};";
+            var insertBuilder = new StringBuilder($"INSERT INTO {tableName.TableEnclosed()} ({joinInsertString}) VALUES ({joinValueString});");
+            if (keyColumn != null)
+                insertBuilder.Append($"SELECT last_insert_id() AS {keyColumn.ToEnclosed()};");
+            return insertBuilder.ToString();
         }
 
         public override string GenerateSelect<T>(out IList<QueryInfo> parameters, List<Expression<Func<T, bool>>> where = null, Dictionary<Expression<Func<T, object>>, RowOrder> orderBy = null, int page = 1, int count = int.MaxValue, Dictionary<Type, IList<string>> excludeColumns = null)

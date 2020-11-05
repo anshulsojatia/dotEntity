@@ -98,6 +98,10 @@ namespace DotEntity.Caching
                         setter = property.CreateSetter<decimal>(_type);
                     else if (propertyType == typeof(decimal?))
                         setter = property.CreateSetter<decimal?>(_type);
+                    else if (propertyType == typeof(float))
+                        setter = property.CreateSetter<float>(_type);
+                    else if (propertyType == typeof(float?))
+                        setter = property.CreateSetter<float?>(_type);
                     else if (propertyType == typeof(double))
                         setter = property.CreateSetter<double>(_type);
                     else if (propertyType == typeof(double?))
@@ -143,6 +147,10 @@ namespace DotEntity.Caching
                         getter = property.CreateGetter<decimal>(_type);
                     else if (propertyType == typeof(decimal?))
                         getter = property.CreateGetter<decimal?>(_type);
+                    else if (propertyType == typeof(float))
+                        getter = property.CreateGetter<float>(_type);
+                    else if (propertyType == typeof(float?))
+                        getter = property.CreateGetter<float?>(_type);
                     else if (propertyType == typeof(double))
                         getter = property.CreateGetter<double>(_type);
                     else if (propertyType == typeof(double?))

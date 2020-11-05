@@ -47,7 +47,7 @@ namespace DotEntity.Extensions
                     ordinalsCaptured = true;
                     columnOrdinals = columnOrdinals ?? new Dictionary<string, int>();
                     //the microsoft sqlite reader's get ordinal performs case sensitive comparision, we'll have to lower case the columns in the case
-                    var doLower = typeName == "SqliteMaster" && dataReader.GetType().FullName == "Microsoft.Data.Sqlite.SqliteDataReader";
+                    var doLower = typeName == "sqlite_master" && dataReader.GetType().FullName == "Microsoft.Data.Sqlite.SqliteDataReader";
                     foreach (var c in columnNames)
                     {
                         try

@@ -60,6 +60,8 @@ namespace DotEntity
                     { typeof(double?), "FLOAT" },
                     { typeof(decimal), "NUMERIC(18,5)" },
                     { typeof(decimal?), "NUMERIC(18,5)" },
+                    { typeof(float), "NUMERIC(18,5)" },
+                    { typeof(float?), "NUMERIC(18,5)" },
                     { typeof(bool), "BIT" },
                     { typeof(bool?), "BIT" },
                     { typeof(byte[]), "VARBINARY(MAX)" },

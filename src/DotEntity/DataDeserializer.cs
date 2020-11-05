@@ -70,7 +70,8 @@ namespace DotEntity
         public IEnumerable<T> DeserializeMany(IDataReader reader, DotEntityDbCommand command)
         {
             var columnNames = GetColumns();
-            var rows = reader.GetDataReaderRows(columnNames, _typeofT.Name, command);
+            var tableName = DotEntityDb.GetTableNameForType(_typeofT, true);
+            var rows = reader.GetDataReaderRows(columnNames, tableName, command);
             return DeserializeMany(rows);
         }
 
@@ -80,13 +81,13 @@ namespace DotEntity
             return tArray;
         }
 
-        public void SetProperties(T instance, DataReaderRow row, string[] columnNames, int instanceIndex = 0)
+        public void SetProperties(T instance, DataReaderRow row, string[] columnNames, string tableName, int instanceIndex = 0)
         {
             for (var i = 0; i < columnNames.Length; i++)
             {
                 var fieldName = columnNames[i];
                 //if (!_setterMap.ContainsKey(fieldName)) continue;
-                var fieldValue = row[_typeofT.Name + "." + fieldName, instanceIndex];
+                var fieldValue = row[tableName + "." + fieldName, instanceIndex];
                 _setter.Set(instance, fieldName, fieldValue);
             }
         }
@@ -96,11 +97,11 @@ namespace DotEntity
             var columnNames = GetColumns();
             var tInstances = Instantiator<T>.Instances(rows.Count);
             var index = 0;
-
+            var tableName = DotEntityDb.GetTableNameForType(_typeofT, true);
             foreach (var row in rows)
             {
                 var instance = tInstances[index++];
-                SetProperties(instance, row, columnNames);
+                SetProperties(instance, row, columnNames, tableName);
                 yield return instance;
             }
         }
@@ -173,8 +174,9 @@ namespace DotEntity
 
             //let's check if have this object in cache
             var keyColumn = deserializer.GetKeyColumn();
+            var tableNameForType = DotEntityDb.GetTableNameForType(instanceType, true);
             var cacheKey = string.Format(localObjectKey, instanceType.Name, keyColumn,
-                currentDataRow[instanceType.Name + "." + keyColumn, instanceIndex]);
+                currentDataRow[tableNameForType + "." + keyColumn, instanceIndex]);
 
             if (!localCache.TryGetValue(cacheKey, out object newInstance))
             {
@@ -182,13 +184,13 @@ namespace DotEntity
                 newInstance = Instantiator.GetInstance(instanceType);
 
                 //assign properties
-                GenericInvoker.Invoke(deserializer, "SetProperties", newInstance, currentDataRow, columns, instanceIndex);
+                GenericInvoker.Invoke(deserializer, "SetProperties", newInstance, currentDataRow, columns, tableNameForType, instanceIndex);
                 localCache.Add(cacheKey, newInstance);
             }
             return newInstance;
         }
 
-        internal void SetPropertyAs<TType>(T instance, string fieldName, object value)
+        internal void SetPropertyAs(T instance, string fieldName, object value)
         {
             _setter.Set(instance, fieldName, value);
         }
