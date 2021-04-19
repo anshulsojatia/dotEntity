@@ -1,7 +1,7 @@
 ﻿// #region Author Information
 // // Category.cs
 // // 
-// // (c) Apexol Technologies. All Rights Reserved.
+// // (c) Sojatia Infocrafts Private Limited. All Rights Reserved.
 // // 
 // #endregion
 

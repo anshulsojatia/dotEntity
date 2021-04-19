@@ -1,7 +1,7 @@
 ﻿// #region Author Information
 // // InformationSchema.cs
 // // 
-// // (c) Apexol Technologies. All Rights Reserved.
+// // (c) Sojatia Infocrafts Private Limited. All Rights Reserved.
 // // 
 // #endregion
 namespace DotEntity.MySql.Internals.System

@@ -4,10 +4,10 @@
     <TargetFrameworks>net451;netstandard1.5;</TargetFrameworks>
     <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
     <Authors>Team Roasted Bytes</Authors>
-    <Company>Apexol Technologies</Company>
+    <Company>Sojatia Infocrafts Private Limited</Company>
     <Title>dotEntity Sqlite Provider</Title>
     <Description>Sqlite Database Provider for dotEntity</Description>
-    <Copyright>(C) 2019 Sojatia Infocrafts</Copyright>
+    <Copyright>(C) 2021 Sojatia Infocrafts</Copyright>
     <PackageLicenseUrl>http://dotentity.net/licensing</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/RoastedBytes/dotEntity</PackageProjectUrl>
     <RepositoryUrl>https://github.com/RoastedBytes/dotEntity.git</RepositoryUrl>

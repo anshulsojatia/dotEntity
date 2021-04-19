@@ -4,10 +4,10 @@
     <TargetFrameworks>net451;netstandard1.5;</TargetFrameworks>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <Authors>Team Roasted Bytes</Authors>
-    <Company>Apexol Technologies</Company>
+    <Company>Sojatia Infocrafts Private Limited</Company>
     <Title>dotEntity ORM</Title>
     <Description>Yet another simple and powerful micro ORM for .NET</Description>
-    <Copyright>(C) 2019 Sojatia Infocrafts</Copyright>
+    <Copyright>(C) 2021 Sojatia Infocrafts</Copyright>
     <PackageLicenseUrl>http://dotentity.net/licensing</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/RoastedBytes/dotEntity</PackageProjectUrl>
     <RepositoryUrl>https://github.com/RoastedBytes/dotEntity.git</RepositoryUrl>

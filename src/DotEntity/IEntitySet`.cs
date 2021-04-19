@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright(C) 2017  Apexol Technologies
+ * Copyright(C) 2017-2021  Sojatia Infocrafts Private Limited
  * 
  * This file (IEntitySet`.cs) is part of dotEntity(https://github.com/RoastedBytes/dotentity).
  * 
