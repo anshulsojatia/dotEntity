@@ -66,6 +66,8 @@ namespace DotEntity
                 var propertyName = p.Name;
 
                 var propertyValue = getterMap.Get<object>(obj, propertyName); // p.GetValue(obj);
+                if (p.PropertyType.GetTypeInfo().IsEnum)
+                    propertyValue = (int) propertyValue;
                 dict.Add(propertyName, propertyValue);
             }
 
