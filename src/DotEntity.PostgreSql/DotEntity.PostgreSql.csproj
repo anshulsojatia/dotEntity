@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net461;net5.0;</TargetFrameworks>
+    <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
+    <Authors>Team Roasted Bytes</Authors>
+    <Company>Sojatia Infocrafts Private Limited</Company>
+    <Title>dotEntity MySql Provider</Title>
+    <Description>MySql provider for dotEntity</Description>
+    <Copyright>(C) 2021 Sojatia Infocrafts</Copyright>
+    <PackageLicenseUrl>http://dotentity.net/licensing</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/RoastedBytes/dotEntity</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/RoastedBytes/dotEntity.git</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
+    <PackageTags>Micro-ORM, Database, .NET Framework, POCO, PostgreSql</PackageTags>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Version>1.0.0</Version>
+    <PackageId>DotEntity.PostgreSql</PackageId>
+    <AssemblyName>DotEntity.PostgreSql</AssemblyName>
+    <UserSecretsId>0db9c100-0152-4a91-b755-6744b9c0014a</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql" Version="5.0.4" />
+  </ItemGroup> 
+
+  <ItemGroup>
+    <ProjectReference Include="..\DotEntity\DotEntity.csproj" />
+  </ItemGroup> 
+
+ 
+
+</Project>

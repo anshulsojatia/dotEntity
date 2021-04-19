@@ -1,9 +1,7 @@
 ﻿using System;
 using System.IO;
-#if NETSTANDARD15
-using Microsoft.DotNet.PlatformAbstractions;
-#endif
 using System.Reflection;
+using Microsoft.DotNet.PlatformAbstractions;
 
 namespace DotEntity.Tests
 {
@@ -14,16 +12,12 @@ namespace DotEntity.Tests
         protected string MySqlConnectionString;
         protected string MsSqlConnectionString;
         protected string SqliteConnectionString;
+        protected string PostgreSqlConnectionString;
         protected const string ContextKey = "DotEntity.Tests.PersistanceTests";
         private readonly string _sqliteFile;
         public DotEntityTest()
         {
-#if NETSTANDARD15
             _sqliteFile = ApplicationEnvironment.ApplicationBasePath + @"\TestDb\sqlite.db";
-#else
-            _sqliteFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"\TestDb\sqlite.db");
-
-#endif
             IsAppVeyor = Environment.GetEnvironmentVariable("appveyor") == "true";
             IsDeploymentServer = Environment.GetEnvironmentVariable("env.dotentity_deployment") == "true";
             MySqlConnectionString = this.IsAppVeyor
@@ -36,7 +30,10 @@ namespace DotEntity.Tests
                     ? @"Data Source=.\SqlExpress;Initial Catalog=unittest_db;Integrated Security=True;"
                     : @"Data Source=.;Initial Catalog=unittest_db;Integrated Security=True;Persist Security Info=False;User ID=iis_user;Password=iis_user";
 
-            
+            PostgreSqlConnectionString = this.IsAppVeyor
+                ? @"host=127.0.0.1;user id=postgres;password=Password12!;database=mytest;"
+                : @"host=127.0.0.1;user id=postgres;password=admin;database=testdb;";
+
             SqliteConnectionString = $"Data Source={_sqliteFile};";
         }
 

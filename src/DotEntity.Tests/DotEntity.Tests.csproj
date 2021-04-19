@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net451;netstandard1.5;</TargetFrameworks>
+    <TargetFrameworks>net5.0</TargetFrameworks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net45|AnyCPU'">
     <DefineConstants>TRACE;DEBUG;NET45;</DefineConstants>
@@ -47,6 +47,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DotEntity.MySql\DotEntity.MySql.csproj" />
+    <ProjectReference Include="..\DotEntity.PostgreSql\DotEntity.PostgreSql.csproj" />
     <ProjectReference Include="..\DotEntity.Sqlite\DotEntity.Sqlite.csproj" />
     <ProjectReference Include="..\DotEntity.SqlServer\DotEntity.SqlServer.csproj" />
     <ProjectReference Include="..\DotEntity.Tests.Data\DotEntity.Tests.Data.csproj" />

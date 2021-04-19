@@ -31,3 +31,5 @@ src/DotEntity.Tests/DotEntity.Tests.csproj.user
 src/DotEntity.Benchmarks/obj/
 src/DotEntity.Benchmarks/bin/
 src/DotEntity.Benchmarks/BenchmarkDotNet.Artifacts/
+src/DotEntity.PostgreSql/bin/
+src/DotEntity.PostgreSql/obj/
