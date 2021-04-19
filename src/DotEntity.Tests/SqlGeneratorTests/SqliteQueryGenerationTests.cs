@@ -1,5 +1,4 @@
-﻿#if NET451 || NETSTANDARD15
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -626,4 +625,3 @@ namespace DotEntity.Tests.SqlGeneratorTests
     }
 
 }
-#endif

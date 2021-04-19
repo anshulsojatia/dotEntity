@@ -515,10 +515,10 @@ namespace DotEntity.Tests.SqlGeneratorTests
         {
             var p = new Customer();
             var sql = generator.GenerateInsert(p, out IList<QueryInfo> queryParameters);
-            var expected = "INSERT INTO [xyz].[Customer] ([Name]) OUTPUT inserted.[CustomerId] VALUES (@Name);";
+            var expected = "INSERT INTO [xyz].[Customer] ([Name],[Uid]) OUTPUT inserted.[CustomerId] VALUES (@Name,@Uid);";
 
             Assert.AreEqual(expected, sql);
-            Assert.AreEqual(1, queryParameters.Count);
+            Assert.AreEqual(2, queryParameters.Count);
         }
 
         [Test]

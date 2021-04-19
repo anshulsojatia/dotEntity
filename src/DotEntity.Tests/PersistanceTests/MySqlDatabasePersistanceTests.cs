@@ -357,5 +357,22 @@ namespace DotEntity.Tests.PersistanceTests
             var pc = EntitySet<ProductCategory>.Where(x => x.CategoryId == categoryId).SelectSingle();
             Assert.IsNull(pc);
         }
+
+        [Test]
+        public void Index_Tests_Succeeds()
+        {
+            using (var transaction = new DotEntityTransaction())
+            {
+                DotEntity.Database.CreateIndex<Customer>(new string[] { nameof(Customer.Uid) }, null, transaction);
+                transaction.Commit();
+            }
+
+            using (var transaction = new DotEntityTransaction())
+            {
+                DotEntity.Database.DropIndex<Customer>(new string[] { nameof(Customer.Uid) }, transaction);
+                transaction.Commit();
+            }
+
+        }
     }
 }

@@ -5,8 +5,10 @@ namespace DotEntity.Tests.Data
     public class Customer
     {
         [Key]
-        public string CustomerId { get; set; }
+        public int CustomerId { get; set; }
 
         public string Name { get; set; }
+
+        public int Uid { get; set; }
     }
 }

@@ -12,7 +12,8 @@ namespace DotEntity.Tests.PersistanceTests
             {
                 typeof(Product),
                 typeof(Category),
-                typeof(ProductCategory)
+                typeof(ProductCategory),
+                typeof(Customer)
             }, transaction);
 
             DotEntity.Database.CreateConstraint(Relation.Create<Product, ProductCategory>("Id", "ProductId"), transaction);
@@ -26,6 +27,7 @@ namespace DotEntity.Tests.PersistanceTests
             DotEntity.Database.DropTable<ProductCategory>(transaction);
             DotEntity.Database.DropTable<Product>(transaction);
             DotEntity.Database.DropTable<Category>(transaction);
+            DotEntity.Database.DropTable<Customer>(transaction);
         }
     }
 }
