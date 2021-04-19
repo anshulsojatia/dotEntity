@@ -12,24 +12,7 @@ namespace DotEntity.MySql
     {
         public override string GenerateInsert(string tableName, object entity, out IList<QueryInfo> parameters)
         {
-            var type = entity.GetType();
-            string keyColumn = null;
-            string[] excludeColumns = null;
-            try
-            {
-                keyColumn = type.GetKeyColumnName(out var keyColumnType);
-                if (keyColumnType.PropertyType == typeof(int))
-                {
-                    //check if value is non-zero
-                    if ((int)keyColumnType.GetValue(entity) == 0)
-                        excludeColumns = new[] { keyColumn };
-                }
-            }
-            catch
-            {
-                keyColumn = null;
-            }
-
+            GetColumns(entity, out var keyColumn, out var excludeColumns);
             Dictionary<string, object> columnValueMap = QueryParserUtilities.ParseObjectKeyValues(entity, exclude: excludeColumns);
             var insertColumns = columnValueMap.Keys.ToArray();
             var joinInsertString = string.Join(",", insertColumns.Select(x => x.ToEnclosed()));
