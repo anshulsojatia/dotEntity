@@ -37,7 +37,7 @@ namespace DotEntity
 
         public DataReaderRow()
         {
-            RowInformation = new Dictionary<string, object>();
+            RowInformation = new Dictionary<string, object>(StringComparer.CurrentCultureIgnoreCase);
         }
 
         public string[] Columns => RowInformation.Keys.ToArray();
