@@ -42,6 +42,14 @@ namespace DotEntity.Tests.PersistanceTests
         }
 
         [Test]
+        public void Mysql_AddColumn_Succeeds()
+        {
+            using var transaction = new DotEntityTransaction();
+            DotEntity.Database.AddColumn<Product, int>("SomeRandomColumn", 0, transaction);
+            transaction.Commit();
+        }
+
+        [Test]
         public void MySqlInsert_Succeeds()
         {
             var product = new Product()

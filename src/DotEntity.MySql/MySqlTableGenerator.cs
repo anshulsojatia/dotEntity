@@ -65,6 +65,20 @@ namespace DotEntity.MySql
             return builder.ToString();
         }
 
+        public override string GetAddColumnScript<T, T1>(string columnName, T1 value, PropertyInfo propertyInfo = null)
+        {
+            var tableName = DotEntityDb.GetTableNameForType(typeof(T));
+            var constraintName = $"CONSTRAINT DF_{tableName}_{columnName}";
+            var dataTypeString = GetFormattedDbTypeForType(typeof(T1), propertyInfo);
+            var builder = new StringBuilder($"ALTER TABLE {tableName.ToEnclosed()}{Environment.NewLine}");
+            builder.Append($"ADD {columnName.ToEnclosed()} {dataTypeString} NOT NULL");
+            if (value != null)
+            {
+                builder.Append($" DEFAULT '{GetValueInTargetType<T1>(value)}'{Environment.NewLine}");
+            }
+            return builder.ToString();
+        }
+
         public override string GetDropTableScript(string tableName)
         {
             return $"DROP TABLE IF EXISTS {tableName.ToEnclosed()};";
