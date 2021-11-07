@@ -370,6 +370,11 @@ namespace DotEntity
             return this;
         }
 
+        public bool ContainJoins()
+        {
+            return _joinList != null && _joinList.Count > 0;
+        }
+
         public static IEntitySet<T> Just()
         {
             return Instance;

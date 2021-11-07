@@ -197,5 +197,11 @@ namespace DotEntity
         /// <param name="columns">The columns to be excluded from the query</param>
         /// <returns>An implementation object of type <see cref="IEntitySet{T}"/></returns>
         IEntitySet<T> SkipColumns<T1>(params string[] columns);
+
+        /// <summary>
+        /// Determines if the query contains any joins
+        /// </summary>
+        /// <returns>True if query contains joins. False otherwise.</returns>
+        bool ContainJoins();
     }
 }
