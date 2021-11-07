@@ -14,7 +14,7 @@
     <RepositoryType>Git</RepositoryType>
     <PackageTags>Micro-ORM, Database, .NET Framework, POCO</PackageTags>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>2.1.7</Version>
+    <Version>2.1.8</Version>
     <PackageId>DotEntity</PackageId>
     <AssemblyName>DotEntity</AssemblyName>
   </PropertyGroup>
