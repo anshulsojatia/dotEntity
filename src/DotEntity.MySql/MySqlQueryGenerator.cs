@@ -356,26 +356,16 @@ namespace DotEntity.MySql
 
             var whereStringBuilder = new List<string>();
             var whereString = "";
-            var rootTypeWhereBuilder = new List<string>();
-            var rootTypeWhereString = "";
             if (where != null)
             {
                 var parser = new ExpressionTreeParser(typedAliases);
                 foreach (var wh in where)
                 {
                     var wStr = parser.GetWhereString(wh);
-                    if (wh.Parameters[0].Type == typeof(T))
-                    {
-                        rootTypeWhereBuilder.Add(wStr);
-                    }
-                    else
-                    {
-                        whereStringBuilder.Add(wStr);
-                    }
+                    whereStringBuilder.Add(wStr);
                 }
                 parameters = parameters?.Concat(parser.QueryInfoList).ToList() ?? parser.QueryInfoList;
                 whereString = string.Join(" AND ", WrapWithBraces(whereStringBuilder)).Trim();
-                rootTypeWhereString = string.Join(" AND ", WrapWithBraces(rootTypeWhereBuilder)).Trim();
             }
 
             var orderByStringBuilder = new List<string>();
@@ -420,17 +410,12 @@ namespace DotEntity.MySql
             builder.Append(";" + Environment.NewLine);
             var rootIdColumnName = $"{parentAliasUsed}.{typeof(T).GetKeyColumnName().ToEnclosed()}";
 
-            var columnNameString = QueryParserUtilities.GetSelectColumnString(new List<Type>() { typeof(T) }, null, excludeColumns);
-            if (!string.IsNullOrEmpty(rootTypeWhereString))
-            {
-                rootTypeWhereString = " WHERE " + rootTypeWhereString;
-            }
             builder.Append(
-                $"SELECT COUNT(DISTINCT {rootIdColumnName}) FROM (SELECT {columnNameString} FROM {tableName.ToEnclosed()} {parentAliasUsed} {rootTypeWhereString}) AS {parentAliasUsed} ");
+                $"SELECT COUNT(DISTINCT {rootIdColumnName}) FROM {tableName.ToEnclosed()} {parentAliasUsed} ");
             //join
             builder.Append(joinBuilder);
 
-            //and other wheres if any
+            ////and other wheres if any
             if (!string.IsNullOrEmpty(whereString))
             {
                 builder.Append(" WHERE " + whereString);
