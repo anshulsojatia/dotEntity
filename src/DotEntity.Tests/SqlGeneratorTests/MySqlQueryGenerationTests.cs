@@ -637,7 +637,8 @@ namespace DotEntity.Tests.SqlGeneratorTests
                 new JoinMeta<Category>("CategoryId", "Id")
             });
 
-            var expected = "SELECT * FROM `Product` t1 INNER JOIN `ProductCategory` t2 ON t1.`Id` = t2.`ProductId` INNER JOIN `Category` t3 ON t2.`CategoryId` = t3.`Id`;";
+            var expected = @"CREATE TEMPORARY TABLE __DOTENTITY_FILTERED_IDS AS (SELECT DISTINCT(t1.`Id`) FROM `Product` t1 INNER JOIN `ProductCategory` t2 ON t1.`Id` = t2.`ProductId` INNER JOIN `Category` t3 ON t2.`CategoryId` = t3.`Id` );
+SELECT * FROM `Product` t1 INNER JOIN `ProductCategory` t2 ON t1.`Id` = t2.`ProductId` INNER JOIN `Category` t3 ON t2.`CategoryId` = t3.`Id`  WHERE t1.`Id` IN (SELECT * FROM __DOTENTITY_FILTERED_IDS);";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(0, queryParameters.Count);
         }
@@ -652,7 +653,8 @@ namespace DotEntity.Tests.SqlGeneratorTests
                 new JoinMeta<Category>("CategoryId", "Id", additionalExpression: additionalExpression)
             });
 
-            var expected = "SELECT * FROM `Product` t1 INNER JOIN `ProductCategory` t2 ON t1.`Id` = t2.`ProductId` INNER JOIN `Category` t3 ON t2.`CategoryId` = t3.`Id` AND t3.`CategoryName` = @t3_CategoryName;";
+            var expected = @"CREATE TEMPORARY TABLE __DOTENTITY_FILTERED_IDS AS (SELECT DISTINCT(t1.`Id`) FROM `Product` t1 INNER JOIN `ProductCategory` t2 ON t1.`Id` = t2.`ProductId` INNER JOIN `Category` t3 ON t2.`CategoryId` = t3.`Id` AND t3.`CategoryName` = @t3_CategoryName );
+SELECT * FROM `Product` t1 INNER JOIN `ProductCategory` t2 ON t1.`Id` = t2.`ProductId` INNER JOIN `Category` t3 ON t2.`CategoryId` = t3.`Id` AND t3.`CategoryName` = @t3_CategoryName  WHERE t1.`Id` IN (SELECT * FROM __DOTENTITY_FILTERED_IDS);";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(1, queryParameters.Count);
         }
@@ -666,7 +668,8 @@ namespace DotEntity.Tests.SqlGeneratorTests
                 new JoinMeta<Category>("CategoryId", "Id", SourceColumn.Parent)
             });
 
-            var expected = "SELECT * FROM `Product` t1 INNER JOIN `ProductCategory` t2 ON t1.`Id` = t2.`ProductId` INNER JOIN `Category` t3 ON t1.`CategoryId` = t3.`Id`;";
+            var expected = @"CREATE TEMPORARY TABLE __DOTENTITY_FILTERED_IDS AS (SELECT DISTINCT(t1.`Id`) FROM `Product` t1 INNER JOIN `ProductCategory` t2 ON t1.`Id` = t2.`ProductId` INNER JOIN `Category` t3 ON t1.`CategoryId` = t3.`Id` );
+SELECT * FROM `Product` t1 INNER JOIN `ProductCategory` t2 ON t1.`Id` = t2.`ProductId` INNER JOIN `Category` t3 ON t1.`CategoryId` = t3.`Id`  WHERE t1.`Id` IN (SELECT * FROM __DOTENTITY_FILTERED_IDS);";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(0, queryParameters.Count);
         }
@@ -681,7 +684,8 @@ namespace DotEntity.Tests.SqlGeneratorTests
                 new JoinMeta<Category>("CategoryId", "Id")
             }, new List<LambdaExpression>(){ expression });
 
-            var expected = "SELECT * FROM `Product` t1 INNER JOIN `ProductCategory` t2 ON t1.`Id` = t2.`ProductId` INNER JOIN `Category` t3 ON t2.`CategoryId` = t3.`Id`  WHERE (t1.`Id` = t3.`Id`);";
+            var expected = @"CREATE TEMPORARY TABLE __DOTENTITY_FILTERED_IDS AS (SELECT DISTINCT(t1.`Id`) FROM `Product` t1 INNER JOIN `ProductCategory` t2 ON t1.`Id` = t2.`ProductId` INNER JOIN `Category` t3 ON t2.`CategoryId` = t3.`Id`  WHERE (t1.`Id` = t3.`Id`));
+SELECT * FROM `Product` t1 INNER JOIN `ProductCategory` t2 ON t1.`Id` = t2.`ProductId` INNER JOIN `Category` t3 ON t2.`CategoryId` = t3.`Id`  WHERE t1.`Id` IN (SELECT * FROM __DOTENTITY_FILTERED_IDS);";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(1, queryParameters.Count);
         }
@@ -696,7 +700,8 @@ namespace DotEntity.Tests.SqlGeneratorTests
                 new JoinMeta<Category>("CategoryId", "Id")
             }, new List<LambdaExpression>() { expression });
 
-            var expected = "SELECT Product_Id FROM (SELECT * FROM `Product` t1 INNER JOIN `ProductCategory` t2 ON t1.`Id` = t2.`ProductId` INNER JOIN `Category` t3 ON t2.`CategoryId` = t3.`Id`  WHERE (t1.`Id` = t3.`Id`)) AS WrappedResult;";
+            var expected = @"CREATE TEMPORARY TABLE __DOTENTITY_FILTERED_IDS AS (SELECT DISTINCT(t1.`Id`) FROM `Product` t1 INNER JOIN `ProductCategory` t2 ON t1.`Id` = t2.`ProductId` INNER JOIN `Category` t3 ON t2.`CategoryId` = t3.`Id`  WHERE (t1.`Id` = t3.`Id`));
+SELECT Product_Id FROM `Product` t1 INNER JOIN `ProductCategory` t2 ON t1.`Id` = t2.`ProductId` INNER JOIN `Category` t3 ON t2.`CategoryId` = t3.`Id`  WHERE t1.`Id` IN (SELECT * FROM __DOTENTITY_FILTERED_IDS);";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(1, queryParameters.Count);
         }
@@ -712,7 +717,8 @@ namespace DotEntity.Tests.SqlGeneratorTests
                 new JoinMeta<Category>("CategoryId", "Id")
             }, new List<LambdaExpression>() { expression1, expression2 });
 
-            var expected = "SELECT * FROM `Product` t1 LEFT OUTER JOIN `ProductCategory` t2 ON t1.`Id` = t2.`ProductId` INNER JOIN `Category` t3 ON t2.`CategoryId` = t3.`Id`  WHERE (t1.`Id` = t3.`Id`) AND (t2.`CategoryId` > t3.`Id`);";
+            var expected = @"CREATE TEMPORARY TABLE __DOTENTITY_FILTERED_IDS AS (SELECT DISTINCT(t1.`Id`) FROM `Product` t1 LEFT OUTER JOIN `ProductCategory` t2 ON t1.`Id` = t2.`ProductId` INNER JOIN `Category` t3 ON t2.`CategoryId` = t3.`Id`  WHERE (t1.`Id` = t3.`Id`) AND (t2.`CategoryId` > t3.`Id`));
+SELECT * FROM `Product` t1 LEFT OUTER JOIN `ProductCategory` t2 ON t1.`Id` = t2.`ProductId` INNER JOIN `Category` t3 ON t2.`CategoryId` = t3.`Id`  WHERE t1.`Id` IN (SELECT * FROM __DOTENTITY_FILTERED_IDS);";
             Assert.AreEqual(expected, sql);
             Assert.AreEqual(2, queryParameters.Count);
         }

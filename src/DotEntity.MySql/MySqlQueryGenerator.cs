@@ -10,6 +10,8 @@ namespace DotEntity.MySql
 {
     public class MySqlQueryGenerator : DefaultQueryGenerator
     {
+        const string TempTableName = "__DOTENTITY_FILTERED_IDS";
+
         public override string GenerateInsert(string tableName, object entity, out IList<QueryInfo> parameters)
         {
             GetColumns(entity, out var keyColumn, out var excludeColumns);
@@ -56,7 +58,7 @@ namespace DotEntity.MySql
 
                 orderByString = string.Join(", ", orderByStringBuilder).Trim(',');
             }
-         
+
             // make the query now
             builder.Append($"SELECT {QueryParserUtilities.GetSelectColumnString(new List<Type>() { typeof(T) }, null, excludeColumns)} FROM ");
             builder.Append(tableName.ToEnclosed());
@@ -112,7 +114,7 @@ namespace DotEntity.MySql
 
                 orderByString = string.Join(", ", orderByStringBuilder).Trim(',');
             }
-           
+
             // make the query now
             builder.Append($"SELECT {QueryParserUtilities.GetSelectColumnString(new List<Type>() { typeof(T) }, null, excludeColumns)} FROM ");
             builder.Append(tableName.ToEnclosed());
@@ -205,7 +207,7 @@ namespace DotEntity.MySql
             var tableName = DotEntityDb.GetTableNameForType<T>();
             var parentAliasUsed = "t1";
             var lastAliasUsed = parentAliasUsed;
-            typedAliases.Add(typeof(T).Name, new List<string>() { lastAliasUsed});
+            typedAliases.Add(typeof(T).Name, new List<string>() { lastAliasUsed });
 
             var joinBuilder = new StringBuilder();
             foreach (var joinMeta in joinMetas)
@@ -276,32 +278,48 @@ namespace DotEntity.MySql
 
             var allTypes = joinMetas.Select(x => x.OnType).Distinct().ToList();
             allTypes.Add(typeof(T));
-            // make the query now
-            builder.Append($"SELECT {QueryParserUtilities.GetSelectColumnString(allTypes, typedAliases, excludeColumns)} FROM ");
+            var tablePartBuilder = new StringBuilder();
+            var commonPartBuilder = new StringBuilder();
+            var wherePartBuilder = new StringBuilder();
 
-            builder.Append(tableName.ToEnclosed() + $" {parentAliasUsed} ");
+            tablePartBuilder.Append(tableName.ToEnclosed() + $" {parentAliasUsed} ");
 
             //join
-            builder.Append(joinBuilder);
+            tablePartBuilder.Append(joinBuilder);
 
             if (!string.IsNullOrEmpty(whereString))
             {
-                builder.Append(" WHERE " + whereString);
+                wherePartBuilder.Append(" WHERE " + whereString);
             }
 
             if (!string.IsNullOrEmpty(orderByString))
             {
-                builder.Append(" ORDER BY " + orderByString);
+                commonPartBuilder.Append(" ORDER BY " + orderByString);
             }
             if (page > 1 || count != int.MaxValue)
             {
                 var offset = (page - 1) * count;
-                builder.Append($" LIMIT {offset},{count}");
+                commonPartBuilder.Append($" LIMIT {offset},{count}");
             }
-            var query = builder.ToString().Trim() + ";";
-            return query;
+
+            var rootIdColumnName = $"{parentAliasUsed}.{typeof(T).GetKeyColumnName().ToEnclosed()}";
+
+            // make the query now
+            //to properly fetch relevant rows with pagination, we need to create a temp table
+            builder.Append($"CREATE TEMPORARY TABLE {TempTableName} AS (SELECT DISTINCT({rootIdColumnName}) FROM {tablePartBuilder}{wherePartBuilder}{commonPartBuilder});{Environment.NewLine}");
+            builder.Append($"SELECT {QueryParserUtilities.GetSelectColumnString(allTypes, typedAliases, excludeColumns)} FROM ");
+            builder.Append(tablePartBuilder.ToString());
+
+            builder.Append($" WHERE {rootIdColumnName} IN (SELECT * FROM {TempTableName})");
+            if (!string.IsNullOrEmpty(orderByString))
+            {
+                builder.Append(" ORDER BY " + orderByString);
+            }
+
+            var query = builder.ToString().Trim();
+            return query + ";";           
         }
-        
+
         public override string GenerateJoinWithTotalMatchingCount<T>(out IList<QueryInfo> parameters, List<IJoinMeta> joinMetas, List<LambdaExpression> @where = null,
             Dictionary<LambdaExpression, RowOrder> orderBy = null, int page = 1, int count = Int32.MaxValue, Dictionary<Type, IList<string>> excludeColumns = null)
         {
@@ -383,43 +401,49 @@ namespace DotEntity.MySql
 
             var allTypes = joinMetas.Select(x => x.OnType).Distinct().ToList();
             allTypes.Add(typeof(T));
-            // make the query now
-            builder.Append($"SELECT {QueryParserUtilities.GetSelectColumnString(allTypes, typedAliases, excludeColumns)} FROM ");
+            var tablePartBuilder = new StringBuilder();
+            var commonPartBuilder = new StringBuilder();
+            var wherePartBuilder = new StringBuilder();
 
-            builder.Append(tableName.ToEnclosed() + $" {parentAliasUsed} ");
+            tablePartBuilder.Append(tableName.ToEnclosed() + $" {parentAliasUsed} ");
 
             //join
-            builder.Append(joinBuilder);
+            tablePartBuilder.Append(joinBuilder);
 
             if (!string.IsNullOrEmpty(whereString))
             {
-                builder.Append(" WHERE " + whereString);
+                wherePartBuilder.Append(" WHERE " + whereString);
             }
 
             if (!string.IsNullOrEmpty(orderByString))
             {
-                builder.Append(" ORDER BY " + orderByString);
+                commonPartBuilder.Append(" ORDER BY " + orderByString);
             }
             if (page > 1 || count != int.MaxValue)
             {
                 var offset = (page - 1) * count;
-                builder.Append($" LIMIT {offset},{count}");
+                commonPartBuilder.Append($" LIMIT {offset},{count}");
+            }
+
+            var rootIdColumnName = $"{parentAliasUsed}.{typeof(T).GetKeyColumnName().ToEnclosed()}";
+
+            // make the query now
+            //to properly fetch relevant rows with pagination, we need to create a temp table
+            builder.Append($"CREATE TEMPORARY TABLE {TempTableName} AS (SELECT DISTINCT({rootIdColumnName}) FROM {tablePartBuilder}{wherePartBuilder}{commonPartBuilder});{Environment.NewLine}");
+            builder.Append($"SELECT {QueryParserUtilities.GetSelectColumnString(allTypes, typedAliases, excludeColumns)} FROM ");
+            builder.Append(tablePartBuilder.ToString());
+
+            builder.Append($" WHERE {rootIdColumnName} IN (SELECT * FROM {TempTableName})");
+            if (!string.IsNullOrEmpty(orderByString))
+            {
+                builder.Append(" ORDER BY " + orderByString);
             }
 
             //now thecount query
             builder.Append(";" + Environment.NewLine);
-            var rootIdColumnName = $"{parentAliasUsed}.{typeof(T).GetKeyColumnName().ToEnclosed()}";
 
             builder.Append(
-                $"SELECT COUNT(DISTINCT {rootIdColumnName}) FROM {tableName.ToEnclosed()} {parentAliasUsed} ");
-            //join
-            builder.Append(joinBuilder);
-
-            ////and other wheres if any
-            if (!string.IsNullOrEmpty(whereString))
-            {
-                builder.Append(" WHERE " + whereString);
-            }
+                $"SELECT COUNT(DISTINCT({rootIdColumnName})) FROM {tablePartBuilder}{wherePartBuilder}");          
 
             var query = builder.ToString().Trim();
             return query + ";";
@@ -505,32 +529,45 @@ namespace DotEntity.MySql
 
             var allTypes = joinMetas.Select(x => x.OnType).Distinct().ToList();
             allTypes.Add(typeof(T));
-            // make the query now
-            builder.Append($"SELECT {rawSelection} FROM ");
-            builder.Append($"(SELECT {QueryParserUtilities.GetSelectColumnString(allTypes, typedAliases)} FROM ");
-            builder.Append(tableName.ToEnclosed() + $" {parentAliasUsed} ");
+
+            var tablePartBuilder = new StringBuilder();
+            var commonPartBuilder = new StringBuilder();
+            var wherePartBuilder = new StringBuilder();
+
+            tablePartBuilder.Append(tableName.ToEnclosed() + $" {parentAliasUsed} ");
 
             //join
-            builder.Append(joinBuilder);
+            tablePartBuilder.Append(joinBuilder);
 
             if (!string.IsNullOrEmpty(whereString))
             {
-                builder.Append(" WHERE " + whereString);
+                wherePartBuilder.Append(" WHERE " + whereString);
             }
 
             if (!string.IsNullOrEmpty(orderByString))
             {
-                builder.Append(" ORDER BY " + orderByString);
+                commonPartBuilder.Append(" ORDER BY " + orderByString);
             }
             if (page > 1 || count != int.MaxValue)
             {
                 var offset = (page - 1) * count;
-                builder.Append($" LIMIT {offset},{count}");
+                commonPartBuilder.Append($" LIMIT {offset},{count}");
             }
 
-            builder.Append($") AS WrappedResult");
-            var query = builder.ToString().Trim() + ";";
-            return query;
+            var rootIdColumnName = $"{parentAliasUsed}.{typeof(T).GetKeyColumnName().ToEnclosed()}";
+
+            // make the query now
+            //to properly fetch relevant rows with pagination, we need to create a temp table
+            builder.Append($"CREATE TEMPORARY TABLE {TempTableName} AS (SELECT DISTINCT({rootIdColumnName}) FROM {tablePartBuilder}{wherePartBuilder}{commonPartBuilder});{Environment.NewLine}");
+            builder.Append($"SELECT {rawSelection} FROM ");
+            builder.Append(tablePartBuilder.ToString());
+
+            builder.Append($" WHERE {rootIdColumnName} IN (SELECT * FROM {TempTableName})");
+            if (!string.IsNullOrEmpty(orderByString))
+            {
+                builder.Append(" ORDER BY " + orderByString);
+            }
+            return builder + ";";
         }
     }
 }

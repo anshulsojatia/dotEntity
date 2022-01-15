@@ -29,8 +29,8 @@ namespace DotEntity.Tests.SqlGeneratorTests
             var sql = generator.GetCreateTableScript<Product>();
             var expected = @"CREATE TABLE `Product`" + Environment.NewLine +
                            "(\t `Id` INT NOT NULL AUTO_INCREMENT," + Environment.NewLine +
-                           "\t `ProductName` TEXT NOT NULL," + Environment.NewLine +
-                           "\t `ProductDescription` TEXT NULL," + Environment.NewLine +
+                           "\t `ProductName` TEXT NOT NULL COLLATE utf8mb4_unicode_ci," + Environment.NewLine +
+                           "\t `ProductDescription` TEXT NULL COLLATE utf8mb4_unicode_ci," + Environment.NewLine +
                            "\t `DateCreated` DATETIME NOT NULL," + Environment.NewLine +
                            "\t `Price` NUMERIC(18,5) NOT NULL," + Environment.NewLine +
                            "\t `IsActive` TINYINT(1) NOT NULL," + Environment.NewLine +

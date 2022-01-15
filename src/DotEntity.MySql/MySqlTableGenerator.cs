@@ -38,12 +38,18 @@ namespace DotEntity.MySql
                 var fieldName = property.Name;
                 var dbFieldType = GetFormattedDbTypeForType(pType, property);
                 var identityString = "";
+                var collation = "";
                 //do we have key attribute here?
                 if (fieldName == keyColumn && pType == typeof(int))
                 {
                     identityString = " AUTO_INCREMENT";
                 }
-                builder.Append($"\t {fieldName.ToEnclosed()} {dbFieldType}{identityString},");
+                //set collation for string
+                if(pType == typeof(string))
+                {
+                    collation = " COLLATE utf8mb4_unicode_ci";
+                }
+                builder.Append($"\t {fieldName.ToEnclosed()} {dbFieldType}{identityString}{collation},");
                 builder.Append(Environment.NewLine);
             }
             builder.Append($"PRIMARY KEY ({keyColumn.ToEnclosed()}));");
